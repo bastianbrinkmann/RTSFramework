@@ -1,16 +1,12 @@
-﻿using RTSFramework.Contracts.Artefacts;
-
-namespace RTSFramework.Concrete.CSharp.Artefacts
+﻿namespace RTSFramework.Concrete.CSharp.Artefacts
 {
 	public class MSTestTestcase : ICSharpTestcase
     {
-		public MSTestTestcase(string id, string category)
+		public MSTestTestcase(string id)
 		{
 			Id = id;
-			Category = category;
 		}
 
 		public string Id { get; }
-		public string Category { get; }
-	}
+    }
 }

@@ -6,9 +6,9 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
     {
         public string Id { get; }
 
-        public CSharpDocument(Document document)
+        public CSharpDocument(string filePath)
         {
-            Id = document.Id.ToString();
+            Id = filePath;
         }
     }
 }

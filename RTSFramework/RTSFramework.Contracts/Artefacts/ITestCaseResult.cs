@@ -4,6 +4,6 @@
 	{
 		TTC AssociatedTestCase { get; }
 
-		bool Successful { get; }
+		TestCaseResultType Outcome { get; }
 	}
 }

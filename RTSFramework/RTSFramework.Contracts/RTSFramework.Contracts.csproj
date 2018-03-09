@@ -44,6 +44,7 @@
     <Compile Include="Artefacts\IDelta.cs" />
     <Compile Include="Artefacts\IProgramElement.cs" />
     <Compile Include="Artefacts\ITestCaseResult.cs" />
+    <Compile Include="Artefacts\TestCaseResultType.cs" />
     <Compile Include="IAutomatedTestFramework.cs" />
     <Compile Include="IDeltaDiscoverer.cs" />
     <Compile Include="IOfflineDeltaDiscoverer.cs" />

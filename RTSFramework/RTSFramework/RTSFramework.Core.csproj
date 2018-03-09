@@ -73,6 +73,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OfflineController.cs" />
     <Compile Include="OnlineController.cs" />
     <Compile Include="OperationalDelta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
