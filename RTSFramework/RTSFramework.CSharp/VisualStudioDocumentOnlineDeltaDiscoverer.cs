@@ -7,16 +7,16 @@ using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp
 {
-    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, CSharpDocument, IDelta<CSharpDocument>>
+    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, CSharpDocument, IDelta<CSharpDocument, CSharpProgram>>
     {
 
-        private OperationalDelta<CSharpDocument> delta = new OperationalDelta<CSharpDocument>();
+        private OperationalDelta<CSharpDocument, CSharpProgram> delta = new OperationalDelta<CSharpDocument, CSharpProgram>();
 
         private Solution solution;
         private MSBuildWorkspace workspace;
 
 
-        public IDelta<CSharpDocument> GetCurrentDelta()
+        public IDelta<CSharpDocument, CSharpProgram> GetCurrentDelta()
         {
             return delta;
         }
@@ -30,9 +30,10 @@ namespace RTSFramework.Concrete.CSharp
         
         public void StartDiscovery(CSharpProgram startingVersion)
         {
-            var msWorkspace = MSBuildWorkspace.Create();
-            solution = msWorkspace.OpenSolutionAsync(startingVersion.SolutionPath).Result;
-            msWorkspace.WorkspaceChanged += MSWorkspaceOnWorkspaceChanged;
+            delta.Source = startingVersion;
+            workspace = MSBuildWorkspace.Create();
+            solution = workspace.OpenSolutionAsync(startingVersion.SolutionPath).Result;
+            workspace.WorkspaceChanged += MSWorkspaceOnWorkspaceChanged;
         }
 
         private void MSWorkspaceOnWorkspaceChanged(object sender, WorkspaceChangeEventArgs args)

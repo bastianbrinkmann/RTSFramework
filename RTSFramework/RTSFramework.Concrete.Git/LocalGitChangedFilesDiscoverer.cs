@@ -8,7 +8,7 @@ using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class LocalGitChangedFilesDiscoverer : IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument>>
+    public class LocalGitChangedFilesDiscoverer : IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument, GitProgramVersion>>
     {
         private string repositoryPath;
 
@@ -18,12 +18,22 @@ namespace RTSFramework.Concrete.Git
         }
 
         //TODO: Instead of CSharpDocument return string and use DeltaAdapter to filter only the CSharpDocuments
-        public IDelta<CSharpDocument> Discover(GitProgramVersion oldVersion, GitProgramVersion newVersion)
+        public IDelta<CSharpDocument, GitProgramVersion> Discover(GitProgramVersion oldVersion, GitProgramVersion newVersion)
         {
-            var delta = new OperationalDelta<CSharpDocument>();
+            var delta = new OperationalDelta<CSharpDocument, GitProgramVersion>
+            {
+                Source = oldVersion
+            };
+
 
             using (Repository repo = new Repository(repositoryPath))
             {
+                if (oldVersion.VersionReferenceType == VersionReferenceType.LatestCommit)
+                {
+                    oldVersion.VersionId = repo.Head.Tip.Id.Sha;
+                }
+
+
                 if (oldVersion.VersionReferenceType == VersionReferenceType.LatestCommit &&
                     newVersion.VersionReferenceType == VersionReferenceType.CurrentChanges)
                 {

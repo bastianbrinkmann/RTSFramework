@@ -4,7 +4,7 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Contracts
 {
-    public interface IRTSApproach<TD, TPe, TTc> where TD : IDelta<TPe> where TTc : ITestCase where TPe : IProgramElement
+    public interface IRTSApproach<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TTc : ITestCase where TPe : IProgramElement where TP : IProgram
     {
         IEnumerable<TTc> PerformRTS(IEnumerable<TTc> testCases, TD delta);
     }

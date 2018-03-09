@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace RTSFramework.Contracts.Artefacts
+﻿namespace RTSFramework.Contracts.Artefacts
 {
-	public interface IDelta<TPe> where TPe : IProgramElement
-    { 
-
+    public interface IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram
+	{
+	    TP Source { get; }
 	}
 }

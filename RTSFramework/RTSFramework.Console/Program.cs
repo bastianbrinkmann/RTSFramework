@@ -4,6 +4,7 @@ using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
+using RTSFramework.Concrete.RTS;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Core;
@@ -24,13 +25,13 @@ namespace RTSFramework.Console
 
             var container = new UnityContainer();
 
-		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
+		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
             container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
-            container.RegisterType<IRTSApproach<IDelta<CSharpDocument>, CSharpDocument, MSTestTestcase>, DocumentLevelDynamicRTSApproach>();
+            container.RegisterType<IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>, DocumentLevelDynamicRTSApproach>();
 
-            container.RegisterType<OfflineController<IDelta<CSharpDocument>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+            container.RegisterType<OfflineController<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
 
-            var controller = container.Resolve<OfflineController<IDelta<CSharpDocument>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+            var controller = container.Resolve<OfflineController<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
 
 		    var results = controller.ExecuteImpactedTests(new GitProgramVersion(VersionReferenceType.LatestCommit), new GitProgramVersion(VersionReferenceType.CurrentChanges));
 

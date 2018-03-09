@@ -225,12 +225,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Artefacts\CSharpProgram.cs" />
+    <Compile Include="Artefacts\ICSharpProgram.cs" />
     <Compile Include="Artefacts\ICSharpProgramElement.cs" />
     <Compile Include="Artefacts\CSharpDocument.cs" />
     <Compile Include="Artefacts\ICSharpTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestResult.cs" />
-    <Compile Include="DocumentLevelDynamicRTSApproach.cs" />
     <Compile Include="MSTestFrameworkConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\TrxParser.cs" />

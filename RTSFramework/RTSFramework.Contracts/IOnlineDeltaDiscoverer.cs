@@ -2,7 +2,7 @@
 
 namespace RTSFramework.Contracts
 {
-	public interface IOnlineDeltaDiscoverer<TP, TPe, TD> : IDeltaDiscoverer<TP, TPe, TD> where TD : IDelta<TPe> where TPe : IProgramElement where TP : IProgram
+	public interface IOnlineDeltaDiscoverer<TP, TPe, TD> : IDeltaDiscoverer<TP, TPe, TD> where TD : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram
 	{
 		TD GetCurrentDelta();
 

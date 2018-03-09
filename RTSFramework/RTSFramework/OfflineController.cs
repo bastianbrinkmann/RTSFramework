@@ -5,13 +5,13 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Core
 {
-	public class OfflineController<TD, TPe, TP, TTc> where TD : IDelta<TPe> where TPe : IProgramElement where TP : IProgram where TTc : ITestCase
+	public class OfflineController<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram where TTc : ITestCase
 	{
 	    private readonly IOfflineDeltaDiscoverer<TP, TPe, TD> deltaDiscoverer;
 	    private readonly IAutomatedTestFramework<TTc> testFramework;
-	    private readonly IRTSApproach<TD, TPe, TTc> rtsApproach;
+	    private readonly IRTSApproach<TD, TPe, TP, TTc> rtsApproach;
 
-        public OfflineController(IOfflineDeltaDiscoverer<TP, TPe, TD> deltaDiscoverer, IAutomatedTestFramework<TTc> testFramework, IRTSApproach<TD, TPe, TTc> rtsApproach)
+        public OfflineController(IOfflineDeltaDiscoverer<TP, TPe, TD> deltaDiscoverer, IAutomatedTestFramework<TTc> testFramework, IRTSApproach<TD, TPe, TP, TTc> rtsApproach)
         {
             this.deltaDiscoverer = deltaDiscoverer;
             this.testFramework = testFramework;

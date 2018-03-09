@@ -80,6 +80,10 @@
       <Project>{2B9BB9A5-DB75-4EC9-BE24-0F06619D3216}</Project>
       <Name>RTSFramework.Concrete.Git</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
+      <Project>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</Project>
+      <Name>RTSFramework.Concrete.RTS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
       <Name>RTSFramework.Contracts</Name>

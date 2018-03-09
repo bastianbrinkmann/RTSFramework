@@ -10,5 +10,7 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
         {
             SolutionPath = solutionPath;
         }
+
+        public string VersionId { get; }
     }
 }

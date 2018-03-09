@@ -6,12 +6,12 @@ namespace RTSFramework.Concrete.Git.Artefacts
     {
         public VersionReferenceType VersionReferenceType { get; }
 
-        public string CommitIdentifier { get; }
+        public string VersionId { get; set; }
 
-        public GitProgramVersion(VersionReferenceType referenceType, string commitIdentifier = null)
+        public GitProgramVersion(VersionReferenceType referenceType, string versionId = null)
         {
             VersionReferenceType = referenceType;
-            CommitIdentifier = commitIdentifier;
+            VersionId = versionId;
         }
     }
 }
