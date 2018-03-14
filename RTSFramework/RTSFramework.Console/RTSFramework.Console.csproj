@@ -33,9 +33,33 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.7.3\lib\net46\CommonServiceLocator.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.ObjectModel.14.0.0\lib\net20\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -77,15 +101,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
-      <Project>{2B9BB9A5-DB75-4EC9-BE24-0F06619D3216}</Project>
+      <Project>{2b9bb9a5-db75-4ec9-be24-0f06619d3216}</Project>
       <Name>RTSFramework.Concrete.Git</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
-      <Project>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</Project>
+      <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
       <Name>RTSFramework.Concrete.RTS</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
-      <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
+      <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.csproj">
@@ -93,7 +117,7 @@
       <Name>RTSFramework.Concrete.CSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework\RTSFramework.Core.csproj">
-      <Project>{34343ADE-C3E0-423D-94B6-9D0400F498CB}</Project>
+      <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
     </ProjectReference>
   </ItemGroup>
