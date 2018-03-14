@@ -20,7 +20,8 @@ namespace RTSFramework.Concrete.CSharp
 
         protected override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTestsInternal(IEnumerable<MSTestTestcase> tests)
         {
-            var testsFullyQualifiedNames = tests.Select(x => x.Id).ToList();
+            var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
+            var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
 
             var results = new List<ITestCaseResult<MSTestTestcase>>();
 
@@ -32,12 +33,36 @@ namespace RTSFramework.Concrete.CSharp
 
                 ExecuteVsTestsByArguments(arguments);
 
-                var executionResult = ParseVsTestsTrxAnswer();
-                results.AddRange(executionResult.TestcasesResults);
+
+                var trxFile = GetTrxFile();
+                if (trxFile == null)
+                {
+                    throw new ArgumentException("Test Execution Failed as no trx file was created!");
+                }
+                var exectionResult = TrxFileParser.Parse(trxFile.FullName, msTestTestcases);
+
+                results.AddRange(exectionResult.TestcasesResults);
                
                 //TODO parse coverage file
+            
+                var parser = new MikeParser();
 
+                var codecoverageFile = Path.Combine(TestResultsFolder, Path.GetFileNameWithoutExtension(trxFile.Name),  @"In", exectionResult.CodeCoverageFile);
+                FileInfo info = new FileInfo(codecoverageFile);
+                var project = parser.Parse(new[] { info.FullName });
+                
+                foreach (var package in project.GetPackages())
+                {
+                    foreach (var file in package.GetFiles())
+                    {
+                        if (file.Metrics.CoveredElements > 0)
+                        {
+                            //TODO hand over previous map, adjust map
+                        }
+                    }
+                }
 
+                trxFile.Delete();
             }
 
             return results;

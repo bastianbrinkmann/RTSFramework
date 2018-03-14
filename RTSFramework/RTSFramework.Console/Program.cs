@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
@@ -18,8 +21,10 @@ namespace RTSFramework.Console
 	{
 		static void Main(string[] args)
 		{
-		    //string solutionFile = @"C:\Git\TIATestProject\TIATestProject.sln";
-		    string repositoryPath = @"C:\Git\TIATestProject";
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+
+            //string solutionFile = @"C:\Git\TIATestProject\TIATestProject.sln";
+            string repositoryPath = @"C:\Git\TIATestProject";
             List<string> testAssemblies = new List<string>
             {
                 @"C:\Git\TIATestProject\MainProject.Test\bin\Debug\MainProject.Test.dll"
@@ -28,8 +33,11 @@ namespace RTSFramework.Console
             var container = new UnityContainer();
 
 		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
-            container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
-		    container.RegisterType<
+            //container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
+            container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
+
+
+            container.RegisterType<
                 IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>, 
                 RetestAllApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>> ();
             
@@ -53,5 +61,18 @@ namespace RTSFramework.Console
 
             System.Console.ReadKey();
 		}
-	}
+
+        static Assembly CurrentDomain_AssemblyResolve(object sender,ResolveEventArgs args)
+        {
+            var assemblyname = new AssemblyName(args.Name).Name;
+
+            var assemblyFileName = Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), assemblyname + ".dll");
+            if (File.Exists(assemblyFileName))
+            {
+                var assembly = Assembly.LoadFrom(assemblyFileName);
+                return assembly;
+            }
+            return null;
+        }
+    }
 }

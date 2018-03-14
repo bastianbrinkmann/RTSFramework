@@ -23,6 +23,7 @@ namespace RTSFramework.Concrete.CSharp
         private const string TestMethodAttributeName = "TestMethodAttribute";
         private const string TestCategoryAttributeName = "TestCategoryAttribute";
 
+        protected const string TestResultsFolder = @"TestResults";
         public MSTestFrameworkConnector(IEnumerable<string> sources)
         {
             this.sources = sources;
@@ -103,30 +104,36 @@ namespace RTSFramework.Concrete.CSharp
 
                 ExecuteVsTestsByArguments(arguments);
 
-                return ParseVsTestsTrxAnswer().TestcasesResults;
+                return ParseVsTestsTrxAnswer(tests).TestcasesResults;
             }
 
             return new List<ITestCaseResult<MSTestTestcase>>();
         }
 
-        protected MSTestExectionResult ParseVsTestsTrxAnswer()
+        protected FileInfo GetTrxFile()
         {
-            var testResultsFolder = @"TestResults";
-            var directory = new DirectoryInfo(testResultsFolder);
+            var directory = new DirectoryInfo(TestResultsFolder);
             if (directory.Exists)
             {
                 var myFile = (from f in directory.GetFiles()
-                              where f.Name.EndsWith(".trx")
-                              orderby f.LastWriteTime descending
-                              select f).FirstOrDefault();
-                if (myFile != null)
-                {
-                    var results = TrxFileParser.Parse(myFile.FullName, testCases);
+                    where f.Name.EndsWith(".trx")
+                    orderby f.LastWriteTime descending
+                    select f).FirstOrDefault();
+                return myFile;
+            }
 
-                    myFile.Delete();
+            return null;
+        }
 
-                    return results;
-                }
+        protected MSTestExectionResult ParseVsTestsTrxAnswer(IEnumerable<MSTestTestcase> tests)
+        {
+            var trxFile = GetTrxFile();
+            if (trxFile != null)
+            {
+                var results = TrxFileParser.Parse(trxFile.FullName, tests);
+
+                trxFile.Delete();
+                return results;
             }
 
             throw new ArgumentException("Test Execution Failed as no trx file was created!");
