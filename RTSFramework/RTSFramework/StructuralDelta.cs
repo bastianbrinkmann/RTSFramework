@@ -3,7 +3,7 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Core
 {
-    public class OperationalDelta<TPe, TP> : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram
+    public class StructuralDelta<TPe, TP> : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram
     {
         public IList<TPe> AddedElements { get; } = new List<TPe>();
 

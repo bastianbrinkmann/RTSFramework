@@ -10,7 +10,7 @@ namespace RTSFramework.Concrete.CSharp
     public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, CSharpDocument, IDelta<CSharpDocument, CSharpProgram>>
     {
 
-        private OperationalDelta<CSharpDocument, CSharpProgram> delta = new OperationalDelta<CSharpDocument, CSharpProgram>();
+        private StructuralDelta<CSharpDocument, CSharpProgram> delta = new StructuralDelta<CSharpDocument, CSharpProgram>();
 
         private Solution solution;
         private MSBuildWorkspace workspace;

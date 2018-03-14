@@ -20,7 +20,7 @@ namespace RTSFramework.Concrete.Git
         //TODO: Instead of CSharpDocument return string and use DeltaAdapter to filter only the CSharpDocuments
         public IDelta<CSharpDocument, GitProgramVersion> Discover(GitProgramVersion oldVersion, GitProgramVersion newVersion)
         {
-            var delta = new OperationalDelta<CSharpDocument, GitProgramVersion>
+            var delta = new StructuralDelta<CSharpDocument, GitProgramVersion>
             {
                 Source = oldVersion
             };
