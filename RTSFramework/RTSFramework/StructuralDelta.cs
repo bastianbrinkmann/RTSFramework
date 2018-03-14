@@ -7,7 +7,7 @@ namespace RTSFramework.Core
     {
         public IList<TPe> AddedElements { get; } = new List<TPe>();
 
-        public IList<TPe> RemovedElements { get; } = new List<TPe>();
+        public IList<TPe> DeletedElements { get; } = new List<TPe>();
 
         public IList<TPe> ChangedElements { get; } = new List<TPe>();
 

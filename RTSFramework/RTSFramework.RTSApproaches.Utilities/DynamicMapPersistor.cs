@@ -49,7 +49,7 @@ namespace RTSFramework.RTSApproaches.Utilities
                 }
             }
 
-            return null;
+            return new TestCasesToProgramMap();
         }
     }
 }

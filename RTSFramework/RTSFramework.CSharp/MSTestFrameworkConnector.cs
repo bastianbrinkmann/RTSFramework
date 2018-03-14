@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Mono.Cecil;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
@@ -14,14 +11,17 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Concrete.CSharp
 {
-    public class MSTestFrameworkConnector : IAutomatedTestFramework<MSTestTestcase>, ITestCaseDiscoverySink, IMessageLogger
+    public class MSTestFrameworkConnector : IAutomatedTestFramework<MSTestTestcase>
     {
-        private const string VstestPath = @"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow";
+        private const string VstestPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow";
         private const string Vstestconsole = @"vstest.console.exe";
         private const string MSTestAdapterPath = @"C:\Git\RTSFramework\RTSFramework\packages\MSTest.TestAdapter.1.2.0\build\_common";
 
         private List<MSTestTestcase> testCases;
-        private IEnumerable<string> sources;
+        private readonly IEnumerable<string> sources;
+
+        private const string TestMethodAttributeName = "TestMethodAttribute";
+        private const string TestCategoryAttributeName = "TestCategoryAttribute";
 
         public MSTestFrameworkConnector(IEnumerable<string> sources)
         {
@@ -30,83 +30,87 @@ namespace RTSFramework.Concrete.CSharp
 
         public IEnumerable<MSTestTestcase> GetTestCases()
         {
-            //testCases = new List<MSTestTestcase>();
-
-            //string testAdapterPathArg = "/TestAdapterPath:" + MSTestAdapterPath;
-            //foreach (var source in sources)
-            //{
-            //    string listTestsArg = "/ListTests:" + source;
-
-            //    var discovererProcess = new Process
-            //    {
-            //        StartInfo = new ProcessStartInfo
-            //        {
-            //            FileName = Path.Combine(VstestPath, Vstestconsole),
-            //            Arguments = testAdapterPathArg +  " " + listTestsArg,
-            //            UseShellExecute = false,
-            //            RedirectStandardOutput = true,
-            //            CreateNoWindow = true
-            //        }
-            //    };
-
-            //    discovererProcess.Start();
-
-            //    bool testsListed = false;
-            //    while (!discovererProcess.StandardOutput.EndOfStream)
-            //    {
-            //        string line = discovererProcess.StandardOutput.ReadLine();
-            //        if (line.Contains("The following Tests are available:"))
-            //        {
-            //            testsListed = true;
-            //            continue;
-            //        }
-
-            //        if (testsListed && !string.IsNullOrEmpty(line.Trim()))
-            //        {
-            //            testCases.Add(new MSTestTestcase(line.Trim(), source));
-            //        }
-            //    }
-
-            //}
-
             if (testCases == null)
             {
                 testCases = new List<MSTestTestcase>();
 
-                var discoverer = new MSTestDiscoverer();
-                discoverer.DiscoverTests(sources, null, this, this);
+                foreach (var modulePath in sources)
+                {
+                    ModuleDefinition module = GetModuleDefinition(modulePath);
+                    foreach (TypeDefinition type in module.Types)
+                    {
+                        if (type.HasMethods)
+                        {
+                            foreach (MethodDefinition method in type.Methods)
+                            {
+                                if (method.CustomAttributes.Any(x => x.AttributeType.Name == TestMethodAttributeName))
+                                {
+                                    var declaringTypeFull = method.DeclaringType.FullName;
+
+                                    var testCase = new MSTestTestcase($"{declaringTypeFull}.{method.Name}");
+
+                                    var categoryAttributes =
+                                        method.CustomAttributes.Where(x => x.AttributeType.Name == TestCategoryAttributeName);
+                                    foreach (var categoryAttr in categoryAttributes)
+                                    {
+                                        testCase.Categories.Add((string)categoryAttr.ConstructorArguments[0].Value);
+                                    }
+
+                                    testCases.Add(testCase);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             return testCases;
         }
 
+        private ModuleDefinition GetModuleDefinition(string moduleFilePath)
+        {
+            FileInfo fileInfo = new FileInfo(moduleFilePath);
+            if (!fileInfo.Exists)
+            {
+                throw new ArgumentException("Invalid path to a module: " + moduleFilePath);
+            }
+            ModuleDefinition module;
+
+            ReaderParameters parameters = new ReaderParameters { ReadSymbols = true };
+            try
+            {
+                module = ModuleDefinition.ReadModule(moduleFilePath, parameters);
+            }
+            catch (Exception)
+            {
+                module = ModuleDefinition.ReadModule(moduleFilePath);
+            }
+
+            return module;
+        }
+
         public IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
-        { 
+        {
+            return ExecuteTestsInternal(tests);
+        }
+
+        protected virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTestsInternal(IEnumerable<MSTestTestcase> tests)
+        {
             var testsFullyQualifiedNames = tests.Select(x => x.Id).ToList();
             if (testsFullyQualifiedNames.Any())
             {
-                string testCaseFilterArg = "/TestCaseFilter:";
-                testCaseFilterArg += "FullyQualifiedName=" + string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
-                string testAdapterPathArg = "/TestAdapterPath:" + MSTestAdapterPath;
-                string sourcesArg = string.Join(" ", this.sources);
-                string loggerArg = "/logger:trx";
+                var arguments = BuildArguments(testsFullyQualifiedNames);
 
-                var discovererProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = Path.Combine(VstestPath, Vstestconsole),
-                        Arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg,
-                        CreateNoWindow = true,
-                        UseShellExecute = false
-                    }
-                };
+                ExecuteVsTestsByArguments(arguments);
 
-                discovererProcess.Start();
-
-                discovererProcess.WaitForExit();
+                return ParseVsTestsTrxAnswer().TestcasesResults;
             }
 
+            return new List<ITestCaseResult<MSTestTestcase>>();
+        }
+
+        protected MSTestExectionResult ParseVsTestsTrxAnswer()
+        {
             var testResultsFolder = @"TestResults";
             var directory = new DirectoryInfo(testResultsFolder);
             if (directory.Exists)
@@ -125,17 +129,36 @@ namespace RTSFramework.Concrete.CSharp
                 }
             }
 
-            throw new ArgumentException("Test Execution Failed!");
+            throw new ArgumentException("Test Execution Failed as no trx file was created!");
         }
 
-        public void SendTestCase(TestCase discoveredTest)
+        protected void ExecuteVsTestsByArguments(string arguments)
         {
-            testCases.Add(new MSTestTestcase(discoveredTest.FullyQualifiedName));
+            var discovererProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = Path.Combine(VstestPath, Vstestconsole),
+                    Arguments = arguments,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                }
+            };
+
+            discovererProcess.Start();
+            discovererProcess.WaitForExit();
         }
 
-        public void SendMessage(TestMessageLevel testMessageLevel, string message)
+        protected string BuildArguments(List<string> testsFullyQualifiedNames)
         {
-            //TODO Handle?
+            string testCaseFilterArg = "/TestCaseFilter:";
+            testCaseFilterArg += "FullyQualifiedName=" + string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
+            string testAdapterPathArg = "/TestAdapterPath:" + MSTestAdapterPath;
+            string sourcesArg = string.Join(" ", sources);
+            string loggerArg = "/logger:trx";
+            string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;
+
+            return arguments;
         }
     }
 }

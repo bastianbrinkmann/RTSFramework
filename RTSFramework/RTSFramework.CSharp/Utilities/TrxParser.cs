@@ -10,7 +10,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
     public static class TrxFileParser
     {
-        public static IEnumerable<MSTestTestResult> Parse(string filename, IEnumerable<MSTestTestcase> testCases)
+        public static MSTestExectionResult Parse(string filename, IEnumerable<MSTestTestcase> testCases)
         {
             try
             {
@@ -48,7 +48,19 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                         DurationInSeconds = (et - st).TotalSeconds,
                         AssociatedTestCase = testCase
                     };
-                return results;
+                var executionResult = new MSTestExectionResult();
+                executionResult.TestcasesResults.AddRange(results);
+
+                var collectorElement =
+                (from collectors in doc.Descendants(ns + "Collector")
+                    let uri = collectors.Attribute("uri")?.Value
+                    where uri == "datacollector://microsoft/CodeCoverage/2.0"
+                    select collectors).SingleOrDefault();
+
+                string fileName = collectorElement?.Descendants(ns + "A").SingleOrDefault()?.Attribute("href")?.Value;
+                executionResult.CodeCoverageFile = fileName;
+
+                return executionResult;
             }
             catch (Exception ex)
             {

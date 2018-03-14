@@ -2,6 +2,6 @@
 {
     public interface IProgramElement
     {
-        
+        string Id { get; }
     }
 }

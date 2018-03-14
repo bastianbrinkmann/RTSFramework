@@ -50,8 +50,8 @@ namespace RTSFramework.Concrete.Git
                                         delta.AddedElements.Add(new CSharpDocument(filePath));
                                     break;
                                 case ChangeKind.Deleted:
-                                    if (delta.RemovedElements.All(x => x.Id != filePath))
-                                        delta.RemovedElements.Add(new CSharpDocument(filePath));
+                                    if (delta.DeletedElements.All(x => x.Id != filePath))
+                                        delta.DeletedElements.Add(new CSharpDocument(filePath));
                                     break;
                                 case ChangeKind.Modified:
                                     if (delta.ChangedElements.All(x => x.Id != filePath))

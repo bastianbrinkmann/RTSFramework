@@ -7,8 +7,8 @@
     <ProjectGuid>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.Concrete.RTS</RootNamespace>
-    <AssemblyName>RTSFramework.Concrete.RTS</AssemblyName>
+    <RootNamespace>RTSFramework.RTSApproaches.Concrete</RootNamespace>
+    <AssemblyName>RTSFramework.RTSApproaches.Concrete</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -61,23 +61,20 @@
   <ItemGroup>
     <Compile Include="DocumentLevelDynamicRTSApproach.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RetestAllApproach.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
-      <Project>{2B9BB9A5-DB75-4EC9-BE24-0F06619D3216}</Project>
-      <Name>RTSFramework.Concrete.Git</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
       <Name>RTSFramework.Contracts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.csproj">
-      <Project>{ECDB3480-0CF5-4DED-8118-046F41CD4743}</Project>
-      <Name>RTSFramework.Concrete.CSharp</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.Utilities.csproj">
       <Project>{8E0E2C16-376E-4465-AF69-E1B300726080}</Project>
       <Name>RTSFramework.RTSApproaches.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework\RTSFramework.Core.csproj">
+      <Project>{34343ADE-C3E0-423D-94B6-9D0400F498CB}</Project>
+      <Name>RTSFramework.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

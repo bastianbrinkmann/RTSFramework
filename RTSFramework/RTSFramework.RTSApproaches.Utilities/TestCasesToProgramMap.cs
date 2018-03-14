@@ -6,7 +6,7 @@ namespace RTSFramework.RTSApproaches.Utilities
     {
         public string ProgramVersionId { get; set; }
 
-        public ISet<Dictionary<string, HashSet<string>>> TestCaseToProgramElementsMap { get; set; }
-            = new HashSet<Dictionary<string, HashSet<string>>>();
+        public Dictionary<string, HashSet<string>> TestCaseToProgramElementsMap { get; set; }
+            = new Dictionary<string, HashSet<string>>();
     }
 }
