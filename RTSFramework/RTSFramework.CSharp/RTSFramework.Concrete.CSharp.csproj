@@ -53,13 +53,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.Coverage.Analysis">
-      <HintPath>$(VS140COMNTOOLS)..\IDE\PrivateAssemblies\Microsoft.VisualStudio.Coverage.Analysis.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Coverage.Interop">
-      <HintPath>$(VS140COMNTOOLS)..\IDE\PrivateAssemblies\Microsoft.VisualStudio.Coverage.Interop.dll</HintPath>
-    </Reference>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.7.3\lib\net46\CommonServiceLocator.dll</HintPath>
     </Reference>
@@ -90,15 +83,6 @@
     <Reference Include="Microsoft.CodeAnalysis.Workspaces.Desktop, Version=2.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeAnalysis.Workspaces.Common.2.7.0\lib\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.ObjectModel.14.0.0\lib\net20\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.14.0.0.1\lib\net20\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.14.0.0.1\lib\net20\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net45\Mono.Cecil.dll</HintPath>
@@ -277,21 +261,8 @@
     <Compile Include="Artefacts\MSTestTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestResult.cs" />
     <Compile Include="MSTestFrameworkConnectorWithOpenCoverage.cs" />
-    <Compile Include="MSTestFrameworkConnectorWithMapUpdating.cs" />
     <Compile Include="MSTestFrameworkConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\ClassElement.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\CoverageElement.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\FileElement.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\LineElement.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\PackageElement.cs" />
-    <Compile Include="Utilities\CodeCoverageElements\ProjectElement.cs" />
-    <Compile Include="Utilities\CodeCoverageMetrics\BaseMetrics.cs" />
-    <Compile Include="Utilities\CodeCoverageMetrics\ClassMetrics.cs" />
-    <Compile Include="Utilities\CodeCoverageMetrics\FileMetrics.cs" />
-    <Compile Include="Utilities\CodeCoverageMetrics\PackageMetrics.cs" />
-    <Compile Include="Utilities\CodeCoverageMetrics\ProjectMetrics.cs" />
-    <Compile Include="Utilities\MikeParser.cs" />
     <Compile Include="Utilities\OpenCoverXmlParser.cs" />
     <Compile Include="Utilities\TrxParser.cs" />
     <Compile Include="VisualStudioDocumentOnlineDeltaDiscoverer.cs" />
