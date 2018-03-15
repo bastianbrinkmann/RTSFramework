@@ -90,21 +90,17 @@ namespace RTSFramework.Concrete.CSharp
             return module;
         }
 
-        public IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
+        public virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
-            return ExecuteTestsInternal(tests);
-        }
-
-        protected virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTestsInternal(IEnumerable<MSTestTestcase> tests)
-        {
-            var testsFullyQualifiedNames = tests.Select(x => x.Id).ToList();
+            var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
+            var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
             if (testsFullyQualifiedNames.Any())
             {
                 var arguments = BuildArguments(testsFullyQualifiedNames);
 
                 ExecuteVsTestsByArguments(arguments);
 
-                return ParseVsTestsTrxAnswer(tests).TestcasesResults;
+                return ParseVsTestsTrxAnswer(msTestTestcases).TestcasesResults;
             }
 
             return new List<ITestCaseResult<MSTestTestcase>>();

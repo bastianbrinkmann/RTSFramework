@@ -1,13 +1,19 @@
-﻿using RTSFramework.Contracts;
+﻿using System.Collections.Generic;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Core;
 
 namespace RTSFramework.RTSApproaches.Concrete
 {
-    public class RetestAllApproach<TD, TPe, TP, TTc> : IRTSApproach<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram where TTc : ITestCase
+    public class RetestAllApproach<TD, TPe, TP, TTc> : RTSApproachBase<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram where TTc : ITestCase
     {
-        public System.Collections.Generic.IEnumerable<TTc> PerformRTS(System.Collections.Generic.IEnumerable<TTc> testCases, TD delta)
+
+        public override void StartRTS(IEnumerable<TTc> testCases, TD delta)
         {
-            return testCases;
+            foreach (TTc testcase in testCases)
+            {
+                ReportToAllListeners(testcase);
+            }
         }
     }
 }

@@ -4,18 +4,19 @@ using Newtonsoft.Json;
 
 namespace RTSFramework.RTSApproaches.Utilities
 {
-    public static class DynamicMapPersistor
+    internal static class DynamicMapPersistor
     {
         private const string MapStoragePlace = "TestCasesToProgramMaps";
+        private const string FileExtension = ".json";
 
-        public static void PersistTestCasestoProgramMap(TestCasesToProgramMap map)
+        internal static void PersistTestCasestoProgramMap(TestCasesToProgramMap map)
         {
             if (!Directory.Exists(MapStoragePlace))
             {
                 Directory.CreateDirectory(MapStoragePlace);
             }
 
-            FileInfo file = new FileInfo(Path.Combine(MapStoragePlace, Uri.EscapeUriString(map.ProgramVersionId)));
+            FileInfo file = GetFile(map.ProgramVersionId);
 
             using (FileStream stream = file.Open(FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -27,11 +28,16 @@ namespace RTSFramework.RTSApproaches.Utilities
             }
         }
 
-        public static TestCasesToProgramMap LoadTestCasesToProgramMap(string programVersionId)
+        private static FileInfo GetFile(string programVersionId)
+        {
+            return new FileInfo(Path.Combine(MapStoragePlace, Uri.EscapeUriString(programVersionId) + FileExtension));
+        }
+
+        internal static TestCasesToProgramMap LoadTestCasesToProgramMap(string programVersionId)
         {
             if (Directory.Exists(MapStoragePlace))
             {
-                FileInfo file = new FileInfo(Path.Combine(MapStoragePlace, Uri.EscapeUriString(programVersionId)));
+                FileInfo file = GetFile(programVersionId);
 
                 if (file.Exists)
                 {
@@ -49,7 +55,7 @@ namespace RTSFramework.RTSApproaches.Utilities
                 }
             }
 
-            return new TestCasesToProgramMap();
+            return new TestCasesToProgramMap{ProgramVersionId = programVersionId};
         }
     }
 }

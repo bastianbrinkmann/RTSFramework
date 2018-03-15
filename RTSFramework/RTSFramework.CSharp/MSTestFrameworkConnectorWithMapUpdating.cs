@@ -1,39 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Mono.Cecil;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.RTSApproaches.Utilities;
+using Unity.Attributes;
 
 namespace RTSFramework.Concrete.CSharp
 {
-    public class MSTestFrameworkConnectorWithMapUpdating : MSTestFrameworkConnector
+    public class MSTestFrameworkConnectorWithMapUpdating : MSTestFrameworkConnector, IAutomatedTestFrameworkWithMapUpdating<MSTestTestcase>
     {
+        private string sourceVersionId, targetVersionId;
 
         public MSTestFrameworkConnectorWithMapUpdating(IEnumerable<string> sources) : base(sources)
         {
         }
 
-        protected override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTestsInternal(IEnumerable<MSTestTestcase> tests)
+        public override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
             var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
             var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
 
             var results = new List<ITestCaseResult<MSTestTestcase>>();
-
-
+            TestCasesToProgramMap map = DynamicMapDictionary.GetMapByVersionId(sourceVersionId).CloneMap(targetVersionId);
+            
             foreach (string test in testsFullyQualifiedNames)
             {
+                HashSet<string> currentTestCaseToProgramMap;
+
+                if (!map.TestCaseToProgramElementsMap.TryGetValue(test, out currentTestCaseToProgramMap))
+                {
+                    currentTestCaseToProgramMap = new HashSet<string>();
+                    map.TestCaseToProgramElementsMap[test] = currentTestCaseToProgramMap;
+                }
+
                 var arguments = BuildArguments(new List<string>{ test });
                 arguments += " /Enablecodecoverage";
 
                 ExecuteVsTestsByArguments(arguments);
 
-
+                //Parse TrxFile for results
                 var trxFile = GetTrxFile();
                 if (trxFile == null)
                 {
@@ -43,8 +52,7 @@ namespace RTSFramework.Concrete.CSharp
 
                 results.AddRange(exectionResult.TestcasesResults);
                
-                //TODO parse coverage file
-            
+                //Coverage file parsing
                 var parser = new MikeParser();
 
                 var codecoverageFile = Path.Combine(TestResultsFolder, Path.GetFileNameWithoutExtension(trxFile.Name),  @"In", exectionResult.CodeCoverageFile);
@@ -57,7 +65,10 @@ namespace RTSFramework.Concrete.CSharp
                     {
                         if (file.Metrics.CoveredElements > 0)
                         {
-                            //TODO hand over previous map, adjust map
+                            if (!currentTestCaseToProgramMap.Contains(file.Path))
+                            {
+                                currentTestCaseToProgramMap.Add(file.Path);
+                            }
                         }
                     }
                 }
@@ -65,8 +76,15 @@ namespace RTSFramework.Concrete.CSharp
                 trxFile.Delete();
             }
 
+            DynamicMapDictionary.UpdateMap(map);
+
             return results;
         }
-        
+
+        public void SetSourceAndTargetVersion(string sourceVersion, string targetVersion)
+        {
+            sourceVersionId = sourceVersion;
+            targetVersionId = targetVersion;
+        }
     }
 }

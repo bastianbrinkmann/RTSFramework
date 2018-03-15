@@ -6,6 +6,11 @@ namespace RTSFramework.Contracts
 {
     public interface IRTSApproach<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TTc : ITestCase where TPe : IProgramElement where TP : IProgram
     {
-        IEnumerable<TTc> PerformRTS(IEnumerable<TTc> testCases, TD delta);
+        void RegisterImpactedTestObserver(IRTSListener<TTc> listener);
+
+        void UnregisterImpactedTestObserver(IRTSListener<TTc> listener);
+
+        void StartRTS(IEnumerable<TTc> testCases, TD delta);
+
     }
 }

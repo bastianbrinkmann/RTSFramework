@@ -11,6 +11,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Concrete;
+using RTSFramework.RTSApproaches.Utilities;
 using Unity;
 using Unity.Lifetime;
 using Unity.Policy.Mapping;
@@ -21,7 +22,7 @@ namespace RTSFramework.Console
 	{
 		static void Main(string[] args)
 		{
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             //string solutionFile = @"C:\Git\TIATestProject\TIATestProject.sln";
             string repositoryPath = @"C:\Git\TIATestProject";
@@ -32,18 +33,20 @@ namespace RTSFramework.Console
 
             var container = new UnityContainer();
 
-		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, IDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
+		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, StructuralDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
             //container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
-            container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
+            container.RegisterInstance(typeof(IAutomatedTestFrameworkWithMapUpdating<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
 
-
+            //container.RegisterType<
+            //    IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>,
+            //    RetestAllApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
             container.RegisterType<
-                IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>, 
-                RetestAllApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>> ();
-            
-            container.RegisterType<OfflineController<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+               IRTSApproach<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>,
+               DocumentLevelDynamicRTSApproach<GitProgramVersion, CSharpDocument, MSTestTestcase >>();
 
-            var controller = container.Resolve<OfflineController<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+            container.RegisterType<DynamicRTSController<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+
+            var controller = container.Resolve<DynamicRTSController<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
 
 		    var results = controller.ExecuteImpactedTests(new GitProgramVersion(VersionReferenceType.LatestCommit), new GitProgramVersion(VersionReferenceType.CurrentChanges));
 
@@ -65,13 +68,18 @@ namespace RTSFramework.Console
         static Assembly CurrentDomain_AssemblyResolve(object sender,ResolveEventArgs args)
         {
             var assemblyname = new AssemblyName(args.Name).Name;
+            var vs2015CommonTools = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
 
-            var assemblyFileName = Path.Combine(Environment.GetEnvironmentVariable("VS140COMNTOOLS"), assemblyname + ".dll");
-            if (File.Exists(assemblyFileName))
+            if(vs2015CommonTools != null)
             {
-                var assembly = Assembly.LoadFrom(assemblyFileName);
-                return assembly;
+                var assemblyFileName = Path.Combine(vs2015CommonTools, assemblyname + ".dll");
+                if (File.Exists(assemblyFileName))
+                {
+                    var assembly = Assembly.LoadFrom(assemblyFileName);
+                    return assembly;
+                }
             }
+            
             return null;
         }
     }
