@@ -11,10 +11,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Concrete;
-using RTSFramework.RTSApproaches.Utilities;
 using Unity;
-using Unity.Lifetime;
-using Unity.Policy.Mapping;
 
 namespace RTSFramework.Console
 {
@@ -35,8 +32,8 @@ namespace RTSFramework.Console
 
 		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, StructuralDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
             //container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
-            container.RegisterInstance(typeof(IAutomatedTestFrameworkWithMapUpdating<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
-
+            //container.RegisterInstance(typeof(IAutomatedTestFrameworkWithMapUpdating<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
+            container.RegisterInstance(typeof(IAutomatedTestFrameworkWithCoverageCollection<MSTestTestcase>), new MSTestFrameworkConnectorWithOpenCoverage(testAssemblies));
             //container.RegisterType<
             //    IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>,
             //    RetestAllApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();

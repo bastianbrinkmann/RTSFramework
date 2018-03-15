@@ -112,6 +112,9 @@
     <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
+    <Reference Include="OpenCover.Framework">
+      <HintPath>..\packages\OpenCover.4.6.519\tools\OpenCover.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
@@ -273,6 +276,7 @@
     <Compile Include="Artefacts\MSTestExectionResult.cs" />
     <Compile Include="Artefacts\MSTestTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestResult.cs" />
+    <Compile Include="MSTestFrameworkConnectorWithOpenCoverage.cs" />
     <Compile Include="MSTestFrameworkConnectorWithMapUpdating.cs" />
     <Compile Include="MSTestFrameworkConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -288,6 +292,7 @@
     <Compile Include="Utilities\CodeCoverageMetrics\PackageMetrics.cs" />
     <Compile Include="Utilities\CodeCoverageMetrics\ProjectMetrics.cs" />
     <Compile Include="Utilities\MikeParser.cs" />
+    <Compile Include="Utilities\OpenCoverXmlParser.cs" />
     <Compile Include="Utilities\TrxParser.cs" />
     <Compile Include="VisualStudioDocumentOnlineDeltaDiscoverer.cs" />
   </ItemGroup>

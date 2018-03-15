@@ -37,7 +37,7 @@ namespace RTSFramework.Concrete.CSharp
                     map.TestCaseToProgramElementsMap[test] = currentTestCaseToProgramMap;
                 }
 
-                var arguments = BuildArguments(new List<string>{ test });
+                var arguments = BuildVsTestsArguments(new List<string>{ test });
                 arguments += " /Enablecodecoverage";
 
                 ExecuteVsTestsByArguments(arguments);

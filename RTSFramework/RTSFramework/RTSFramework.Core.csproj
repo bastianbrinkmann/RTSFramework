@@ -83,15 +83,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoverageData.cs" />
     <Compile Include="DynamicRTSController.cs" />
     <Compile Include="RTSApproachBase.cs" />
     <Compile Include="StructuralDelta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\ConsoleStopWatchTracker.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.Utilities.csproj">
+      <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>
+      <Name>RTSFramework.RTSApproaches.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -126,6 +126,11 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if not exist "$(TargetDir)\OpenCover" mkdir $(TargetDir)\OpenCover
+
+xcopy /E /Y /I "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

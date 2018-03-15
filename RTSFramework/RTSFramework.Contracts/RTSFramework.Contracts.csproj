@@ -83,10 +83,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Artefacts\ICoverageData.cs" />
     <Compile Include="Artefacts\IDelta.cs" />
     <Compile Include="Artefacts\IProgramElement.cs" />
     <Compile Include="Artefacts\ITestCaseResult.cs" />
     <Compile Include="Artefacts\TestCaseResultType.cs" />
+    <Compile Include="IAutomatedTestFrameworkWithCoverageCollection.cs" />
     <Compile Include="IAutomatedTestFramework.cs" />
     <Compile Include="IAutomatedTestFrameworkWithMapUpdating.cs" />
     <Compile Include="IDeltaDiscoverer.cs" />

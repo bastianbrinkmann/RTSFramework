@@ -13,20 +13,20 @@ namespace RTSFramework.Concrete.CSharp
 {
     public class MSTestFrameworkConnector : IAutomatedTestFramework<MSTestTestcase>
     {
-        private const string VstestPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow";
-        private const string Vstestconsole = @"vstest.console.exe";
+        protected const string VstestPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow";
+        protected const string Vstestconsole = @"vstest.console.exe";
         private const string MSTestAdapterPath = @"C:\Git\RTSFramework\RTSFramework\packages\MSTest.TestAdapter.1.2.0\build\_common";
 
         private List<MSTestTestcase> testCases;
-        private readonly IEnumerable<string> sources;
+        protected readonly IEnumerable<string> Sources;
 
         private const string TestMethodAttributeName = "TestMethodAttribute";
         private const string TestCategoryAttributeName = "TestCategoryAttribute";
 
-        protected const string TestResultsFolder = @"TestResults";
+        protected virtual string TestResultsFolder => @"TestResults";
         public MSTestFrameworkConnector(IEnumerable<string> sources)
         {
-            this.sources = sources;
+            this.Sources = sources;
         }
 
         public IEnumerable<MSTestTestcase> GetTestCases()
@@ -35,7 +35,7 @@ namespace RTSFramework.Concrete.CSharp
             {
                 testCases = new List<MSTestTestcase>();
 
-                foreach (var modulePath in sources)
+                foreach (var modulePath in Sources)
                 {
                     ModuleDefinition module = GetModuleDefinition(modulePath);
                     foreach (TypeDefinition type in module.Types)
@@ -96,7 +96,7 @@ namespace RTSFramework.Concrete.CSharp
             var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
             if (testsFullyQualifiedNames.Any())
             {
-                var arguments = BuildArguments(testsFullyQualifiedNames);
+                var arguments = BuildVsTestsArguments(testsFullyQualifiedNames);
 
                 ExecuteVsTestsByArguments(arguments);
 
@@ -152,12 +152,13 @@ namespace RTSFramework.Concrete.CSharp
             discovererProcess.WaitForExit();
         }
 
-        protected string BuildArguments(List<string> testsFullyQualifiedNames)
+        protected string BuildVsTestsArguments(List<string> testsFullyQualifiedNames)
         {
             string testCaseFilterArg = "/TestCaseFilter:";
-            testCaseFilterArg += "FullyQualifiedName=" + string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
+            testCaseFilterArg += "FullyQualifiedName=" +
+                                 string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
             string testAdapterPathArg = "/TestAdapterPath:" + MSTestAdapterPath;
-            string sourcesArg = string.Join(" ", sources);
+            string sourcesArg = string.Join(" ", Sources);
             string loggerArg = "/logger:trx";
             string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;
 
