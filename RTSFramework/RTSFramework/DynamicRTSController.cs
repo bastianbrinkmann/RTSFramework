@@ -8,15 +8,15 @@ using RTSFramework.RTSApproaches.Utilities;
 
 namespace RTSFramework.Core
 {
-	public class DynamicRTSController<TPeDiscoverer, TPeRTSApproach, TP, TTc> : IRTSListener<TTc> where TPeDiscoverer : IProgramModelElement where TPeRTSApproach : IProgramModelElement where TTc : ITestCase where TP: IProgramModel
+	public class DynamicRTSController<TPeDiscoverer, TPeRTSApproach, TPDiscoverer, TTc> : IRTSListener<TTc> where TPeDiscoverer : IProgramModelElement where TPeRTSApproach : IProgramModelElement where TTc : ITestCase where TPDiscoverer : IProgramModel
 	{
-	    private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TPeDiscoverer>> deltaDiscoverer;
+	    private readonly IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>> deltaDiscoverer;
 	    private readonly IAutomatedTestFramework<TTc> testFramework;
 	    private readonly IRTSApproach<TPeRTSApproach, TTc> rtsApproach;
 	    private readonly IDeltaAdapter<TPeDiscoverer, TPeRTSApproach> deltaAdapter;
 
         public DynamicRTSController(
-            IOfflineDeltaDiscoverer<TP, StructuralDelta<TPeDiscoverer>> deltaDiscoverer,
+            IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>> deltaDiscoverer,
             IAutomatedTestFramework<TTc> testFramework, 
             IRTSApproach<TPeRTSApproach, TTc> rtsApproach, 
             IDeltaAdapter<TPeDiscoverer, TPeRTSApproach> deltaAdapter)
@@ -27,7 +27,7 @@ namespace RTSFramework.Core
             this.deltaAdapter = deltaAdapter;
         }
 
-	    public IEnumerable<ITestCaseResult<TTc>> ExecuteImpactedTests(TP oldVersion, TP newVersion)
+	    public IEnumerable<ITestCaseResult<TTc>> ExecuteImpactedTests(TPDiscoverer oldVersion, TPDiscoverer newVersion)
 	    {
             StructuralDelta<TPeDiscoverer> delta = default(StructuralDelta<TPeDiscoverer>);
 	        ConsoleStopWatchTracker.ReportNeededTimeOnConsole(

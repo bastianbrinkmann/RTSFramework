@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Artefacts\ICoverageData.cs" />
+    <Compile Include="Artefacts\IArtefactAdapter.cs" />
     <Compile Include="Delta\IDelta.cs" />
     <Compile Include="Artefacts\IProgramModelElement.cs" />
     <Compile Include="Artefacts\ITestCaseResult.cs" />

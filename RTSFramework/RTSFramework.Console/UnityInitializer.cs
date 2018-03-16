@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using RTSFramework.Concrete.Adatpers;
+﻿using RTSFramework.Concrete.Adatpers.DeltaAdapters;
 using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
+using RTSFramework.Concrete.TFS2010.Artefacts;
 using RTSFramework.Concrete.User;
+using RTSFramework.Console.RunConfigurations;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
 using RTSFramework.Core;
 using RTSFramework.Core.Artefacts;
@@ -17,50 +17,84 @@ namespace RTSFramework.Console
 {
     public static class UnityInitializer
     {
-        public static void Init(IUnityContainer container, string gitRepoPath = null)
+        public static void Init(IUnityContainer container, RunConfiguration configuration)
         {
             InitAdapters(container);
 
-            InitDiscoverer(container, gitRepoPath);
-            InitTestFramework(container);
-            InitRTSApproaches(container);
-            InitController(container);
+            InitDiscoverer(container, configuration);
+            InitTestFramework(container, configuration);
+            InitRTSApproaches(container, configuration);
+            InitController(container, configuration);
         }
 
-        private static void InitRTSApproaches(IUnityContainer container)
+        private static void InitRTSApproaches(IUnityContainer container, RunConfiguration configuration)
         {
-            //var rtsApproach = new RetestAllApproach<CSharpFileElement, MSTestTestcase>();
-            var rtsApproach = new DynamicRTSApproach<CSharpFileElement, MSTestTestcase>();
+            IRTSApproach<CSharpFileElement, MSTestTestcase> rtsApproach = null;
+
+            if (configuration.RTSApproachType == RTSApproachType.RetestAll)
+            {
+                rtsApproach = new RetestAllApproach<CSharpFileElement, MSTestTestcase>();
+            }
+            else if (configuration.RTSApproachType == RTSApproachType.DynamicRTS)
+            {
+                rtsApproach = new DynamicRTSApproach<CSharpFileElement, MSTestTestcase>();
+            }
 
             container.RegisterInstance(typeof(IRTSApproach<CSharpFileElement, MSTestTestcase>), rtsApproach);
         }
 
-        private static void InitTestFramework(IUnityContainer container)
+        private static void InitTestFramework(IUnityContainer container, RunConfiguration configuration)
         {
-            List<string> testAssemblies = new List<string>
+            IAutomatedTestFramework<MSTestTestcase> testFramework;
+            if (configuration.PersistDynamicMap)
             {
-                @"C:\Git\TIATestProject\MainProject.Test\bin\Debug\MainProject.Test.dll"
-            };
-
-            //var testFramework = new MSTestFrameworkConnector(testAssemblies);
-            var testFramework = new MSTestFrameworkConnectorWithOpenCoverage(testAssemblies);
+                testFramework = new MSTestFrameworkConnectorWithOpenCoverage(configuration.TestAssemblies);
+            }
+            else
+            {
+                testFramework = new MSTestFrameworkConnector(configuration.TestAssemblies);
+            }
 
             container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), testFramework);
         }
 
-        private static void InitDiscoverer(IUnityContainer container, string gitRepoPath)
-        {             
-            string[] intendedChanges = { @"C:\Git\TIATestProject\MainProject\Calculator.cs" };
+        private static void InitDiscoverer(IUnityContainer container, RunConfiguration configuration)
+        {
+            if (configuration.ProgramModelType == ProgramModelType.GitProgramModel)
+            {
+                IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>> gitDiscoverer = null;
 
-            //var discoverer = new LocalGitChangedFilesDiscoverer(gitRepoPath);
-            var discoverer = new UserIntendedChangesDiscoverer<GitProgramModel>(intendedChanges);
-
-            container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>), discoverer);
+                if (configuration.DiscoveryType == DiscoveryType.LocalDiscovery)
+                {
+                    gitDiscoverer = new LocalGitChangedFilesDiscoverer(configuration.GitRepositoryPath);
+                }
+                else if (configuration.DiscoveryType == DiscoveryType.UserBasedDiscovery)
+                {
+                    gitDiscoverer = new UserIntendedChangesDiscoverer<GitProgramModel>(configuration.IntendedChanges);
+                }
+                
+                container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>), gitDiscoverer);
+            }
+            else if (configuration.ProgramModelType == ProgramModelType.TFS2010ProgramModel)
+            {
+                if (configuration.DiscoveryType == DiscoveryType.UserBasedDiscovery)
+                {
+                    var tfsDiscoverer = new UserIntendedChangesDiscoverer<TFS2010ProgramModel>(configuration.IntendedChanges);
+                    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>), tfsDiscoverer);
+                }
+            }
         }
 
-        private static void InitController(IUnityContainer container)
+        private static void InitController(IUnityContainer container, RunConfiguration configuration)
         {
-            container.RegisterType<DynamicRTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            if (configuration.ProgramModelType == ProgramModelType.GitProgramModel)
+            {
+                container.RegisterType<DynamicRTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            }
+            else if (configuration.ProgramModelType == ProgramModelType.TFS2010ProgramModel)
+            {
+                container.RegisterType<DynamicRTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            }
         }
 
         private static void InitAdapters(IUnityContainer container)

@@ -2,7 +2,6 @@
 {
     public enum VersionReferenceType
     {
-        SpecificCommit,
         LatestCommit,
         CurrentChanges
     }

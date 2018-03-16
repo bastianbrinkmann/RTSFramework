@@ -6,7 +6,7 @@ using RTSFramework.Contracts.Delta;
 
 namespace RTSFramework.Concrete.CSharp
 {
-    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, IDelta>
+    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgramModel, IDelta>
     {
 
         private StructuralDelta<CSharpFileElement> delta = new StructuralDelta<CSharpFileElement>();
@@ -27,7 +27,7 @@ namespace RTSFramework.Concrete.CSharp
             workspace.CloseSolution();
         }
         
-        public void StartDiscovery(CSharpProgram startingVersion)
+        public void StartDiscovery(CSharpProgramModel startingVersion)
         {
             delta.SourceModelId = startingVersion.VersionId;
             workspace = MSBuildWorkspace.Create();

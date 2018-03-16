@@ -57,10 +57,6 @@
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.7.3\lib\net46\CommonServiceLocator.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.ObjectModel.14.0.0\lib\net20\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -94,6 +90,10 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunConfiguration.cs" />
+    <Compile Include="RunConfigurations\DiscoveryType.cs" />
+    <Compile Include="RunConfigurations\ProgramModelType.cs" />
+    <Compile Include="RunConfigurations\RTSApproachType.cs" />
     <Compile Include="UnityInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +112,10 @@
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
       <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
       <Name>RTSFramework.Concrete.RTS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Concrete.TFS2010\RTSFramework.Concrete.TFS2010.csproj">
+      <Project>{BFA8DBD3-1761-4660-A372-334482F08950}</Project>
+      <Name>RTSFramework.Concrete.TFS2010</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.User\RTSFramework.Concrete.User.csproj">
       <Project>{fd02117b-dd28-41c8-9a18-655ad2023445}</Project>

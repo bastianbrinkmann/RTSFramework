@@ -252,7 +252,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artefacts\CSharpProgram.cs" />
+    <Compile Include="Artefacts\CSharpProgramModel.cs" />
     <Compile Include="Artefacts\ICSharpProgram.cs" />
     <Compile Include="Artefacts\CSharpFileElement.cs" />
     <Compile Include="Artefacts\ICSharpTestcase.cs" />
