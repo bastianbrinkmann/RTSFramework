@@ -84,17 +84,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Artefacts\ICoverageData.cs" />
-    <Compile Include="Artefacts\IDelta.cs" />
-    <Compile Include="Artefacts\IProgramElement.cs" />
+    <Compile Include="Delta\IDelta.cs" />
+    <Compile Include="Artefacts\IProgramModelElement.cs" />
     <Compile Include="Artefacts\ITestCaseResult.cs" />
+    <Compile Include="Delta\IDeltaAdapter.cs" />
+    <Compile Include="Delta\StructuralDelta.cs" />
     <Compile Include="Artefacts\TestCaseResultType.cs" />
     <Compile Include="IAutomatedTestFrameworkWithCoverageCollection.cs" />
     <Compile Include="IAutomatedTestFramework.cs" />
-    <Compile Include="IAutomatedTestFrameworkWithMapUpdating.cs" />
     <Compile Include="IDeltaDiscoverer.cs" />
     <Compile Include="IOfflineDeltaDiscoverer.cs" />
     <Compile Include="IOnlineDeltaDiscoverer.cs" />
-    <Compile Include="Artefacts\IProgram.cs" />
+    <Compile Include="Artefacts\IProgramModel.cs" />
     <Compile Include="Artefacts\ITestCase.cs" />
     <Compile Include="IRTSApproach.cs" />
     <Compile Include="IRTSListener.cs" />

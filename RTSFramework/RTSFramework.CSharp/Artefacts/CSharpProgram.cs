@@ -2,7 +2,7 @@
 
 namespace RTSFramework.Concrete.CSharp.Artefacts
 {
-    public class CSharpProgram : IProgram
+    public class CSharpProgram : IProgramModel
     {
         public string SolutionPath { get; }
 

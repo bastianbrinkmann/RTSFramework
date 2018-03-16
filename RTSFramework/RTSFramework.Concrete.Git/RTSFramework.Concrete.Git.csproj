@@ -89,8 +89,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artefacts\GitProgramVersion.cs" />
+    <Compile Include="Artefacts\GitProgramModel.cs" />
     <Compile Include="Artefacts\VersionReferenceType.cs" />
+    <Compile Include="CommitIdentifierHelper.cs" />
     <Compile Include="LocalGitChangedFilesDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

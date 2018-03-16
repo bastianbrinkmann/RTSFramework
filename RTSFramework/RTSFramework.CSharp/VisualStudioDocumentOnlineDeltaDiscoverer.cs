@@ -2,21 +2,20 @@
 using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Core;
+using RTSFramework.Contracts.Delta;
 
 namespace RTSFramework.Concrete.CSharp
 {
-    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, CSharpDocument, IDelta<CSharpDocument, CSharpProgram>>
+    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgram, IDelta>
     {
 
-        private StructuralDelta<CSharpDocument, CSharpProgram> delta = new StructuralDelta<CSharpDocument, CSharpProgram>();
+        private StructuralDelta<CSharpFileElement> delta = new StructuralDelta<CSharpFileElement>();
 
         private Solution solution;
         private MSBuildWorkspace workspace;
 
 
-        public IDelta<CSharpDocument, CSharpProgram> GetCurrentDelta()
+        public IDelta GetCurrentDelta()
         {
             return delta;
         }
@@ -30,7 +29,7 @@ namespace RTSFramework.Concrete.CSharp
         
         public void StartDiscovery(CSharpProgram startingVersion)
         {
-            delta.Source = startingVersion;
+            delta.SourceModelId = startingVersion.VersionId;
             workspace = MSBuildWorkspace.Create();
             solution = workspace.OpenSolutionAsync(startingVersion.SolutionPath).Result;
             workspace.WorkspaceChanged += MSWorkspaceOnWorkspaceChanged;
@@ -41,7 +40,7 @@ namespace RTSFramework.Concrete.CSharp
             if (args.Kind == WorkspaceChangeKind.DocumentChanged)
             {
                 var rosylnDocument = solution.GetDocument(args.DocumentId);
-                var csharpDocument = new CSharpDocument(args.DocumentId.ToString());
+                var csharpDocument = new CSharpFileElement(args.DocumentId.ToString());
 
                 delta.ChangedElements.Add(csharpDocument);
             }

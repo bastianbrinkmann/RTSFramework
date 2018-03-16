@@ -1,31 +1,32 @@
 ﻿using System.Collections.Generic;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Delta;
 
 namespace RTSFramework.Core
 {
-    public abstract class RTSApproachBase<TD, TPe, TP, TTc> : IRTSApproach<TD, TPe, TP, TTc> where TD : IDelta<TPe, TP> where TTc : ITestCase where TPe : IProgramElement where TP : IProgram
+    public abstract class RTSApproachBase<TPe, TTc> : IRTSApproach<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
     {
-        protected readonly List<IRTSListener<TTc>> Listeners = new List<IRTSListener<TTc>>();
+        private readonly List<IRTSListener<TTc>> listeners = new List<IRTSListener<TTc>>();
 
         public void RegisterImpactedTestObserver(IRTSListener<TTc> listener)
         {
-            Listeners.Add(listener);
+            listeners.Add(listener);
         }
 
         public void UnregisterImpactedTestObserver(IRTSListener<TTc> listener)
         {
-            Listeners.Remove(listener);
+            listeners.Remove(listener);
         }
 
         protected void ReportToAllListeners(TTc impactedTest)
         {
-            foreach (var listener in Listeners)
+            foreach (var listener in listeners)
             {
                 listener.NotifyImpactedTest(impactedTest);
             }
         }
 
-        public abstract void StartRTS(IEnumerable<TTc> testCases, TD delta);
+        public abstract void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe> delta);
     }
 }

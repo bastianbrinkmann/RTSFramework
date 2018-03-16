@@ -7,77 +7,65 @@ using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
+using RTSFramework.Concrete.User;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Delta;
 using RTSFramework.Core;
+using RTSFramework.Core.Artefacts;
 using RTSFramework.RTSApproaches.Concrete;
 using Unity;
 
 namespace RTSFramework.Console
 {
-	class Program
-	{
-		static void Main(string[] args)
-		{
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
-            //string solutionFile = @"C:\Git\TIATestProject\TIATestProject.sln";
+    class Program
+    {
+        static void Main(string[] args)
+        {
             string repositoryPath = @"C:\Git\TIATestProject";
-            List<string> testAssemblies = new List<string>
+
+            var latestCommitId = CommitIdentifierHelper.GetVersionIdentifier(repositoryPath,
+                VersionReferenceType.LatestCommit);
+            var uncomittedId = CommitIdentifierHelper.GetVersionIdentifier(repositoryPath,
+                VersionReferenceType.CurrentChanges);
+
+            GitProgramModel oldProgramModel = new GitProgramModel
             {
-                @"C:\Git\TIATestProject\MainProject.Test\bin\Debug\MainProject.Test.dll"
+                VersionReferenceType = VersionReferenceType.LatestCommit,
+                VersionId = latestCommitId
+            };
+            GitProgramModel newProgramModel = new GitProgramModel
+            {
+                VersionReferenceType = VersionReferenceType.CurrentChanges,
+                VersionId = uncomittedId
             };
 
             var container = new UnityContainer();
+            UnityInitializer.Init(container, repositoryPath);
 
-		    container.RegisterInstance(typeof(IOfflineDeltaDiscoverer<GitProgramVersion, CSharpDocument, StructuralDelta<CSharpDocument, GitProgramVersion>>), new LocalGitChangedFilesDiscoverer(repositoryPath));
-            //container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), new MSTestFrameworkConnector(testAssemblies));
-            //container.RegisterInstance(typeof(IAutomatedTestFrameworkWithMapUpdating<MSTestTestcase>), new MSTestFrameworkConnectorWithMapUpdating(testAssemblies));
-            container.RegisterInstance(typeof(IAutomatedTestFrameworkWithCoverageCollection<MSTestTestcase>), new MSTestFrameworkConnectorWithOpenCoverage(testAssemblies));
-            //container.RegisterType<
-            //    IRTSApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>,
-            //    RetestAllApproach<IDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
-            container.RegisterType<
-               IRTSApproach<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>,
-               DocumentLevelDynamicRTSApproach<GitProgramVersion, CSharpDocument, MSTestTestcase >>();
+            var controller = container.Resolve<DynamicRTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
 
-            container.RegisterType<DynamicRTSController<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+            var results = controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
 
-            var controller = container.Resolve<DynamicRTSController<StructuralDelta<CSharpDocument, GitProgramVersion>, CSharpDocument, GitProgramVersion, MSTestTestcase>>();
+            ReportFinalResults(results);
+        }
 
-		    var results = controller.ExecuteImpactedTests(new GitProgramVersion(VersionReferenceType.LatestCommit), new GitProgramVersion(VersionReferenceType.CurrentChanges));
+        private static void ReportFinalResults(IEnumerable<ITestCaseResult<MSTestTestcase>> results)
+        {
+            System.Console.WriteLine();
+            System.Console.WriteLine("Final more detailed Test Results:");
 
-            System.Console.WriteLine("Test Results:");
-
-		    var testCaseResults = results as IList<ITestCaseResult<MSTestTestcase>> ?? results.ToList();
-		    foreach (var result in testCaseResults)
-		    {
-		        System.Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
-		    }
+            var testCaseResults = results as IList<ITestCaseResult<MSTestTestcase>> ?? results.ToList();
+            foreach (var result in testCaseResults)
+            {
+                System.Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
+            }
             int numberOfFailedTests = testCaseResults.Count(x => x.Outcome == TestCaseResultType.Failed);
 
             System.Console.WriteLine();
-            System.Console.WriteLine(numberOfFailedTests == 0 ? "All tests passed!" : $"{numberOfFailedTests} of {testCaseResults.Count()} failed!" );
+            System.Console.WriteLine(numberOfFailedTests == 0 ? "All tests passed!" : $"{numberOfFailedTests} of {testCaseResults.Count()} failed!");
 
             System.Console.ReadKey();
-		}
-
-        static Assembly CurrentDomain_AssemblyResolve(object sender,ResolveEventArgs args)
-        {
-            var assemblyname = new AssemblyName(args.Name).Name;
-            var vs2015CommonTools = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
-
-            if(vs2015CommonTools != null)
-            {
-                var assemblyFileName = Path.Combine(vs2015CommonTools, assemblyname + ".dll");
-                if (File.Exists(assemblyFileName))
-                {
-                    var assembly = Assembly.LoadFrom(assemblyFileName);
-                    return assembly;
-                }
-            }
-            
-            return null;
         }
     }
 }

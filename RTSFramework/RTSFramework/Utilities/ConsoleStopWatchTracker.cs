@@ -11,7 +11,11 @@ namespace RTSFramework.Core.Utilities
             stopwatch.Start();
             action();
             stopwatch.Stop();
+
+            var oldColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Blue; ;
             Console.WriteLine($"{actionName} took {stopwatch.Elapsed.TotalSeconds} Seconds");
+            Console.ForegroundColor = oldColor;
         }
     }
 }

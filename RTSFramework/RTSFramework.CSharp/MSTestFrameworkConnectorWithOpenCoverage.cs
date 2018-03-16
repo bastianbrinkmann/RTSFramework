@@ -63,13 +63,16 @@ namespace RTSFramework.Concrete.CSharp
                     FileName = Path.GetFullPath(Path.Combine(OpenCoverPath, OpenCoverExe)),
                     Arguments = arguments,
                     CreateNoWindow = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
                 }
             };
 
-            Debug.WriteLine(discovererProcess.StartInfo.FileName + " " + discovererProcess.StartInfo.Arguments);
+            discovererProcess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
 
             discovererProcess.Start();
+            discovererProcess.BeginOutputReadLine();
+
             discovererProcess.WaitForExit();
         }
 

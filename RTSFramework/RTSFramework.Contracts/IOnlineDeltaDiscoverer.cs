@@ -1,8 +1,9 @@
 ﻿using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Delta;
 
 namespace RTSFramework.Contracts
 {
-	public interface IOnlineDeltaDiscoverer<TP, TPe, TD> : IDeltaDiscoverer<TP, TPe, TD> where TD : IDelta<TPe, TP> where TPe : IProgramElement where TP : IProgram
+	public interface IOnlineDeltaDiscoverer<TP, TD> : IDeltaDiscoverer<TP, TD> where TD : IDelta where TP : IProgramModel
 	{
 		TD GetCurrentDelta();
 

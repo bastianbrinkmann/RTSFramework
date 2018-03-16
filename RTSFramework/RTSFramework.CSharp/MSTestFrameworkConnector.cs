@@ -8,16 +8,18 @@ using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp
 {
     public class MSTestFrameworkConnector : IAutomatedTestFramework<MSTestTestcase>
     {
-        protected const string VstestPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow";
+        protected readonly string VstestPath = Path.Combine(
+            Environment.GetEnvironmentVariable("VS140COMNTOOLS") ?? @"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools",
+            @"..\IDE\CommonExtensions\Microsoft\TestWindow");
         protected const string Vstestconsole = @"vstest.console.exe";
-        private const string MSTestAdapterPath = @"C:\Git\RTSFramework\RTSFramework\packages\MSTest.TestAdapter.1.2.0\build\_common";
+        private const string MSTestAdapterPath = @"MSTestAdapter";
 
-        private List<MSTestTestcase> testCases;
         protected readonly IEnumerable<string> Sources;
 
         private const string TestMethodAttributeName = "TestMethodAttribute";
@@ -31,34 +33,31 @@ namespace RTSFramework.Concrete.CSharp
 
         public IEnumerable<MSTestTestcase> GetTestCases()
         {
-            if (testCases == null)
+            var testCases = new List<MSTestTestcase>();
+
+            foreach (var modulePath in Sources)
             {
-                testCases = new List<MSTestTestcase>();
-
-                foreach (var modulePath in Sources)
+                ModuleDefinition module = GetMonoModuleDefinition(modulePath);
+                foreach (TypeDefinition type in module.Types)
                 {
-                    ModuleDefinition module = GetModuleDefinition(modulePath);
-                    foreach (TypeDefinition type in module.Types)
+                    if (type.HasMethods)
                     {
-                        if (type.HasMethods)
+                        foreach (MethodDefinition method in type.Methods)
                         {
-                            foreach (MethodDefinition method in type.Methods)
+                            if (method.CustomAttributes.Any(x => x.AttributeType.Name == TestMethodAttributeName))
                             {
-                                if (method.CustomAttributes.Any(x => x.AttributeType.Name == TestMethodAttributeName))
+                                var declaringTypeFull = method.DeclaringType.FullName;
+
+                                var testCase = new MSTestTestcase($"{declaringTypeFull}.{method.Name}");
+
+                                var categoryAttributes =
+                                    method.CustomAttributes.Where(x => x.AttributeType.Name == TestCategoryAttributeName);
+                                foreach (var categoryAttr in categoryAttributes)
                                 {
-                                    var declaringTypeFull = method.DeclaringType.FullName;
-
-                                    var testCase = new MSTestTestcase($"{declaringTypeFull}.{method.Name}");
-
-                                    var categoryAttributes =
-                                        method.CustomAttributes.Where(x => x.AttributeType.Name == TestCategoryAttributeName);
-                                    foreach (var categoryAttr in categoryAttributes)
-                                    {
-                                        testCase.Categories.Add((string)categoryAttr.ConstructorArguments[0].Value);
-                                    }
-
-                                    testCases.Add(testCase);
+                                    testCase.Categories.Add((string)categoryAttr.ConstructorArguments[0].Value);
                                 }
+
+                                testCases.Add(testCase);
                             }
                         }
                     }
@@ -68,7 +67,7 @@ namespace RTSFramework.Concrete.CSharp
             return testCases;
         }
 
-        private ModuleDefinition GetModuleDefinition(string moduleFilePath)
+        private ModuleDefinition GetMonoModuleDefinition(string moduleFilePath)
         {
             FileInfo fileInfo = new FileInfo(moduleFilePath);
             if (!fileInfo.Exists)
@@ -90,9 +89,10 @@ namespace RTSFramework.Concrete.CSharp
             return module;
         }
 
+        private IList<MSTestTestcase> msTestTestcases;
         public virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
-            var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
+            msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
             var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
             if (testsFullyQualifiedNames.Any())
             {
@@ -128,7 +128,34 @@ namespace RTSFramework.Concrete.CSharp
             {
                 var results = TrxFileParser.Parse(trxFile.FullName, tests);
 
-                trxFile.Delete();
+                var resultsDirectory = trxFile.Directory;
+                if (resultsDirectory != null)
+                {
+                    foreach (FileInfo file in resultsDirectory.GetFiles())
+                    {
+                        try
+                        {
+                            file.Delete();
+                        }
+                        catch (Exception)
+                        {
+                            //Intentinally empty - vstestconsole sometimes locks files too long - cleaned up in next run then
+                        }
+                    }
+                    foreach (DirectoryInfo dir in resultsDirectory.GetDirectories())
+                    {
+                        try
+                        {
+                            dir.Delete(true);
+                        }
+                        catch (Exception)
+                        { 
+                            //Intentinally empty - vstestconsole sometimes locks directories too long - cleaned up in next run then
+                        }
+                    
+                    }
+                }
+
                 return results;
             }
 
@@ -144,12 +171,27 @@ namespace RTSFramework.Concrete.CSharp
                     FileName = Path.Combine(VstestPath, Vstestconsole),
                     Arguments = arguments,
                     CreateNoWindow = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
                 }
             };
 
+            discovererProcess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
+
             discovererProcess.Start();
+            discovererProcess.BeginOutputReadLine();
+
             discovererProcess.WaitForExit();
+        }
+
+        protected void DiscovererProcessOnOutputDataReceived(object sender, DataReceivedEventArgs dataReceivedEventArgs)
+        {
+
+            //TODO evaluate whether Vstest output can be analyzed more detailed -> e.g. empty row means new class
+            if (dataReceivedEventArgs.Data != null)
+            {
+                Console.WriteLine(dataReceivedEventArgs.Data);
+            }
         }
 
         protected string BuildVsTestsArguments(List<string> testsFullyQualifiedNames)
@@ -157,7 +199,7 @@ namespace RTSFramework.Concrete.CSharp
             string testCaseFilterArg = "/TestCaseFilter:";
             testCaseFilterArg += "FullyQualifiedName=" +
                                  string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
-            string testAdapterPathArg = "/TestAdapterPath:" + MSTestAdapterPath;
+            string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
             string sourcesArg = string.Join(" ", Sources);
             string loggerArg = "/logger:trx";
             string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;

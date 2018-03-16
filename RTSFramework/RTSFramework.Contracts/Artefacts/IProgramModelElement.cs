@@ -1,6 +1,6 @@
 ﻿namespace RTSFramework.Contracts.Artefacts
 {
-    public interface IProgramElement
+    public interface IProgramModelElement
     {
         string Id { get; }
     }

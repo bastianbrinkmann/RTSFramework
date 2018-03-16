@@ -6,5 +6,5 @@ namespace RTSFramework.Contracts
 	public interface IAutomatedTestFramework<TTc> : ITestFramework<TTc> where TTc : ITestCase
 	{
 		IEnumerable<ITestCaseResult<TTc>> ExecuteTests(IEnumerable<TTc> tests);
-	}
+    }
 }

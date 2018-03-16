@@ -94,12 +94,17 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnityInitializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.Adatpers\RTSFramework.Concrete.Adatpers.csproj">
+      <Project>{24f91a87-f395-4fd5-8619-5a509715630e}</Project>
+      <Name>RTSFramework.Concrete.Adatpers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
       <Project>{2b9bb9a5-db75-4ec9-be24-0f06619d3216}</Project>
       <Name>RTSFramework.Concrete.Git</Name>
@@ -107,6 +112,10 @@
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
       <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
       <Name>RTSFramework.Concrete.RTS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Concrete.User\RTSFramework.Concrete.User.csproj">
+      <Project>{fd02117b-dd28-41c8-9a18-655ad2023445}</Project>
+      <Name>RTSFramework.Concrete.User</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
@@ -127,9 +136,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(TargetDir)\OpenCover" mkdir $(TargetDir)\OpenCover
+    <PostBuildEvent>if not exist "$(TargetDir)\OpenCover" mkdir "$(TargetDir)\OpenCover"
+if not exist "$(TargetDir)\MSTestAdapter" mkdir "$(TargetDir)\MSTestAdapter"
 
-xcopy /E /Y /I "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"</PostBuildEvent>
+xcopy /E /Y /I "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"
+xcopy /E /Y /I "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)\MSTestAdapter"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

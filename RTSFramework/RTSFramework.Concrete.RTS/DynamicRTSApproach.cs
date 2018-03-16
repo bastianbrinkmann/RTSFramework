@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Delta;
 using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Utilities;
-using Unity.Attributes;
 
 namespace RTSFramework.RTSApproaches.Concrete
 {
-    public class DocumentLevelDynamicRTSApproach<TP, TPe, TTc> : RTSApproachBase<StructuralDelta<TPe, TP>, TPe, TP, TTc> where TP : IProgram where TTc : ITestCase where TPe : IProgramElement
+    public class DynamicRTSApproach<TPe, TTc> : RTSApproachBase<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
     {
-        public override void StartRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe, TP> delta)
+        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe> delta)
         {
-            var map = DynamicMapDictionary.GetMapByVersionId(delta.Source.VersionId);
+            var map = DynamicMapDictionary.GetMapByVersionId(delta.SourceModelId);
 
             var allTestcases = testCases as IList<TTc> ?? testCases.ToList();
 

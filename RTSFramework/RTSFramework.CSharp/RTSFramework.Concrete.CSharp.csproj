@@ -254,8 +254,7 @@
   <ItemGroup>
     <Compile Include="Artefacts\CSharpProgram.cs" />
     <Compile Include="Artefacts\ICSharpProgram.cs" />
-    <Compile Include="Artefacts\ICSharpProgramElement.cs" />
-    <Compile Include="Artefacts\CSharpDocument.cs" />
+    <Compile Include="Artefacts\CSharpFileElement.cs" />
     <Compile Include="Artefacts\ICSharpTestcase.cs" />
     <Compile Include="Artefacts\MSTestExectionResult.cs" />
     <Compile Include="Artefacts\MSTestTestcase.cs" />

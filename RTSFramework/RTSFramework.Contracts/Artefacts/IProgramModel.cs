@@ -2,7 +2,7 @@
 
 namespace RTSFramework.Contracts.Artefacts
 {
-	public interface IProgram
+	public interface IProgramModel
 	{
         string VersionId { get; }
 	}
