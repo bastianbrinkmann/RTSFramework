@@ -29,7 +29,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                     var testModules = session.Modules.Where(x => sources.Contains(x.ModulePath));
 
                     //Determine Ids of testcases
-                    var coverageIdsTestCases = new List<(uint, MSTestTestcase)>();
+                    var coverageIdsTestCases = new Dictionary<uint, MSTestTestcase>();
 
                     foreach (var module in testModules)
                     {
@@ -39,7 +39,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
                             var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains(x.Id));
 
-                            coverageIdsTestCases.Add((trackedMethod.UniqueId, associatedTest));
+                            coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
                         }
                     }
 
@@ -48,7 +48,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
                     foreach (var module in session.Modules)
                     {
-                        var files = new List<(uint, string)>();
+                        var files = new Dictionary<uint, string>();
 
                         
                         //Determine Ids of files
@@ -59,7 +59,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
                         foreach (var file in module.Files)
                         {
-                            files.Add((file.UniqueId, file.FullPath));
+                            files.Add(file.UniqueId, file.FullPath);
                         }
 
                         foreach (var @class in module.Classes)
@@ -77,7 +77,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                                 }
 
                                 var fileId = method.FileRef.UniqueId;
-                                var filePath = files.Single(x => x.Item1 == fileId).Item2;
+	                            var filePath = files[fileId];
 
                                 foreach (var sequencePoint in method.SequencePoints)
                                 {
@@ -88,7 +88,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
                                     foreach (var methodRef in sequencePoint.TrackedMethodRefs)
                                     {
-                                        var associatedTestcase = coverageIdsTestCases.Single(x => x.Item1 == methodRef.UniqueId).Item2;
+	                                    var associatedTestcase = coverageIdsTestCases[methodRef.UniqueId];
 
 
                                         if (!testCasesToElements[associatedTestcase.Id].Contains(filePath))
