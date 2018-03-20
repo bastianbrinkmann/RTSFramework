@@ -70,21 +70,10 @@ namespace RTSFramework.Console
 
         private static void GitExampleRun(IUnityContainer container, RunConfiguration configuration)
         {
-            var latestCommitId = CommitIdentifierHelper.GetVersionIdentifier(configuration.GitRepositoryPath,
-                VersionReferenceType.LatestCommit);
-            var uncomittedId = CommitIdentifierHelper.GetVersionIdentifier(configuration.GitRepositoryPath,
-                VersionReferenceType.CurrentChanges);
-
-            var oldProgramModel = new GitProgramModel
-            {
-                VersionReferenceType = VersionReferenceType.LatestCommit,
-                VersionId = latestCommitId
-            };
-            var newProgramModel = new GitProgramModel
-            {
-                VersionReferenceType = VersionReferenceType.CurrentChanges,
-                VersionId = uncomittedId
-            };
+            var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
+                GitVersionReferenceType.LatestCommit);
+            var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
+                GitVersionReferenceType.CurrentChanges);
 
             var controller = container.Resolve<DynamicRTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
 

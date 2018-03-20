@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Artefacts\TFS2010ProgramModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TFS2010ProgramModelProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">

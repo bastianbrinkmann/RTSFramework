@@ -1,6 +1,6 @@
 ﻿namespace RTSFramework.Concrete.Git.Artefacts
 {
-    public enum VersionReferenceType
+    public enum GitVersionReferenceType
     {
         LatestCommit,
         CurrentChanges

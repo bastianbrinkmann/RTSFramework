@@ -31,8 +31,8 @@ namespace RTSFramework.Concrete.Git
 
             using (Repository repo = new Repository(repositoryPath))
             {
-                if (oldModel.VersionReferenceType == VersionReferenceType.LatestCommit &&
-                    newModel.VersionReferenceType == VersionReferenceType.CurrentChanges)
+                if (oldModel.GitVersionReferenceType == GitVersionReferenceType.LatestCommit &&
+                    newModel.GitVersionReferenceType == GitVersionReferenceType.CurrentChanges)
                 {
                     TreeChanges changes = repo.Diff.Compare<TreeChanges>();
                     foreach (TreeEntryChanges change in changes)
