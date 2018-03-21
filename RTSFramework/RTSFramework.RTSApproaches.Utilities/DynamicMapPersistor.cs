@@ -22,7 +22,7 @@ namespace RTSFramework.RTSApproaches.Utilities
             {
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
-                    var serializer = new JsonSerializer();
+                    var serializer = JsonSerializer.Create(new JsonSerializerSettings {Formatting = Formatting.Indented});
                     serializer.Serialize(writer, map);
                 }
             }
@@ -47,8 +47,8 @@ namespace RTSFramework.RTSApproaches.Utilities
                         {
                             using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
                             {
-                                var serializer = new JsonSerializer();
-                                return serializer.Deserialize<TestCasesToProgramMap>(jsonReader);
+								var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
+								return serializer.Deserialize<TestCasesToProgramMap>(jsonReader);
                             }
                         }
                     }
