@@ -38,7 +38,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                             {
                                 var fullName = trackedMethod.FullName.Replace("::", ".");
 
-                                var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains(x.Id));
+                                var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains($" {x.Id}()"));
 
                                 coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
                             }
