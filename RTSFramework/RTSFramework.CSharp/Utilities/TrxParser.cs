@@ -21,8 +21,6 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                                        select new
                                        {
                                            executionId = unitTest.Element(ns + "Execution")?.Attribute("id")?.Value,
-                                           codeBase = unitTest.Element(ns + "TestMethod")?.Attribute("codeBase")?.Value,
-                                           className = unitTest.Element(ns + "TestMethod")?.Attribute("className")?.Value,
                                            testName = unitTest.Element(ns + "TestMethod")?.Attribute("name")?.Value
                                        }
                              ).ToList();
@@ -34,15 +32,12 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                     let st = DateTime.Parse(utr.Attribute("startTime")?.Value).ToUniversalTime()
                     let et = DateTime.Parse(utr.Attribute("endTime")?.Value).ToUniversalTime()
                     join testDefinition in testDefinitions on executionId equals testDefinition.executionId
-                    join testCase in testCases on testDefinition.className + "." + testDefinition.testName equals testCase.Id
+                    join testCase in testCases on OrderedTestsHelper.GetTestNumber(testDefinition.testName) equals testCase.OrderedListPosition
                     select new MSTestTestResult
                     {
-                        AssemblyPathName = testDefinition.codeBase,
-                        FullClassName = testDefinition.className,
                         StartTime = st,
                         EndTime = et,
                         Outcome = ParseOutcome(utr.Attribute("outcome")?.Value),
-                        TestName = testDefinition.testName,
                         ErrorMessage = message?.Value ?? "",
                         StackTrace = stackTrace?.Value ?? "",
                         DurationInSeconds = (et - st).TotalSeconds,

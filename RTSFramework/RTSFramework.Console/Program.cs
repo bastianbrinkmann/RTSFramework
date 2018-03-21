@@ -26,7 +26,7 @@ namespace RTSFramework.Console
                 IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},
                 TestAssemblyFolders = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\"},
                 RTSApproachType = RTSApproachType.DynamicRTS,
-                PersistDynamicMap = true,
+                PersistDynamicMap = false,
             };
 
             var container = new UnityContainer();
@@ -84,10 +84,10 @@ namespace RTSFramework.Console
             {
                 System.Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
             }
-            int numberOfFailedTests = testCaseResults.Count(x => x.Outcome == TestCaseResultType.Failed);
+            int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
 
             System.Console.WriteLine();
-            System.Console.WriteLine(numberOfFailedTests == 0 ? "All tests passed!" : $"{numberOfFailedTests} of {testCaseResults.Count()} failed!");
+            System.Console.WriteLine(numberOfTestsNotPassed == 0 ? "All tests passed!" : $"{numberOfTestsNotPassed} of {testCaseResults.Count()} did not pass!");
 
             System.Console.ReadKey();
         }

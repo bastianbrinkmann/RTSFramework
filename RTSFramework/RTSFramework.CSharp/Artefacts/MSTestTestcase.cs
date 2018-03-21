@@ -11,6 +11,7 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
 			Name = name;
 		}
 
+        public int OrderedListPosition { get; set; }
 		public string Id { get; }
 
 		public string Name { get; }

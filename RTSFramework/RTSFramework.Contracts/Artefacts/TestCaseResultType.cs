@@ -5,6 +5,7 @@ namespace RTSFramework.Contracts.Artefacts
     public enum TestCaseResultType
     {
         Passed,
-        Failed
+        Failed,
+        NotExecuted
     }
 }

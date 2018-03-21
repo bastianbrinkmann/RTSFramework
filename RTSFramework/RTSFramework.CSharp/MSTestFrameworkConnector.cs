@@ -34,6 +34,8 @@ namespace RTSFramework.Concrete.CSharp
             Sources = sources;
         }
 
+        //TODO: Think about discovery of tests based on source code (using ASTs)
+        //Advantage: can identify impacted tests even if code does not compile
         public IEnumerable<MSTestTestcase> GetTestCases()
         {
             var testCases = new List<MSTestTestcase>();
@@ -200,24 +202,18 @@ namespace RTSFramework.Concrete.CSharp
                 Console.WriteLine(line);
                 if (line.StartsWith("Passed"))
                 {
-                    int number = GetTestNumber(line);
+                    int number = OrderedTestsHelper.GetTestNumber(line);
                     var currentTest = CurrentlyExecutedTests[number - 1];
                 }
                 else if (line.StartsWith("Failed"))
                 {
-                    int number = GetTestNumber(line);
+                    int number = OrderedTestsHelper.GetTestNumber(line);
                     var currentTest = CurrentlyExecutedTests[number - 1];
                 }
             }
         }
 
-        private int GetTestNumber(string line)
-        {
-            var beforeDash = line.Substring(0, line.IndexOf("-", StringComparison.Ordinal));
-            var numberAsString = beforeDash.Substring(beforeDash.LastIndexOf(" ", StringComparison.Ordinal) + 1);
-
-            return int.Parse(numberAsString);
-        }
+        
 
 		protected string BuildVsTestsArguments()
 		{
@@ -252,7 +248,7 @@ namespace RTSFramework.Concrete.CSharp
 			}
 
 			var testLinks = new List<LinkType>();
-
+		    int i = 1;
 			foreach (MSTestTestcase testcase in CurrentlyExecutedTests)
 			{
 				testLinks.Add(new LinkType
@@ -260,9 +256,11 @@ namespace RTSFramework.Concrete.CSharp
 					id = ComputeMsTestCaseGuid(testcase.Id).ToString(),
 					name = testcase.Name,
 					storage = testcase.AssemblyPath,
-					//TODO Get Type and then to string
-					type = "Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
-				});
+                    //Type needs to be referenced via String as the UnitTestElement class is internal
+                    type = "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.ObjectModel.UnitTestElement, Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.ObjectModel"
+                });
+			    testcase.OrderedListPosition = i;
+			    i++;
 			}
 
 			var testType = new OrderedTestType
@@ -270,7 +268,9 @@ namespace RTSFramework.Concrete.CSharp
 				id = Guid.NewGuid().ToString(),
 				storage = fullPath,
 				name = "Testrun",
-				TestLinks = testLinks.ToArray()
+				TestLinks = testLinks.ToArray(),
+                //TODO: Could be a configurable feature of AutomatedTestFramework
+                continueAfterFailure = true
 			};
 
 			var serializer = new XmlSerializer(typeof(OrderedTestType));
