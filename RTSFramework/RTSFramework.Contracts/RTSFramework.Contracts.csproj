@@ -101,6 +101,7 @@
     <Compile Include="IRTSApproach.cs" />
     <Compile Include="IRTSListener.cs" />
     <Compile Include="ITestFramework.cs" />
+    <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

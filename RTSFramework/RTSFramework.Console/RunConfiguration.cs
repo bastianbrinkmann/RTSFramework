@@ -4,6 +4,7 @@ namespace RTSFramework.Console
 {
     public class RunConfiguration
     {
+        public ProcessingType ProcessingType { get; set; }
         public DiscoveryType DiscoveryType { get; set; }
 
         public ProgramModelType ProgramModelType { get; set; }

@@ -20,7 +20,7 @@ namespace RTSFramework.Concrete.CSharp
 
         private ICoverageData coverageData;
 
-        public override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
+        public override void ProcessTests(IEnumerable<MSTestTestcase> tests)
         {
             CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             if (CurrentlyExecutedTests.Any())
@@ -34,10 +34,8 @@ namespace RTSFramework.Concrete.CSharp
 
                 coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), CurrentlyExecutedTests);
 
-                return executionResult.TestcasesResults;
+                ExecutionResults = executionResult.TestcasesResults;
             }
-
-            return new List<ITestCaseResult<MSTestTestcase>>();
         }
 
 		

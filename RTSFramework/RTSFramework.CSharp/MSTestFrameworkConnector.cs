@@ -97,7 +97,8 @@ namespace RTSFramework.Concrete.CSharp
         }
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
-        public virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
+        protected IEnumerable<ITestCaseResult<MSTestTestcase>> ExecutionResults = new List<ITestCaseResult<MSTestTestcase>>();
+        public virtual void ProcessTests(IEnumerable<MSTestTestcase> tests)
         {
             CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             CurrentlyExecutedTests = CurrentlyExecutedTests.Where(x => !x.Ignored).ToList();
@@ -107,10 +108,8 @@ namespace RTSFramework.Concrete.CSharp
 
                 ExecuteVsTestsByArguments(arguments);
 
-                return ParseVsTestsTrxAnswer().TestcasesResults;
+                ExecutionResults = ParseVsTestsTrxAnswer().TestcasesResults;
             }
-
-            return new List<ITestCaseResult<MSTestTestcase>>();
         }
 
         //TODO Read filepath from console instead!
@@ -281,5 +280,10 @@ namespace RTSFramework.Concrete.CSharp
 
 			return fullPath;
 		}
-	}
+
+        public IEnumerable<ITestCaseResult<MSTestTestcase>> GetResults()
+        {
+            return ExecutionResults;
+        }
+    }
 }

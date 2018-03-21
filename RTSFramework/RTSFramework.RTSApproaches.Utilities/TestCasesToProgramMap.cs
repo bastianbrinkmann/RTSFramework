@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace RTSFramework.RTSApproaches.Utilities
 {
@@ -32,6 +33,16 @@ namespace RTSFramework.RTSApproaches.Utilities
                 {
                     TestCaseToProgramElementsMap[testMap.Key] = testMap.Value;
                 }
+            }
+        }
+
+        public void RemoveDeletedTests(IList<string> allTests)
+        {
+            var deletedTests = TestCaseToProgramElementsMap.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key);
+
+            foreach (var deletedTest in deletedTests)
+            {
+                TestCaseToProgramElementsMap.Remove(deletedTest);
             }
         }
     }

@@ -3,8 +3,8 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Contracts
 {
-	public interface IAutomatedTestFramework<TTc> : ITestFramework<TTc> where TTc : ITestCase
+	public interface IAutomatedTestFramework<TTc> : ITestFramework<TTc>, ITestProcessor<TTc> where TTc : ITestCase
 	{
-		IEnumerable<ITestCaseResult<TTc>> ExecuteTests(IEnumerable<TTc> tests);
-    }
+	    IEnumerable<ITestCaseResult<TTc>> GetResults();
+	}
 }

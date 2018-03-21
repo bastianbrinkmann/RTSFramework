@@ -85,7 +85,7 @@
   <ItemGroup>
     <Compile Include="Artefacts\FileElement.cs" />
     <Compile Include="CoverageData.cs" />
-    <Compile Include="DynamicRTSController.cs" />
+    <Compile Include="RTSController.cs" />
     <Compile Include="RTSApproachBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\ConsoleStopWatchTracker.cs" />

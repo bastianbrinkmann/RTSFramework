@@ -20,13 +20,14 @@ namespace RTSFramework.Console
         {
             var configuration = new RunConfiguration
             {
-                DiscoveryType = DiscoveryType.UserBasedDiscovery,
+                ProcessingType = ProcessingType.Reporting,
+                DiscoveryType = DiscoveryType.LocalDiscovery,
                 ProgramModelType = ProgramModelType.GitProgramModel,
                 GitRepositoryPath = @"C:\Git\TIATestProject",
                 IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},
                 TestAssemblyFolders = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\"},
                 RTSApproachType = RTSApproachType.DynamicRTS,
-                PersistDynamicMap = false,
+                PersistDynamicMap = true
             };
 
             var container = new UnityContainer();
@@ -55,10 +56,9 @@ namespace RTSFramework.Console
                 VersionId = "Test2"
             };
 
-            var controller = container.Resolve<DynamicRTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            var controller = container.Resolve<RTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
 
-            var results = controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
-            ReportFinalResults(results);
+            controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
         }
 
         private static void GitExampleRun(IUnityContainer container, RunConfiguration configuration)
@@ -68,28 +68,9 @@ namespace RTSFramework.Console
             var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
                 GitVersionReferenceType.CurrentChanges);
 
-            var controller = container.Resolve<DynamicRTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            var controller = container.Resolve<RTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
 
-            var results = controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
-            ReportFinalResults(results);
-        }
-
-        private static void ReportFinalResults(IEnumerable<ITestCaseResult<MSTestTestcase>> results)
-        {
-            System.Console.WriteLine();
-            System.Console.WriteLine("Final more detailed Test Results:");
-
-            var testCaseResults = results as IList<ITestCaseResult<MSTestTestcase>> ?? results.ToList();
-            foreach (var result in testCaseResults)
-            {
-                System.Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
-            }
-            int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
-
-            System.Console.WriteLine();
-            System.Console.WriteLine(numberOfTestsNotPassed == 0 ? "All tests passed!" : $"{numberOfTestsNotPassed} of {testCaseResults.Count()} did not pass!");
-
-            System.Console.ReadKey();
+            controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
         }
     }
 }

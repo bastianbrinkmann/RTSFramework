@@ -9,26 +9,29 @@ using RTSFramework.RTSApproaches.Utilities;
 
 namespace RTSFramework.Core
 {
-	public class DynamicRTSController<TPeDiscoverer, TPeRTSApproach, TPDiscoverer, TTc> : IRTSListener<TTc> where TPeDiscoverer : IProgramModelElement where TPeRTSApproach : IProgramModelElement where TTc : ITestCase where TPDiscoverer : IProgramModel
+	public class RTSController<TPeDiscoverer, TPeRTSApproach, TPDiscoverer, TTc> : IRTSListener<TTc> where TPeDiscoverer : IProgramModelElement where TPeRTSApproach : IProgramModelElement where TTc : ITestCase where TPDiscoverer : IProgramModel
 	{
 	    private readonly IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>> deltaDiscoverer;
-	    private readonly IAutomatedTestFramework<TTc> testFramework;
-	    private readonly IRTSApproach<TPeRTSApproach, TTc> rtsApproach;
+	    private readonly ITestFramework<TTc> testFramework;
+        private readonly ITestProcessor<TTc> testProcessor;
+        private readonly IRTSApproach<TPeRTSApproach, TTc> rtsApproach;
 	    private readonly IDeltaAdapter<TPeDiscoverer, TPeRTSApproach> deltaAdapter;
 
-        public DynamicRTSController(
+        public RTSController(
             IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>> deltaDiscoverer,
-            IAutomatedTestFramework<TTc> testFramework, 
+            ITestFramework<TTc> testFramework,
+            ITestProcessor<TTc> testProcessor,
             IRTSApproach<TPeRTSApproach, TTc> rtsApproach, 
             IDeltaAdapter<TPeDiscoverer, TPeRTSApproach> deltaAdapter)
         {
             this.deltaDiscoverer = deltaDiscoverer;
             this.testFramework = testFramework;
+            this.testProcessor = testProcessor;
             this.rtsApproach = rtsApproach;
             this.deltaAdapter = deltaAdapter;
         }
 
-	    public IEnumerable<ITestCaseResult<TTc>> ExecuteImpactedTests(TPDiscoverer oldVersion, TPDiscoverer newVersion)
+	    public void ExecuteImpactedTests(TPDiscoverer oldVersion, TPDiscoverer newVersion)
 	    {
             StructuralDelta<TPeDiscoverer> delta = default(StructuralDelta<TPeDiscoverer>);
 	        ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
@@ -49,9 +52,9 @@ namespace RTSFramework.Core
             rtsApproach.UnregisterImpactedTestObserver(this);
             Console.WriteLine($"{impactedTests.Count} Tests impacted");
 
-            IEnumerable<ITestCaseResult<TTc>> testResults = null;
 	        ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
-	            () => testResults = testFramework.ExecuteTests(impactedTests), "ExecuteWithCodeCoverage");
+	            () => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
+	        
 
 	        var frameworkWithCoverageCollection = testFramework as IAutomatedTestFrameworkWithCoverageCollection<TTc>;
 	        var coverageResults = frameworkWithCoverageCollection?.GetCollectedCoverageData();
@@ -60,11 +63,17 @@ namespace RTSFramework.Core
 	            var oldMap = DynamicMapDictionary.GetMapByVersionId(oldVersion.VersionId);
 	            var newMap = oldMap.CloneMap(newVersion.VersionId);
                 newMap.UpdateByNewPartialMap(coverageResults.TestCaseToProgramElementsMap);
+                newMap.RemoveDeletedTests(allTests.Select(x => x.Id).ToList());
 
 	            DynamicMapDictionary.UpdateMap(newMap);
 	        }
 
-	        return testResults;
+	        var automatedTestsFramework = testFramework as IAutomatedTestFramework<TTc>;
+	        if (automatedTestsFramework != null)
+	        {
+                var testResults = automatedTestsFramework.GetResults();
+                ReportFinalResultsToConsole(testResults);
+            }
 	    }
 
         private readonly List<TTc> impactedTests = new List<TTc>();
@@ -73,5 +82,23 @@ namespace RTSFramework.Core
 	    {
             impactedTests.Add(impactedTest);
         }
-	}
+
+        private void ReportFinalResultsToConsole(IEnumerable<ITestCaseResult<TTc>> results)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Final more detailed Test Results:");
+
+            var testCaseResults = results as IList<ITestCaseResult<TTc>> ?? results.ToList();
+            foreach (var result in testCaseResults)
+            {
+                Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
+            }
+            int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
+
+            Console.WriteLine();
+            Console.WriteLine(numberOfTestsNotPassed == 0 ? "All tests passed!" : $"{numberOfTestsNotPassed} of {testCaseResults.Count()} did not pass!");
+
+            Console.ReadKey();
+        }
+    }
 }

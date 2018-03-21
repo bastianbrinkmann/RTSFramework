@@ -92,6 +92,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunConfiguration.cs" />
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
+    <Compile Include="RunConfigurations\ProcessingType.cs" />
     <Compile Include="RunConfigurations\ProgramModelType.cs" />
     <Compile Include="RunConfigurations\RTSApproachType.cs" />
     <Compile Include="UnityInitializer.cs" />
@@ -108,6 +109,10 @@
     <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
       <Project>{2b9bb9a5-db75-4ec9-be24-0f06619d3216}</Project>
       <Name>RTSFramework.Concrete.Git</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Concrete.Reporting\RTSFramework.Concrete.Reporting.csproj">
+      <Project>{f8157510-d324-4c91-aa56-d68571b9d1c1}</Project>
+      <Name>RTSFramework.Concrete.Reporting</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
       <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
