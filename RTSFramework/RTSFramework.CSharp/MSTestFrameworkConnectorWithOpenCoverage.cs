@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml.Serialization;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
@@ -24,11 +27,10 @@ namespace RTSFramework.Concrete.CSharp
         public override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
             var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
-            var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
-            if (testsFullyQualifiedNames.Any())
+            if (msTestTestcases.Any())
             {
-                var vsTestArguments = BuildVsTestsArguments(testsFullyQualifiedNames);
-                var openCoverArguments = BuildOpenCoverArguments(vsTestArguments);
+				var vsTestArguments = BuildVsTestsArguments(msTestTestcases);
+				var openCoverArguments = BuildOpenCoverArguments(vsTestArguments);
 
                 ExecuteOpenCoverByArguments(openCoverArguments);
 
@@ -42,14 +44,18 @@ namespace RTSFramework.Concrete.CSharp
             return new List<ITestCaseResult<MSTestTestcase>>();
         }
 
+		
+
         private  string BuildOpenCoverArguments(string vstestargs)
         {
             string targetArg = "\"-target:" + Path.Combine(VstestPath, Vstestconsole) + "\"";
             string targetArgsArg = "\"-targetargs:" + vstestargs + "\"";
             string registerArg = "-register:user";
-            string coverbytestArg = "-coverbytest:" + string.Join(";", Sources);
+	        string logArg = "-log:Off";
+	        string hideSkippedArg = "-hideskipped:All";
+			string coverbytestArg = "-coverbytest"; //":" + string.Join(";", Sources);
 
-            string arguments = targetArg + " " + targetArgsArg + " " + registerArg + " " + coverbytestArg;
+            string arguments = targetArg + " " + targetArgsArg + " " + registerArg + " " + logArg + " " + hideSkippedArg + " " + coverbytestArg;
 
             return arguments;
         }

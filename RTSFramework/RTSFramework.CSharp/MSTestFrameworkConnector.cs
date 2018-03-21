@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml.Serialization;
 using Mono.Cecil;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
@@ -48,7 +50,7 @@ namespace RTSFramework.Concrete.CSharp
                             {
                                 var declaringTypeFull = method.DeclaringType.FullName;
 
-                                var testCase = new MSTestTestcase($"{declaringTypeFull}.{method.Name}");
+                                var testCase = new MSTestTestcase($"{declaringTypeFull}.{method.Name}", modulePath, method.Name);
 
                                 var categoryAttributes =
                                     method.CustomAttributes.Where(x => x.AttributeType.Name == TestCategoryAttributeName);
@@ -93,10 +95,9 @@ namespace RTSFramework.Concrete.CSharp
         public virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
             msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
-            var testsFullyQualifiedNames = msTestTestcases.Select(x => x.Id).ToList();
-            if (testsFullyQualifiedNames.Any())
+            if (msTestTestcases.Any())
             {
-                var arguments = BuildVsTestsArguments(testsFullyQualifiedNames);
+                var arguments = BuildVsTestsArguments(msTestTestcases);
 
                 ExecuteVsTestsByArguments(arguments);
 
@@ -194,17 +195,80 @@ namespace RTSFramework.Concrete.CSharp
             }
         }
 
-        protected string BuildVsTestsArguments(List<string> testsFullyQualifiedNames)
-        {
-            string testCaseFilterArg = "/TestCaseFilter:";
-            testCaseFilterArg += "FullyQualifiedName=" +
-                                 string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
-            string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
-            string sourcesArg = string.Join(" ", Sources);
-            string loggerArg = "/logger:trx";
-            string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;
+		protected string BuildVsTestsArguments(IList<MSTestTestcase> msTestTestcases)
+		{
+			var orderedTestsPath = CreateOrderTestsFile(msTestTestcases);
 
-            return arguments;
-        }
-    }
+			string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
+			string loggerArg = "/logger:trx";
+			string arguments = testAdapterPathArg + " " + loggerArg + " " + orderedTestsPath;
+
+			return arguments;
+		}
+
+		// convert the test (<Name space name>.<class name>.<test method name>) to a GUID
+		// https://blogs.msdn.microsoft.com/aseemb/2013/10/05/how-to-create-an-ordered-test-programmatically/
+		private static Guid ComputeMsTestCaseGuid(string data)
+		{
+			SHA1CryptoServiceProvider provider = new SHA1CryptoServiceProvider();
+			byte[] hash = provider.ComputeHash(System.Text.Encoding.Unicode.GetBytes(data));
+			byte[] toGuid = new byte[16];
+			Array.Copy(hash, toGuid, 16);
+			return new Guid(toGuid);
+		}
+
+		private static string CreateOrderTestsFile(IList<MSTestTestcase> msTests)
+		{
+			string fileName = "testrun.orderedtest";
+			string fullPath = Path.GetFullPath(fileName);
+			FileInfo info = new FileInfo(fullPath);
+			if (info.Exists)
+			{
+				info.Delete();
+			}
+
+			var testLinks = new List<LinkType>();
+
+			foreach (MSTestTestcase testcase in msTests)
+			{
+				testLinks.Add(new LinkType
+				{
+					id = ComputeMsTestCaseGuid(testcase.Id).ToString(),
+					name = testcase.Name,
+					storage = testcase.AssemblyPath,
+					//TODO Get Type and then to string
+					type = "Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+				});
+			}
+
+			var testType = new OrderedTestType
+			{
+				id = Guid.NewGuid().ToString(),
+				storage = fullPath,
+				name = "Testrun",
+				TestLinks = testLinks.ToArray()
+			};
+
+			var serializer = new XmlSerializer(typeof(OrderedTestType));
+			using (var stream = info.OpenWrite())
+			{
+				serializer.Serialize(stream, testType);
+			}
+
+			return fullPath;
+		}
+
+		//protected string BuildVsTestsArguments(List<string> testsFullyQualifiedNames)
+		//{
+		//    string testCaseFilterArg = "/TestCaseFilter:";
+		//    testCaseFilterArg += "FullyQualifiedName=" +
+		//                         string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
+		//    string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
+		//    string sourcesArg = string.Join(" ", Sources);
+		//    string loggerArg = "/logger:trx";
+		//    string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;
+
+		//    return arguments;
+		//}
+	}
 }

@@ -31,7 +31,7 @@ namespace RTSFramework.Console
                 ProgramModelType = ProgramModelType.TFS2010ProgramModel,
                 GitRepositoryPath = @"C:\Git\TIATestProject",
                 IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},
-                TestAssemblies = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\MainProject.Test.dll"},
+                TestAssemblyFolders = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\"},
                 RTSApproachType = RTSApproachType.DynamicRTS,
                 PersistDynamicMap = true,
             };

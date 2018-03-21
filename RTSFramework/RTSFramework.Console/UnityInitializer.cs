@@ -1,4 +1,8 @@
-﻿using RTSFramework.Concrete.Adatpers.DeltaAdapters;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using RTSFramework.Concrete.Adatpers.DeltaAdapters;
 using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
@@ -43,16 +47,42 @@ namespace RTSFramework.Console
             container.RegisterInstance(typeof(IRTSApproach<CSharpFileElement, MSTestTestcase>), rtsApproach);
         }
 
+	    private static void GetTestAssemblies(string folder, List<string> testAssemblies)
+	    {
+			//TODO More advanced filtering for test assemblies?
+		    foreach (var assembly in Directory.GetFiles(folder, "*.dll"))
+		    {
+			    var fileName = Path.GetFileName(assembly);
+			    if (testAssemblies.All(x => !x.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase)))
+			    {
+				    testAssemblies.Add(assembly);
+			    }
+			}
+
+			foreach (var subFolder in Directory.GetDirectories(folder))
+			{
+				GetTestAssemblies(subFolder, testAssemblies);
+			}
+	    }
+
         private static void InitTestFramework(IUnityContainer container, RunConfiguration configuration)
         {
             IAutomatedTestFramework<MSTestTestcase> testFramework;
-            if (configuration.PersistDynamicMap)
+
+			var testAssemblies = new List<string>();
+
+			foreach (var folder in configuration.TestAssemblyFolders)
+			{
+				GetTestAssemblies(folder, testAssemblies);
+			}
+
+			if (configuration.PersistDynamicMap)
             {
-                testFramework = new MSTestFrameworkConnectorWithOpenCoverage(configuration.TestAssemblies);
+                testFramework = new MSTestFrameworkConnectorWithOpenCoverage(testAssemblies);
             }
             else
             {
-                testFramework = new MSTestFrameworkConnector(configuration.TestAssemblies);
+                testFramework = new MSTestFrameworkConnector(testAssemblies);
             }
 
             container.RegisterInstance(typeof(IAutomatedTestFramework<MSTestTestcase>), testFramework);

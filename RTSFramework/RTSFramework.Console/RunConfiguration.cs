@@ -14,7 +14,7 @@ namespace RTSFramework.Console
 
         public string[] IntendedChanges { get; set; }
 
-        public string[] TestAssemblies { get; set; }
+        public string[] TestAssemblyFolders { get; set; }
 
         public bool PersistDynamicMap { get; set; }
     }

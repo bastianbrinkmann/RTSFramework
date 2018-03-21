@@ -4,13 +4,19 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
 {
 	public class MSTestTestcase : ICSharpTestcase
     {
-		public MSTestTestcase(string id)
+		public MSTestTestcase(string id, string assemblyPath, string name)
 		{
 			Id = id;
+			AssemblyPath = assemblyPath;
+			Name = name;
 		}
 
 		public string Id { get; }
 
+		public string Name { get; }
+
         public List<string> Categories { get; } = new List<string>();
+
+		public string AssemblyPath { get; }
     }
 }

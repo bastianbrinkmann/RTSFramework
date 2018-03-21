@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
@@ -37,6 +38,8 @@ namespace RTSFramework.Core
 	        ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => allTests = testFramework.GetTestCases(),
 	            "GettingTestcases");
 
+			//TODO Filtering of tests
+		    //var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
 	        var convertedDelta = deltaAdapter.Convert(delta);
 
