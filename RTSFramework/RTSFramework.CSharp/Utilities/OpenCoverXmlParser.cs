@@ -15,7 +15,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
     {
 
 
-        public static ICoverageData Parse(string filename, IEnumerable<string> sources, IEnumerable<MSTestTestcase> testcases)
+        public static ICoverageData Parse(string filename, IEnumerable<MSTestTestcase> testcases)
         {
             var serializer = new XmlSerializer(typeof(CoverageSession),
                                                     new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
@@ -26,12 +26,11 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                     var session = (CoverageSession)serializer.Deserialize(reader);
 
                     var mstestcases = testcases as IList<MSTestTestcase> ?? testcases.ToList();
-                    var testModules = session.Modules.Where(x => sources.Contains(x.ModulePath));
 
                     //Determine Ids of testcases
                     var coverageIdsTestCases = new Dictionary<uint, MSTestTestcase>();
 
-                    foreach (var module in testModules)
+                    foreach (var module in session.Modules)
                     {
                         if (module.TrackedMethods != null)
                         {

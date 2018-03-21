@@ -20,7 +20,7 @@ namespace RTSFramework.Console
         {
             var configuration = new RunConfiguration
             {
-                DiscoveryType = DiscoveryType.LocalDiscovery,
+                DiscoveryType = DiscoveryType.UserBasedDiscovery,
                 ProgramModelType = ProgramModelType.GitProgramModel,
                 GitRepositoryPath = @"C:\Git\TIATestProject",
                 IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},

@@ -32,7 +32,7 @@ namespace RTSFramework.Concrete.CSharp
 
                 var executionResult = ParseVsTestsTrxAnswer();
 
-                coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), Sources, CurrentlyExecutedTests);
+                coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), CurrentlyExecutedTests);
 
                 return executionResult.TestcasesResults;
             }
@@ -49,7 +49,7 @@ namespace RTSFramework.Concrete.CSharp
             string registerArg = "-register:user";
 	        string logArg = "-log:Off";
 	        string hideSkippedArg = "-hideskipped:All";
-			string coverbytestArg = "-coverbytest"; //":" + string.Join(";", Sources);
+			string coverbytestArg = "-coverbytest:" + string.Join(";", Sources.Select(x => @"*Out\" + Path.GetFileName(x)));
 
             string arguments = targetArg + " " + targetArgsArg + " " + registerArg + " " + logArg + " " + hideSkippedArg + " " + coverbytestArg;
 

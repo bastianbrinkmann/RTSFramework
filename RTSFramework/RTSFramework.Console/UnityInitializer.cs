@@ -50,7 +50,7 @@ namespace RTSFramework.Console
 	    private static void GetTestAssemblies(string folder, List<string> testAssemblies)
 	    {
 			//TODO More advanced filtering for test assemblies?
-		    foreach (var assembly in Directory.GetFiles(folder, "*.dll"))
+		    foreach (var assembly in Directory.GetFiles(folder, "*Test.dll"))
 		    {
 			    var fileName = Path.GetFileName(assembly);
 			    if (testAssemblies.All(x => !x.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase)))

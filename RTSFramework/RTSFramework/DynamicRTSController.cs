@@ -57,11 +57,11 @@ namespace RTSFramework.Core
 	        var coverageResults = frameworkWithCoverageCollection?.GetCollectedCoverageData();
 	        if (coverageResults != null)
 	        {
-	            DynamicMapDictionary.UpdateMap(new TestCasesToProgramMap
-	            {
-	                ProgramVersionId = newVersion.VersionId,
-	                TestCaseToProgramElementsMap = coverageResults.TestCaseToProgramElementsMap
-	            });
+	            var oldMap = DynamicMapDictionary.GetMapByVersionId(oldVersion.VersionId);
+	            var newMap = oldMap.CloneMap(newVersion.VersionId);
+                newMap.UpdateByNewPartialMap(coverageResults.TestCaseToProgramElementsMap);
+
+	            DynamicMapDictionary.UpdateMap(newMap);
 	        }
 
 	        return testResults;

@@ -19,5 +19,20 @@ namespace RTSFramework.RTSApproaches.Utilities
 
             return new TestCasesToProgramMap {ProgramVersionId = newId, TestCaseToProgramElementsMap = clone};
         }
+
+        public void UpdateByNewPartialMap(Dictionary<string, HashSet<string>> newMap)
+        {
+            foreach (KeyValuePair<string, HashSet<string>> testMap in newMap)
+            {
+                if (!TestCaseToProgramElementsMap.ContainsKey(testMap.Key))
+                {
+                    TestCaseToProgramElementsMap.Add(testMap.Key, testMap.Value);
+                }
+                else
+                {
+                    TestCaseToProgramElementsMap[testMap.Key] = testMap.Value;
+                }
+            }
+        }
     }
 }
