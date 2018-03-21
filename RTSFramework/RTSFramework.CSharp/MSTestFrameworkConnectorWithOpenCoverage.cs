@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Xml.Serialization;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
-using RTSFramework.RTSApproaches.Utilities;
 
 namespace RTSFramework.Concrete.CSharp
 {
@@ -26,17 +22,17 @@ namespace RTSFramework.Concrete.CSharp
 
         public override IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
-            var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
-            if (msTestTestcases.Any())
+            CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+            if (CurrentlyExecutedTests.Any())
             {
-				var vsTestArguments = BuildVsTestsArguments(msTestTestcases);
+				var vsTestArguments = BuildVsTestsArguments();
 				var openCoverArguments = BuildOpenCoverArguments(vsTestArguments);
 
                 ExecuteOpenCoverByArguments(openCoverArguments);
 
-                var executionResult = ParseVsTestsTrxAnswer(msTestTestcases);
+                var executionResult = ParseVsTestsTrxAnswer();
 
-                coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), Sources, msTestTestcases);
+                coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), Sources, CurrentlyExecutedTests);
 
                 return executionResult.TestcasesResults;
             }

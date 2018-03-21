@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
 using RTSFramework.Concrete.TFS2010.Artefacts;
-using RTSFramework.Concrete.User;
 using RTSFramework.Console.RunConfigurations;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Contracts.Delta;
 using RTSFramework.Core;
 using RTSFramework.Core.Artefacts;
-using RTSFramework.RTSApproaches.Concrete;
 using Unity;
 
 namespace RTSFramework.Console
@@ -27,8 +20,8 @@ namespace RTSFramework.Console
         {
             var configuration = new RunConfiguration
             {
-                DiscoveryType = DiscoveryType.UserBasedDiscovery,
-                ProgramModelType = ProgramModelType.TFS2010ProgramModel,
+                DiscoveryType = DiscoveryType.LocalDiscovery,
+                ProgramModelType = ProgramModelType.GitProgramModel,
                 GitRepositoryPath = @"C:\Git\TIATestProject",
                 IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},
                 TestAssemblyFolders = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\"},

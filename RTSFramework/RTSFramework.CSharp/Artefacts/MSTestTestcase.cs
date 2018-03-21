@@ -15,6 +15,8 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
 
 		public string Name { get; }
 
+        public bool Ignored { get; set; }
+
         public List<string> Categories { get; } = new List<string>();
 
 		public string AssemblyPath { get; }

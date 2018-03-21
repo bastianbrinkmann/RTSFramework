@@ -33,13 +33,16 @@ namespace RTSFramework.Concrete.CSharp.Utilities
 
                     foreach (var module in testModules)
                     {
-                        foreach (var trackedMethod in module.TrackedMethods)
+                        if (module.TrackedMethods != null)
                         {
-                            var fullName = trackedMethod.FullName.Replace("::", ".");
+                            foreach (var trackedMethod in module.TrackedMethods)
+                            {
+                                var fullName = trackedMethod.FullName.Replace("::", ".");
 
-                            var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains(x.Id));
+                                var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains(x.Id));
 
-                            coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
+                                coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
+                            }
                         }
                     }
 

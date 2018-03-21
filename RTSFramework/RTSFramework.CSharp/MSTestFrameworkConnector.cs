@@ -10,7 +10,6 @@ using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp
 {
@@ -26,11 +25,13 @@ namespace RTSFramework.Concrete.CSharp
 
         private const string TestMethodAttributeName = "TestMethodAttribute";
         private const string TestCategoryAttributeName = "TestCategoryAttribute";
+        private const string IgnoreAttributeName = "IgnoreAttribute";
 
-        protected virtual string TestResultsFolder => @"TestResults";
+        private const string TestResultsFolder = "TestResults";
+
         public MSTestFrameworkConnector(IEnumerable<string> sources)
         {
-            this.Sources = sources;
+            Sources = sources;
         }
 
         public IEnumerable<MSTestTestcase> GetTestCases()
@@ -58,6 +59,8 @@ namespace RTSFramework.Concrete.CSharp
                                 {
                                     testCase.Categories.Add((string)categoryAttr.ConstructorArguments[0].Value);
                                 }
+
+                                testCase.Ignored = method.CustomAttributes.Any(x => x.AttributeType.Name == IgnoreAttributeName);
 
                                 testCases.Add(testCase);
                             }
@@ -91,22 +94,24 @@ namespace RTSFramework.Concrete.CSharp
             return module;
         }
 
-        private IList<MSTestTestcase> msTestTestcases;
+        protected IList<MSTestTestcase> CurrentlyExecutedTests;
         public virtual IEnumerable<ITestCaseResult<MSTestTestcase>> ExecuteTests(IEnumerable<MSTestTestcase> tests)
         {
-            msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
-            if (msTestTestcases.Any())
+            CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+            CurrentlyExecutedTests = CurrentlyExecutedTests.Where(x => !x.Ignored).ToList();
+            if (CurrentlyExecutedTests.Any())
             {
-                var arguments = BuildVsTestsArguments(msTestTestcases);
+                var arguments = BuildVsTestsArguments();
 
                 ExecuteVsTestsByArguments(arguments);
 
-                return ParseVsTestsTrxAnswer(msTestTestcases).TestcasesResults;
+                return ParseVsTestsTrxAnswer().TestcasesResults;
             }
 
             return new List<ITestCaseResult<MSTestTestcase>>();
         }
 
+        //TODO Read filepath from console instead!
         protected FileInfo GetTrxFile()
         {
             var directory = new DirectoryInfo(TestResultsFolder);
@@ -122,12 +127,12 @@ namespace RTSFramework.Concrete.CSharp
             return null;
         }
 
-        protected MSTestExectionResult ParseVsTestsTrxAnswer(IEnumerable<MSTestTestcase> tests)
+        protected MSTestExectionResult ParseVsTestsTrxAnswer()
         {
             var trxFile = GetTrxFile();
             if (trxFile != null)
             {
-                var results = TrxFileParser.Parse(trxFile.FullName, tests);
+                var results = TrxFileParser.Parse(trxFile.FullName, CurrentlyExecutedTests);
 
                 var resultsDirectory = trxFile.Directory;
                 if (resultsDirectory != null)
@@ -187,17 +192,36 @@ namespace RTSFramework.Concrete.CSharp
 
         protected void DiscovererProcessOnOutputDataReceived(object sender, DataReceivedEventArgs dataReceivedEventArgs)
         {
+            //TODO Report results on the fly instead of in the end
 
-            //TODO evaluate whether Vstest output can be analyzed more detailed -> e.g. empty row means new class
-            if (dataReceivedEventArgs.Data != null)
+            var line = dataReceivedEventArgs.Data;
+            if (line != null)
             {
-                Console.WriteLine(dataReceivedEventArgs.Data);
+                Console.WriteLine(line);
+                if (line.StartsWith("Passed"))
+                {
+                    int number = GetTestNumber(line);
+                    var currentTest = CurrentlyExecutedTests[number - 1];
+                }
+                else if (line.StartsWith("Failed"))
+                {
+                    int number = GetTestNumber(line);
+                    var currentTest = CurrentlyExecutedTests[number - 1];
+                }
             }
         }
 
-		protected string BuildVsTestsArguments(IList<MSTestTestcase> msTestTestcases)
+        private int GetTestNumber(string line)
+        {
+            var beforeDash = line.Substring(0, line.IndexOf("-", StringComparison.Ordinal));
+            var numberAsString = beforeDash.Substring(beforeDash.LastIndexOf(" ", StringComparison.Ordinal) + 1);
+
+            return int.Parse(numberAsString);
+        }
+
+		protected string BuildVsTestsArguments()
 		{
-			var orderedTestsPath = CreateOrderTestsFile(msTestTestcases);
+			var orderedTestsPath = CreateOrderTestsFile();
 
 			string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
 			string loggerArg = "/logger:trx";
@@ -208,7 +232,7 @@ namespace RTSFramework.Concrete.CSharp
 
 		// convert the test (<Name space name>.<class name>.<test method name>) to a GUID
 		// https://blogs.msdn.microsoft.com/aseemb/2013/10/05/how-to-create-an-ordered-test-programmatically/
-		private static Guid ComputeMsTestCaseGuid(string data)
+		private Guid ComputeMsTestCaseGuid(string data)
 		{
 			SHA1CryptoServiceProvider provider = new SHA1CryptoServiceProvider();
 			byte[] hash = provider.ComputeHash(System.Text.Encoding.Unicode.GetBytes(data));
@@ -217,7 +241,7 @@ namespace RTSFramework.Concrete.CSharp
 			return new Guid(toGuid);
 		}
 
-		private static string CreateOrderTestsFile(IList<MSTestTestcase> msTests)
+		private string CreateOrderTestsFile()
 		{
 			string fileName = "testrun.orderedtest";
 			string fullPath = Path.GetFullPath(fileName);
@@ -229,7 +253,7 @@ namespace RTSFramework.Concrete.CSharp
 
 			var testLinks = new List<LinkType>();
 
-			foreach (MSTestTestcase testcase in msTests)
+			foreach (MSTestTestcase testcase in CurrentlyExecutedTests)
 			{
 				testLinks.Add(new LinkType
 				{
@@ -257,18 +281,5 @@ namespace RTSFramework.Concrete.CSharp
 
 			return fullPath;
 		}
-
-		//protected string BuildVsTestsArguments(List<string> testsFullyQualifiedNames)
-		//{
-		//    string testCaseFilterArg = "/TestCaseFilter:";
-		//    testCaseFilterArg += "FullyQualifiedName=" +
-		//                         string.Join("|FullyQualifiedName=", testsFullyQualifiedNames);
-		//    string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestAdapterPath);
-		//    string sourcesArg = string.Join(" ", Sources);
-		//    string loggerArg = "/logger:trx";
-		//    string arguments = testAdapterPathArg + " " + testCaseFilterArg + " " + sourcesArg + " " + loggerArg;
-
-		//    return arguments;
-		//}
 	}
 }
