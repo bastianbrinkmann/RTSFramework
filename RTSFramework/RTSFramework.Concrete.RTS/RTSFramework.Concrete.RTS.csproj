@@ -83,6 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicMapUpdater.cs" />
     <Compile Include="DynamicRTSApproach.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetestAllApproach.cs" />

@@ -2,7 +2,7 @@
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
 
-namespace RTSFramework.Contracts
+namespace RTSFramework.Contracts.RTSApproach
 {
     public interface IRTSApproach<TPe, TTc>where TTc : ITestCase where TPe : IProgramModelElement
     {

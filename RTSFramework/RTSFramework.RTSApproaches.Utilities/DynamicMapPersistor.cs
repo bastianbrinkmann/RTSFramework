@@ -9,7 +9,7 @@ namespace RTSFramework.RTSApproaches.Utilities
         private const string MapStoragePlace = "TestCasesToProgramMaps";
         private const string FileExtension = ".json";
 
-        internal static void PersistTestCasestoProgramMap(TestCasesToProgramMap map)
+        internal static void PersistTestCasestoProgramMap(TransitiveClosureTestDependencies map)
         {
             if (!Directory.Exists(MapStoragePlace))
             {
@@ -33,7 +33,7 @@ namespace RTSFramework.RTSApproaches.Utilities
             return new FileInfo(Path.Combine(MapStoragePlace, Uri.EscapeUriString(programVersionId) + FileExtension));
         }
 
-        internal static TestCasesToProgramMap LoadTestCasesToProgramMap(string programVersionId)
+        internal static TransitiveClosureTestDependencies LoadTestCasesToProgramMap(string programVersionId)
         {
             if (Directory.Exists(MapStoragePlace))
             {
@@ -48,14 +48,14 @@ namespace RTSFramework.RTSApproaches.Utilities
                             using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
                             {
 								var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
-								return serializer.Deserialize<TestCasesToProgramMap>(jsonReader);
+								return serializer.Deserialize<TransitiveClosureTestDependencies>(jsonReader);
                             }
                         }
                     }
                 }
             }
 
-            return new TestCasesToProgramMap{ProgramVersionId = programVersionId};
+            return new TransitiveClosureTestDependencies{ProgramVersionId = programVersionId};
         }
     }
 }

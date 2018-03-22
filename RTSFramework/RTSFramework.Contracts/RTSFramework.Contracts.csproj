@@ -98,8 +98,9 @@
     <Compile Include="IOnlineDeltaDiscoverer.cs" />
     <Compile Include="Artefacts\IProgramModel.cs" />
     <Compile Include="Artefacts\ITestCase.cs" />
-    <Compile Include="IRTSApproach.cs" />
-    <Compile Include="IRTSListener.cs" />
+    <Compile Include="RTSApproach\IDynamicMapUpdater.cs" />
+    <Compile Include="RTSApproach\IRTSApproach.cs" />
+    <Compile Include="RTSApproach\IRTSListener.cs" />
     <Compile Include="ITestFramework.cs" />
     <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

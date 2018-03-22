@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Console.RunConfigurations
+﻿namespace RTSFramework.Controller.RunConfigurations
 {
     public enum RTSApproachType
     {

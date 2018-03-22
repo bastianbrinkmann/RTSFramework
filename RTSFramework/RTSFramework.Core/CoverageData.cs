@@ -5,7 +5,7 @@ namespace RTSFramework.Core
 {
     public class CoverageData : ICoverageData
     {
-        public Dictionary<string, HashSet<string>> TestCaseToProgramElementsMap { get; set; } 
+        public Dictionary<string, HashSet<string>> TransitiveClosureTestsToProgramElements { get; set; } 
             = new Dictionary<string, HashSet<string>>();
     }
 }

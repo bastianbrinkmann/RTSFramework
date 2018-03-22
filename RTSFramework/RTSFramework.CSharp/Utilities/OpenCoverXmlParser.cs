@@ -103,7 +103,7 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                         }
                     }
 
-                    return new CoverageData {TestCaseToProgramElementsMap = testCasesToElements};
+                    return new CoverageData {TransitiveClosureTestsToProgramElements = testCasesToElements};
                 }
             }
         }

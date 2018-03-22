@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.RTSApproach;
 
-namespace RTSFramework.Core
+namespace RTSFramework.Core.RTSApproach
 {
     public abstract class RTSApproachBase<TPe, TTc> : IRTSApproach<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
     {

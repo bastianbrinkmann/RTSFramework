@@ -5,6 +5,8 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestFramework<TTC> where TTC : ITestCase
 	{
-		IEnumerable<TTC> GetTestCases();
+        IEnumerable<string> Sources { get; set; }
+
+        IEnumerable<TTC> GetTestCases();
 	}
 }

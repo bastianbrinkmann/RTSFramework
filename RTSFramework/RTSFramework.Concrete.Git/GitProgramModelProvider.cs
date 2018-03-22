@@ -29,7 +29,7 @@ namespace RTSFramework.Concrete.Git
                 VersionId = gitProgramModelId,
                 GitVersionReferenceType = referenceType,
                 CommitId = commitid,
-                RepositoryName = Path.GetFileName(repositoryPath)
+                RepositoryPath = repositoryPath
             };
         }
     }

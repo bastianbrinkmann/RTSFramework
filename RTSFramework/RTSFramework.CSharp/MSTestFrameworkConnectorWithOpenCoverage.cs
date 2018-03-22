@@ -14,10 +14,6 @@ namespace RTSFramework.Concrete.CSharp
         private const string OpenCoverExe = "OpenCover.Console.exe";
         private const string OpenCoverPath = "OpenCover";
 
-        public MSTestFrameworkConnectorWithOpenCoverage(IEnumerable<string> sources) : base(sources)
-        {
-        }
-
         private ICoverageData coverageData;
 
         public override void ProcessTests(IEnumerable<MSTestTestcase> tests)
@@ -26,7 +22,9 @@ namespace RTSFramework.Concrete.CSharp
             if (CurrentlyExecutedTests.Any())
             {
 				var vsTestArguments = BuildVsTestsArguments();
-				var openCoverArguments = BuildOpenCoverArguments(vsTestArguments);
+
+                var sources = CurrentlyExecutedTests.Select(x => x.AssemblyPath).Distinct();
+				var openCoverArguments = BuildOpenCoverArguments(vsTestArguments, sources);
 
                 ExecuteOpenCoverByArguments(openCoverArguments);
 
@@ -38,16 +36,14 @@ namespace RTSFramework.Concrete.CSharp
             }
         }
 
-		
-
-        private  string BuildOpenCoverArguments(string vstestargs)
+        private  string BuildOpenCoverArguments(string vstestargs, IEnumerable<string> sources)
         {
             string targetArg = "\"-target:" + Path.Combine(VstestPath, Vstestconsole) + "\"";
             string targetArgsArg = "\"-targetargs:" + vstestargs + "\"";
             string registerArg = "-register:user";
 	        string logArg = "-log:Off";
 	        string hideSkippedArg = "-hideskipped:All";
-			string coverbytestArg = "-coverbytest:" + string.Join(";", Sources.Select(x => @"*Out\" + Path.GetFileName(x)));
+			string coverbytestArg = "-coverbytest:" + string.Join(";", sources.Select(x => @"*Out\" + Path.GetFileName(x)));
 
             string arguments = targetArg + " " + targetArgsArg + " " + registerArg + " " + logArg + " " + hideSkippedArg + " " + coverbytestArg;
 

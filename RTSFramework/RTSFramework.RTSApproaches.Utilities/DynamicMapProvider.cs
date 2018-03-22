@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace RTSFramework.RTSApproaches.Utilities
 {
-    public static class DynamicMapDictionary
+    public class DynamicMapProvider
     {
-        private static readonly List<TestCasesToProgramMap> maps = new List<TestCasesToProgramMap>();
+        private readonly List<TransitiveClosureTestDependencies> maps = new List<TransitiveClosureTestDependencies>();
 
-        public static TestCasesToProgramMap GetMapByVersionId(string versionId)
+        public TransitiveClosureTestDependencies GetMapByVersionId(string versionId)
         {
-            TestCasesToProgramMap map = maps.SingleOrDefault(x => x.ProgramVersionId == versionId);
+            TransitiveClosureTestDependencies map = maps.SingleOrDefault(x => x.ProgramVersionId == versionId);
 
             if (map == null)
             {
@@ -20,7 +20,7 @@ namespace RTSFramework.RTSApproaches.Utilities
             return map;
         }
 
-        public static void UpdateMap(TestCasesToProgramMap map)
+        public void UpdateMap(TransitiveClosureTestDependencies map)
         {
             var currentMap = maps.SingleOrDefault(x => x.ProgramVersionId == map.ProgramVersionId);
 

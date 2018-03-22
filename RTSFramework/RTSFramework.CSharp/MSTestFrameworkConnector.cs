@@ -21,18 +21,13 @@ namespace RTSFramework.Concrete.CSharp
         protected const string Vstestconsole = @"vstest.console.exe";
         private const string MSTestAdapterPath = @"MSTestAdapter";
 
-        protected readonly IEnumerable<string> Sources;
+        public IEnumerable<string> Sources { get; set; }
 
         private const string TestMethodAttributeName = "TestMethodAttribute";
         private const string TestCategoryAttributeName = "TestCategoryAttribute";
         private const string IgnoreAttributeName = "IgnoreAttribute";
 
         private const string TestResultsFolder = "TestResults";
-
-        public MSTestFrameworkConnector(IEnumerable<string> sources)
-        {
-            Sources = sources;
-        }
 
         //TODO: Think about discovery of tests based on source code (using ASTs)
         //Advantage: can identify impacted tests even if code does not compile

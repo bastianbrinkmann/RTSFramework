@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
 using RTSFramework.Concrete.TFS2010.Artefacts;
-using RTSFramework.Console.RunConfigurations;
 using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Core;
+using RTSFramework.Controller;
+using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Artefacts;
 using Unity;
 
@@ -16,37 +14,30 @@ namespace RTSFramework.Console
 {
     class Program
     {
+        private static void SetConfig<T>(RunConfiguration<T> configuration) where T : IProgramModel
+        {
+            configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
+            configuration.DiscoveryType = DiscoveryType.UserIntendedChangesDiscovery;
+            configuration.GitRepositoryPath = @"C:\Git\TIATestProject";
+            configuration.TestAssemblyFolders = new[] { @"C:\Git\TIATestProject\MainProject.Test\bin\Debug\" };
+            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
+        }
+
         static void Main(string[] args)
         {
-            var configuration = new RunConfiguration
-            {
-                ProcessingType = ProcessingType.Reporting,
-                DiscoveryType = DiscoveryType.LocalDiscovery,
-                ProgramModelType = ProgramModelType.GitProgramModel,
-                GitRepositoryPath = @"C:\Git\TIATestProject",
-                IntendedChanges = new[] {@"C:\Git\TIATestProject\MainProject\Calculator.cs"},
-                TestAssemblyFolders = new[] {@"C:\Git\TIATestProject\MainProject.Test\bin\Debug\"},
-                RTSApproachType = RTSApproachType.DynamicRTS,
-                PersistDynamicMap = true
-            };
+            UnityProvider.Initialize();
 
-            var container = new UnityContainer();
-            UnityInitializer.Init(container, configuration);
-
-            if (configuration.ProgramModelType == ProgramModelType.GitProgramModel)
-            {
-                GitExampleRun(container, configuration);
-            }
-            else if (configuration.ProgramModelType == ProgramModelType.TFS2010ProgramModel)
-            {
-                TFS2010ExampleRun(container, configuration);
-            }
+            //GitExampleRun();
+            TFS2010ExampleRun();
 
             Process.Start(Directory.GetCurrentDirectory());
         }
 
-        private static void TFS2010ExampleRun(IUnityContainer container, RunConfiguration configuration)
+        private static void TFS2010ExampleRun()
         {
+            var configuration = new RunConfiguration<TFS2010ProgramModel>();
+            SetConfig(configuration);
+
             var oldProgramModel = new TFS2010ProgramModel
             {
                 VersionId = "Test"
@@ -55,22 +46,31 @@ namespace RTSFramework.Console
             {
                 VersionId = "Test2"
             };
+            configuration.OldProgramModel = oldProgramModel;
+            configuration.NewProgramModel = newProgramModel;
 
-            var controller = container.Resolve<RTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            var controller = UnityProvider.GetTfs2010Controller();
 
-            controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
+            controller.ExecuteImpactedTests(configuration);
         }
 
-        private static void GitExampleRun(IUnityContainer container, RunConfiguration configuration)
+        private static void GitExampleRun()
         {
+            var configuration = new RunConfiguration<GitProgramModel>();
+            SetConfig(configuration);
+
             var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
                 GitVersionReferenceType.LatestCommit);
             var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
                 GitVersionReferenceType.CurrentChanges);
+            configuration.OldProgramModel = oldProgramModel;
+            configuration.NewProgramModel = newProgramModel;
 
-            var controller = container.Resolve<RTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            var controller = UnityProvider.GetGitController();
 
-            controller.ExecuteImpactedTests(oldProgramModel, newProgramModel);
+            controller.ExecuteImpactedTests(configuration);
         }
+
+        
     }
 }

@@ -1,21 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B201BCA6-BE64-4BC2-B290-C4042DF1982C}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{328014C3-3EFC-4DB8-9212-AE13B5542D66}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.Console</RootNamespace>
-    <AssemblyName>RTSFramework.Console</AssemblyName>
+    <RootNamespace>RTSFramework.Controller</RootNamespace>
+    <AssemblyName>RTSFramework.Controller</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,33 +22,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
@@ -88,12 +64,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
+    <Compile Include="RTSController.cs" />
+    <Compile Include="RunConfigurations\DiscoveryType.cs" />
+    <Compile Include="RunConfigurations\ProcessingType.cs" />
+    <Compile Include="RunConfigurations\ProgramModelType.cs" />
+    <Compile Include="RunConfigurations\RTSApproachType.cs" />
+    <Compile Include="RunConfigurations\RunConfiguration.cs" />
+    <Compile Include="UnityProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Concrete.Adatpers\RTSFramework.Concrete.Adatpers.csproj">
@@ -124,10 +102,6 @@
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.Controller\RTSFramework.Controller.csproj">
-      <Project>{328014c3-3efc-4db8-9212-ae13b5542d66}</Project>
-      <Name>RTSFramework.Controller</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
       <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
@@ -141,19 +115,9 @@
       <Name>RTSFramework.RTSApproaches.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if not exist "$(TargetDir)\OpenCover" mkdir "$(TargetDir)\OpenCover"
-if not exist "$(TargetDir)\MSTestAdapter" mkdir "$(TargetDir)\MSTestAdapter"
-
-xcopy /E /Y /I /c "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"
-xcopy /E /Y /I /c "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)\MSTestAdapter"</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

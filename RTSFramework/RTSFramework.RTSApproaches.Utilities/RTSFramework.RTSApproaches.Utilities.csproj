@@ -86,10 +86,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicMapDictionary.cs" />
+    <Compile Include="DynamicMapProvider.cs" />
     <Compile Include="DynamicMapPersistor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestCasesToProgramMap.cs" />
+    <Compile Include="TransitiveClosureTestDependencies.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
