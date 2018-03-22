@@ -76,7 +76,7 @@
       <Project>{ECDB3480-0CF5-4DED-8118-046F41CD4743}</Project>
       <Name>RTSFramework.Concrete.CSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework\RTSFramework.Core.csproj">
+    <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
       <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
     </ProjectReference>

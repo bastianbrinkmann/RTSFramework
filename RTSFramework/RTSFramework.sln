@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2011
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Core", "RTSFramework\RTSFramework.Core.csproj", "{34343ADE-C3E0-423D-94B6-9D0400F498CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Core", "RTSFramework.Core\RTSFramework.Core.csproj", "{34343ADE-C3E0-423D-94B6-9D0400F498CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Console", "RTSFramework.Console\RTSFramework.Console.csproj", "{B201BCA6-BE64-4BC2-B290-C4042DF1982C}"
 EndProject
