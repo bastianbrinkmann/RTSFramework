@@ -86,13 +86,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicMapProvider.cs" />
+    <Compile Include="DynamicMapManager.cs" />
     <Compile Include="DynamicMapPersistor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransitiveClosureTestDependencies.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
+      <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
+      <Name>RTSFramework.Contracts</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

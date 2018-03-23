@@ -92,7 +92,7 @@
     <Compile Include="Artefacts\GitProgramModel.cs" />
     <Compile Include="Artefacts\GitVersionReferenceType.cs" />
     <Compile Include="GitProgramModelProvider.cs" />
-    <Compile Include="LocalGitChangedFilesDiscoverer.cs" />
+    <Compile Include="LocalGitFilesDeltaDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,9 +3,9 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestFramework<TTC> where TTC : ITestCase
+	public interface ITestsDiscoverer<TTC> where TTC : ITestCase
 	{
-        IEnumerable<string> Sources { get; set; }
+        IEnumerable<string> Sources { set; }
 
         IEnumerable<TTC> GetTestCases();
 	}

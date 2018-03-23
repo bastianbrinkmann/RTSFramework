@@ -27,8 +27,8 @@ namespace RTSFramework.Console
         {
             UnityProvider.Initialize();
 
-            //GitExampleRun();
-            TFS2010ExampleRun();
+            GitExampleRun();
+            //TFS2010ExampleRun();
 
             Process.Start(Directory.GetCurrentDirectory());
         }

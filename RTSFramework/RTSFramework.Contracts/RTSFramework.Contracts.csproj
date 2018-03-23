@@ -91,17 +91,16 @@
     <Compile Include="Delta\IDeltaAdapter.cs" />
     <Compile Include="Delta\StructuralDelta.cs" />
     <Compile Include="Artefacts\TestCaseResultType.cs" />
-    <Compile Include="IAutomatedTestFrameworkWithCoverageCollection.cs" />
-    <Compile Include="IAutomatedTestFramework.cs" />
+    <Compile Include="IAutomatedTestsExecutorWithCoverageCollection.cs" />
+    <Compile Include="IAutomatedTestsExecutor.cs" />
     <Compile Include="IDeltaDiscoverer.cs" />
     <Compile Include="IOfflineDeltaDiscoverer.cs" />
     <Compile Include="IOnlineDeltaDiscoverer.cs" />
     <Compile Include="Artefacts\IProgramModel.cs" />
     <Compile Include="Artefacts\ITestCase.cs" />
-    <Compile Include="RTSApproach\IDynamicMapUpdater.cs" />
     <Compile Include="RTSApproach\IRTSApproach.cs" />
     <Compile Include="RTSApproach\IRTSListener.cs" />
-    <Compile Include="ITestFramework.cs" />
+    <Compile Include="ITestsDiscoverer.cs" />
     <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

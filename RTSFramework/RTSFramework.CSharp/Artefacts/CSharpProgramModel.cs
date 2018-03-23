@@ -2,6 +2,7 @@
 
 namespace RTSFramework.Concrete.CSharp.Artefacts
 {
+    //TODO Remove?
     public class CSharpProgramModel : IProgramModel
     {
         public string VersionId { get; set; }

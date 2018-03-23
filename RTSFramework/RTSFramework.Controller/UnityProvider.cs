@@ -2,6 +2,7 @@
 using RTSFramework.Concrete.Adatpers.DeltaAdapters;
 using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
 using RTSFramework.Concrete.Reporting;
@@ -29,9 +30,9 @@ namespace RTSFramework.Controller
             InitDynamicMapHandling();
 
             InitDiscoverer();
-            InitTestFramework();
+            InitTestsDiscoverer();
             InitRTSApproaches();
-            InitTestProcessors();
+            InitTestsProcessors();
 
             InitController();
         }
@@ -48,15 +49,14 @@ namespace RTSFramework.Controller
 
         private static void InitDynamicMapHandling()
         {
-            UnityContainer.RegisterType<IDynamicMapUpdater, DynamicMapUpdater>();
-            UnityContainer.RegisterInstance(typeof(DynamicMapProvider), new DynamicMapProvider());
+            UnityContainer.RegisterInstance(typeof(DynamicMapManager), new DynamicMapManager());
         }
 
-        private static void InitTestProcessors()
+        private static void InitTestsProcessors()
         {
             UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.Reporting.ToString());
-            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestFrameworkConnectorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
-            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestFrameworkConnector>(ProcessingType.MSTestExecutionWithoutCoverage.ToString());
+            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
+            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutor>(ProcessingType.MSTestExecutionWithoutCoverage.ToString());
 
             UnityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase>>>(
                 new InjectionFactory(c =>
@@ -73,15 +73,14 @@ namespace RTSFramework.Controller
                 new Func<RTSApproachType, IRTSApproach<CSharpFileElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<CSharpFileElement, MSTestTestcase>>(name.ToString()))));
         }
 
-        private static void InitTestFramework()
+        private static void InitTestsDiscoverer()
         {
-            //TODO Seperate TestFramework Part and Execution Part?
-            UnityContainer.RegisterType<ITestFramework<MSTestTestcase>, MSTestFrameworkConnector>();
+            UnityContainer.RegisterType<ITestsDiscoverer<MSTestTestcase>, MSTestTestsDiscoverer>();
         }
 
         private static void InitDiscoverer()
         {
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>, LocalGitChangedFilesDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>, LocalGitFilesDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
             UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>, UserIntendedChangesDiscoverer<GitProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
 
             UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>>(

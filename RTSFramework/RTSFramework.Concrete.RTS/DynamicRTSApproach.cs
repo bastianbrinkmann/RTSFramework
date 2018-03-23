@@ -11,20 +11,24 @@ namespace RTSFramework.RTSApproaches.Concrete
 {
     public class DynamicRTSApproach<TPe, TTc> : RTSApproachBase<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
     {
-        private readonly DynamicMapProvider dynamicMapProvider;
-        public DynamicRTSApproach(DynamicMapProvider dynamicMapProvider)
+        private readonly DynamicMapManager dynamicMapManager;
+        public DynamicRTSApproach(DynamicMapManager dynamicMapManager)
         {
-            this.dynamicMapProvider = dynamicMapProvider;
+            this.dynamicMapManager = dynamicMapManager;
         }
+
+        private IList<TTc> allTests;
+        private StructuralDelta<TPe> currentDelta;
 
         public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe> delta)
         {
-            var map = dynamicMapProvider.GetMapByVersionId(delta.SourceModelId);
+            allTests = testCases as IList<TTc> ?? testCases.ToList();
+            currentDelta = delta;
 
-            var allTestcases = testCases as IList<TTc> ?? testCases.ToList();
+            var map = dynamicMapManager.GetMap(delta.SourceModelId);
 
             //TODO: Iterate over tests required as there could be new tests
-            foreach (var testcase in allTestcases)
+            foreach (var testcase in allTests)
             {
                 HashSet<string> linkedElements;
                 if (map.TransitiveClosureTestsToProgramElements.TryGetValue(testcase.Id, out linkedElements))
@@ -41,6 +45,11 @@ namespace RTSFramework.RTSApproaches.Concrete
                     ReportToAllListeners(testcase);
                 }
             }
+        }
+
+        public void UpdateMap(ICoverageData coverageData)
+        {
+            dynamicMapManager.UpdateDynamicMap(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, allTests);
         }
     }
 }

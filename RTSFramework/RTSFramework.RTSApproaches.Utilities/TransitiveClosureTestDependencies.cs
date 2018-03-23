@@ -36,7 +36,7 @@ namespace RTSFramework.RTSApproaches.Utilities
             }
         }
 
-        public void RemoveDeletedTests(IList<string> allTests)
+        public void RemoveDeletedTests(IEnumerable<string> allTests)
         {
             var deletedTests = TransitiveClosureTestsToProgramElements.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key);
 

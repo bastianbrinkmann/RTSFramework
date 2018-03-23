@@ -9,10 +9,8 @@ using RTSFramework.Core.Artefacts;
 
 namespace RTSFramework.Concrete.Git
 {
-    //TODO This is more a Delta provider than a discoverer?
-    public class LocalGitChangedFilesDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>
+    public class LocalGitFilesDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>
     {
-        //TODO: Instead of CSharpFileElement return string and use DeltaAdapter to filter only the CSharpDocuments
         public StructuralDelta<FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {
             //TODO: Console Read for RepositoryPath

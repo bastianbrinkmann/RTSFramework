@@ -8,6 +8,8 @@ using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Utilities;
+using RTSFramework.RTSApproaches.Concrete;
+using RTSFramework.RTSApproaches.Utilities;
 using Unity.Attributes;
 
 namespace RTSFramework.Controller
@@ -16,9 +18,8 @@ namespace RTSFramework.Controller
 	{
 	    private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>>> deltaDiscovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
-        private readonly ITestFramework<TTc> testFramework;
+        private readonly ITestsDiscoverer<TTc> testsDiscoverer;
         private readonly Func<RTSApproachType, IRTSApproach<TPeRTSApproach, TTc>> rtsApproachFactory;
-	    private readonly IDynamicMapUpdater dynamicMapUpdater;
 
         [Dependency]
         public Lazy<IDeltaAdapter<TPeDiscoverer, TPeRTSApproach>> DeltaAdapter { get; set; }
@@ -26,15 +27,14 @@ namespace RTSFramework.Controller
         public RTSController(
             Func<DiscoveryType, IOfflineDeltaDiscoverer<TPDiscoverer, StructuralDelta<TPeDiscoverer>>> deltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
-            ITestFramework<TTc> testFramework,
+            ITestsDiscoverer<TTc> testsDiscoverer,
             Func<RTSApproachType, IRTSApproach<TPeRTSApproach, TTc>> rtsApproachFactory, 
-            IDynamicMapUpdater dynamicMapUpdater)
+            DynamicMapManager dynamicMapUpdater)
         {
             this.deltaDiscovererFactory = deltaDiscovererFactory;
             this.testProcessorFactory = testProcessorFactory;
-            this.testFramework = testFramework;
+            this.testsDiscoverer = testsDiscoverer;
             this.rtsApproachFactory = rtsApproachFactory;
-            this.dynamicMapUpdater = dynamicMapUpdater;
         }
 
         private static void GetTestAssemblies(string folder, List<string> testAssemblies)
@@ -69,7 +69,7 @@ namespace RTSFramework.Controller
                 GetTestAssemblies(folder, testAssemblies);
             }
 
-            testFramework.Sources = testAssemblies;
+            testsDiscoverer.Sources = testAssemblies;
 	    }
 
 	    private IRTSApproach<TPeRTSApproach, TTc> InitializeRTSApproach(RunConfiguration<TPDiscoverer> configuration)
@@ -98,8 +98,8 @@ namespace RTSFramework.Controller
             var delta = PerformDeltaDiscovery(configuration);
 
             IEnumerable<TTc> allTests = null;
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => allTests = testFramework.GetTestCases(),
-                "GettingTestcases");
+            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => allTests = testsDiscoverer.GetTestCases(),
+                "TestsDiscovery");
             //TODO Filtering of tests
             //var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
@@ -115,14 +115,15 @@ namespace RTSFramework.Controller
 	            () => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
 	        
 
-	        var processorWithCoverageCollection = testProcessor as IAutomatedTestFrameworkWithCoverageCollection<TTc>;
-	        var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
+	        var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
+            var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
 	        if (coverageResults != null)
-	        {
-                dynamicMapUpdater.UpdateDynamicMap(coverageResults, configuration.OldProgramModel.VersionId, configuration.NewProgramModel.VersionId, allTests.Select(x => x.Id).ToList());
+            {
+                var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TPeRTSApproach, TTc>;
+                dynamicRtsApproach?.UpdateMap(coverageResults);
 	        }
 
-	        var automatedTestsProcessor = testProcessor as IAutomatedTestFramework<TTc>;
+	        var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
 	        if (automatedTestsProcessor != null)
 	        {
                 var testResults = automatedTestsProcessor.GetResults();
@@ -150,7 +151,7 @@ namespace RTSFramework.Controller
             int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
 
             Console.WriteLine();
-            Console.WriteLine(numberOfTestsNotPassed == 0 ? "All tests passed!" : $"{numberOfTestsNotPassed} of {testCaseResults.Count()} did not pass!");
+            Console.WriteLine(numberOfTestsNotPassed == 0 ? $"All {testCaseResults.Count} tests passed!" : $"{numberOfTestsNotPassed} of {testCaseResults.Count} did not pass!");
 
             Console.ReadKey();
         }

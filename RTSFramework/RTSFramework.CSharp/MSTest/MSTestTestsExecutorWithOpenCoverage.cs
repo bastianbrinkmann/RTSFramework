@@ -7,9 +7,9 @@ using RTSFramework.Concrete.CSharp.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 
-namespace RTSFramework.Concrete.CSharp
+namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class MSTestFrameworkConnectorWithOpenCoverage : MSTestFrameworkConnector, IAutomatedTestFrameworkWithCoverageCollection<MSTestTestcase>
+    public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor, IAutomatedTestsExecutorWithCoverageCollection<MSTestTestcase>
     {
         private const string OpenCoverExe = "OpenCover.Console.exe";
         private const string OpenCoverPath = "OpenCover";
@@ -38,7 +38,7 @@ namespace RTSFramework.Concrete.CSharp
 
         private  string BuildOpenCoverArguments(string vstestargs, IEnumerable<string> sources)
         {
-            string targetArg = "\"-target:" + Path.Combine(VstestPath, Vstestconsole) + "\"";
+            string targetArg = "\"-target:" + Path.Combine(MSTestConstants.VstestPath, MSTestConstants.Vstestconsole) + "\"";
             string targetArgsArg = "\"-targetargs:" + vstestargs + "\"";
             string registerArg = "-register:user";
 	        string logArg = "-log:Off";
