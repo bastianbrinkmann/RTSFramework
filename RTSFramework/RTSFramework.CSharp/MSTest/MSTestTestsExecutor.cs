@@ -120,13 +120,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 if (line.StartsWith("Passed"))
                 {
                     int number = OrderedTestsHelper.GetTestNumber(line);
-                    var currentTest = CurrentlyExecutedTests[number - 1];
+                    //var currentTest = CurrentlyExecutedTests.Single(x=> x.OrderedListPosition == number);
                 }
                 else if (line.StartsWith("Failed"))
                 {
                     int number = OrderedTestsHelper.GetTestNumber(line);
-                    var currentTest = CurrentlyExecutedTests[number - 1];
-                }
+					//var currentTest = CurrentlyExecutedTests.Single(x => x.OrderedListPosition == number);
+				}
             }
         }
 

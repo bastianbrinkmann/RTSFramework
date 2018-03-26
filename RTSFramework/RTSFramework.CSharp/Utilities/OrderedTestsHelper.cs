@@ -6,6 +6,10 @@ namespace RTSFramework.Concrete.CSharp.Utilities
     {
         public static int GetTestNumber(string line)
         {
+	        if (!line.Contains("-"))
+	        {
+		        return -1;
+	        }
             var beforeDash = line.Substring(0, line.IndexOf("-", StringComparison.Ordinal));
 
             string numberAsString = beforeDash;
