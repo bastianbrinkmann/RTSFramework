@@ -53,33 +53,37 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             {
                 var results = TrxFileParser.Parse(trxFile.FullName, CurrentlyExecutedTests);
 
-                var resultsDirectory = trxFile.Directory;
-                if (resultsDirectory != null)
-                {
-                    foreach (FileInfo file in resultsDirectory.GetFiles())
-                    {
-                        try
-                        {
-                            file.Delete();
-                        }
-                        catch (Exception)
-                        {
-                            //Intentinally empty - vstestconsole sometimes locks files too long - cleaned up in next run then
-                        }
-                    }
-                    foreach (DirectoryInfo dir in resultsDirectory.GetDirectories())
-                    {
-                        try
-                        {
-                            dir.Delete(true);
-                        }
-                        catch (Exception)
-                        {
-                            //Intentinally empty - vstestconsole sometimes locks directories too long - cleaned up in next run then
-                        }
+	            bool cleanUpResultDirectory = false;
+	            if (cleanUpResultDirectory)
+	            {
+					var resultsDirectory = trxFile.Directory;
+					if (resultsDirectory != null)
+					{
+						foreach (FileInfo file in resultsDirectory.GetFiles())
+						{
+							try
+							{
+								file.Delete();
+							}
+							catch (Exception)
+							{
+								//Intentinally empty - vstestconsole sometimes locks files too long - cleaned up in next run then
+							}
+						}
+						foreach (DirectoryInfo dir in resultsDirectory.GetDirectories())
+						{
+							try
+							{
+								dir.Delete(true);
+							}
+							catch (Exception)
+							{
+								//Intentinally empty - vstestconsole sometimes locks directories too long - cleaned up in next run then
+							}
 
-                    }
-                }
+						}
+					}
+				}
 
                 return results;
             }
