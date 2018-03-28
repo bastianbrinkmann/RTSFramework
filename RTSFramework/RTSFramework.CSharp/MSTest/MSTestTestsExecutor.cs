@@ -93,7 +93,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
         protected void ExecuteVsTestsByArguments(string arguments)
         {
-            var discovererProcess = new Process
+            var executorProccess = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -105,17 +105,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 }
             };
 
-            discovererProcess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
+            executorProccess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
 
-            discovererProcess.Start();
-            discovererProcess.BeginOutputReadLine();
+            executorProccess.Start();
+            executorProccess.BeginOutputReadLine();
 
-            discovererProcess.WaitForExit();
+            executorProccess.WaitForExit();
         }
 
         protected void DiscovererProcessOnOutputDataReceived(object sender, DataReceivedEventArgs dataReceivedEventArgs)
         {
-            //TODO Report results on the fly instead of in the end
+            //TODO Report results on the fly instead of in the end -> use custom logger
 
             var line = dataReceivedEventArgs.Data;
             if (line != null)
@@ -124,6 +124,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 if (line.StartsWith("Passed"))
                 {
                     int number = OrderedTestsHelper.GetTestNumber(line);
+                    //TODO: This does not work as e.g. data row tests all get one extra element
                     //var currentTest = CurrentlyExecutedTests.Single(x=> x.OrderedListPosition == number);
                 }
                 else if (line.StartsWith("Failed"))
@@ -167,7 +168,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             }
 
             var testLinks = new List<LinkType>();
-            int i = 1;
             foreach (MSTestTestcase testcase in CurrentlyExecutedTests)
             {
                 testLinks.Add(new LinkType
@@ -178,8 +178,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                     //Type needs to be referenced via String as the UnitTestElement class is internal
                     type = "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.ObjectModel.UnitTestElement, Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.ObjectModel"
                 });
-                testcase.OrderedListPosition = i;
-                i++;
             }
 
             var testType = new OrderedTestType

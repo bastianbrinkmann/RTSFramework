@@ -16,11 +16,11 @@ namespace RTSFramework.Console
     {
         private static void SetConfig<T>(RunConfiguration<T> configuration) where T : IProgramModel
         {
-            configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
+            configuration.ProcessingType = ProcessingType.MSTestExecutionWithoutCoverage;
             configuration.DiscoveryType = DiscoveryType.UserIntendedChangesDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject";
-            configuration.TestAssemblyFolders = new[] { @"C:\Git\TIATestProject\MainProject.Test\bin\Debug\" };
-            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
+            configuration.TestAssemblyFolders = new[] { @"C:\Git\TIATestProject\MainProject.Test\bin\Debug" };
+            configuration.RTSApproachType = RTSApproachType.RetestAll;
         }
 
         static void Main(string[] args)

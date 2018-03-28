@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Concrete.CSharp.Artefacts
@@ -13,5 +14,7 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
         public DateTime EndTime { get; set; }
 
         public MSTestTestcase AssociatedTestCase { get; set; }
+
+        public List<ITestCaseResult<MSTestTestcase>> ChildrenResults { get; } = new List<ITestCaseResult<MSTestTestcase>>();
     }
 }

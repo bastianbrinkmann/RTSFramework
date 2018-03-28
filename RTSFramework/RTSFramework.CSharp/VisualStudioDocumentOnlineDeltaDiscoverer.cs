@@ -6,6 +6,7 @@ using RTSFramework.Contracts.Delta;
 
 namespace RTSFramework.Concrete.CSharp
 {
+    //TODO Remove?
     public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgramModel, IDelta>
     {
 

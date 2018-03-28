@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RTSFramework.Contracts.Artefacts
 {
@@ -13,5 +14,7 @@ namespace RTSFramework.Contracts.Artefacts
 		DateTime EndTime { get; }
 
 		TestCaseResultType Outcome { get; }
-	}
+
+        List<ITestCaseResult<TTC>> ChildrenResults { get; }
+    }
 }

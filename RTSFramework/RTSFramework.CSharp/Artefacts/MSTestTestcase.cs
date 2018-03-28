@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RTSFramework.Concrete.CSharp.Artefacts
 {
@@ -11,7 +12,6 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
 			Name = name;
 		}
 
-        public int OrderedListPosition { get; set; }
 		public string Id { get; }
 
 		public string Name { get; }

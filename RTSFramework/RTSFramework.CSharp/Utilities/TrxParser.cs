@@ -7,7 +7,6 @@ using RTSFramework.Contracts.Artefacts;
 
 namespace RTSFramework.Concrete.CSharp.Utilities
 {
-
     public static class TrxFileParser
     {
         public static MSTestExectionResult Parse(string filename, IEnumerable<MSTestTestcase> testCases)
@@ -18,22 +17,21 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                 var doc = XDocument.Load(filename);
 
                 var testDefinitions = (from unitTest in doc.Descendants(ns + "UnitTest")
-                                       select new
-                                       {
-                                           executionId = unitTest.Element(ns + "Execution")?.Attribute("id")?.Value,
-                                           testName = unitTest.Element(ns + "TestMethod")?.Attribute("name")?.Value
-                                       }
-                             ).ToList();
+                    select new
+                    {
+                        executionId = unitTest.Element(ns + "Execution")?.Attribute("id")?.Value,
+                        testName = unitTest.Element(ns + "TestMethod")?.Attribute("name")?.Value
+                    }
+                ).ToList();
 
-                var results = from utr in doc.Descendants(ns + "UnitTestResult")
+                var results = (from utr in doc.Descendants(ns + "UnitTestResult")
                     let executionId = utr.Attribute("executionId")?.Value
                     let message = utr.Descendants(ns + "Message").FirstOrDefault()
                     let stackTrace = utr.Descendants(ns + "StackTrace").FirstOrDefault()
                     let st = DateTime.Parse(utr.Attribute("startTime")?.Value).ToUniversalTime()
                     let et = DateTime.Parse(utr.Attribute("endTime")?.Value).ToUniversalTime()
                     join testDefinition in testDefinitions on executionId equals testDefinition.executionId
-                    join testCase in testCases on OrderedTestsHelper.GetTestNumber(testDefinition.testName) equals testCase.OrderedListPosition
-                    select new MSTestTestResult
+                    select new
                     {
                         StartTime = st,
                         EndTime = et,
@@ -41,10 +39,60 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                         ErrorMessage = message?.Value ?? "",
                         StackTrace = stackTrace?.Value ?? "",
                         DurationInSeconds = (et - st).TotalSeconds,
-                        AssociatedTestCase = testCase
-                    };
+                        Name = OrderedTestsHelper.GetTestName(testDefinition.testName)
+                    }).ToList();
+
+                var msTestTestcases = testCases as IList<MSTestTestcase> ?? testCases.ToList();
                 var executionResult = new MSTestExectionResult();
-                executionResult.TestcasesResults.AddRange(results);
+
+                for (int i = 0, j = 0; i < msTestTestcases.Count; i++)
+                {
+                    var currentTestCase = msTestTestcases[i];
+                    var result = results[j];
+
+                    var currentResult = new MSTestTestResult
+                    {
+                        AssociatedTestCase = currentTestCase,
+                        Outcome = result.Outcome,
+                        DurationInSeconds = result.DurationInSeconds,
+                        EndTime = result.EndTime,
+                        ErrorMessage = result.ErrorMessage,
+                        StackTrace = result.StackTrace,
+                        StartTime = result.StartTime
+                    };
+
+
+                    j++;
+                    if (j < results.Count)
+                    {
+                        var nextResult = results[j];
+                        while (nextResult.Name.StartsWith(currentTestCase.Name + " (Data Row"))
+                        {
+                            var childrenResult = new MSTestTestResult
+                            {
+                                AssociatedTestCase = currentTestCase,
+                                Outcome = nextResult.Outcome,
+                                DurationInSeconds = nextResult.DurationInSeconds,
+                                EndTime = nextResult.EndTime,
+                                ErrorMessage = nextResult.ErrorMessage,
+                                StackTrace = nextResult.StackTrace,
+                                StartTime = nextResult.StartTime
+                            };
+                            currentResult.ChildrenResults.Add(childrenResult);
+
+                            
+                            j++;
+                            if (j >= results.Count)
+                            {
+                                break;
+                            }
+                            nextResult = results[j];
+                        }
+                    }
+                    
+
+                    executionResult.TestcasesResults.Add(currentResult);
+                }
 
                 var collectorElement =
                 (from collectors in doc.Descendants(ns + "Collector")
