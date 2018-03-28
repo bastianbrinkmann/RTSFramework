@@ -4,6 +4,7 @@ using System.Linq;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Core.Artefacts;
 
 namespace RTSFramework.Concrete.User

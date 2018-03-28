@@ -10,6 +10,7 @@ using RTSFramework.Concrete.TFS2010.Artefacts;
 using RTSFramework.Concrete.User;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Artefacts;
@@ -37,14 +38,14 @@ namespace RTSFramework.Controller
             InitController();
         }
 
-        public static RTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010Controller()
+        public static FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010Controller()
         {
-            return UnityContainer.Resolve<RTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            return UnityContainer.Resolve<FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
-        public static RTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitController()
+        public static FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitController()
         {
-            return UnityContainer.Resolve<RTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            return UnityContainer.Resolve<FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
         }
 
         private static void InitDynamicMapHandling()
@@ -89,6 +90,10 @@ namespace RTSFramework.Controller
 
             UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>, UserIntendedChangesDiscoverer<TFS2010ProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
 
+            //NestedDiscoverers
+            UnityContainer.RegisterType<INestedOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>, StructuralDelta<FileElement>>, CSharpFilesDeltaDiscoverer<GitProgramModel>>();
+            UnityContainer.RegisterType<INestedOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpFileElement>, StructuralDelta<FileElement>>, CSharpFilesDeltaDiscoverer<TFS2010ProgramModel>>();
+
             UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>>(
                 new InjectionFactory(c =>
                 new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>(name.ToString()))));
@@ -96,8 +101,8 @@ namespace RTSFramework.Controller
 
         private static void InitController()
         {
-            UnityContainer.RegisterType<RTSController<FileElement, CSharpFileElement, GitProgramModel, MSTestTestcase>>();
-            UnityContainer.RegisterType<RTSController<FileElement, CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            UnityContainer.RegisterType<FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            UnityContainer.RegisterType<FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
         private static void InitAdapters()
@@ -105,8 +110,6 @@ namespace RTSFramework.Controller
             //Trivial Adapters
             UnityContainer.RegisterType<IDeltaAdapter<FileElement, FileElement>, TrivialDeltaAdapter<FileElement>>();
             UnityContainer.RegisterType<IDeltaAdapter<CSharpFileElement, CSharpFileElement>, TrivialDeltaAdapter<CSharpFileElement>>();
-
-            UnityContainer.RegisterType<IDeltaAdapter<FileElement, CSharpFileElement>, FileDeltaCSharpFileDeltaAdapter>();
         }
     }
 }

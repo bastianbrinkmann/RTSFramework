@@ -5,6 +5,7 @@ using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Artefacts;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Core.Artefacts;
 
 namespace RTSFramework.Concrete.Git

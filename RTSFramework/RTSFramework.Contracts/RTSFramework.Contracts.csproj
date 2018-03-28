@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="Artefacts\ICoverageData.cs" />
     <Compile Include="Artefacts\IArtefactAdapter.cs" />
+    <Compile Include="DeltaDiscoverer\INestedOfflineDeltaDiscoverer.cs" />
     <Compile Include="Delta\IDelta.cs" />
     <Compile Include="Artefacts\IProgramModelElement.cs" />
     <Compile Include="Artefacts\ITestCaseResult.cs" />
@@ -93,9 +94,9 @@
     <Compile Include="Artefacts\TestCaseResultType.cs" />
     <Compile Include="IAutomatedTestsExecutorWithCoverageCollection.cs" />
     <Compile Include="IAutomatedTestsExecutor.cs" />
-    <Compile Include="IDeltaDiscoverer.cs" />
-    <Compile Include="IOfflineDeltaDiscoverer.cs" />
-    <Compile Include="IOnlineDeltaDiscoverer.cs" />
+    <Compile Include="DeltaDiscoverer\IDeltaDiscoverer.cs" />
+    <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
+    <Compile Include="DeltaDiscoverer\IOnlineDeltaDiscoverer.cs" />
     <Compile Include="Artefacts\IProgramModel.cs" />
     <Compile Include="Artefacts\ITestCase.cs" />
     <Compile Include="RTSApproach\IRTSApproach.cs" />

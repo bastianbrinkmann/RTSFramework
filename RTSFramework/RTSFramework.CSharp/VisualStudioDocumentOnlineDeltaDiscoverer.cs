@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Artefacts;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.DeltaDiscoverer;
 
 namespace RTSFramework.Concrete.CSharp
 {

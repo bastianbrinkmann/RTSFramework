@@ -265,6 +265,7 @@
     <Compile Include="Artefacts\MSTestExectionResult.cs" />
     <Compile Include="Artefacts\MSTestTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestResult.cs" />
+    <Compile Include="CSharpFilesDeltaDiscoverer.cs" />
     <Compile Include="MSTest\MSTestConstants.cs" />
     <Compile Include="MSTest\MSTestTestsExecutorWithOpenCoverage.cs" />
     <Compile Include="MSTest\MSTestTestsDiscoverer.cs" />
