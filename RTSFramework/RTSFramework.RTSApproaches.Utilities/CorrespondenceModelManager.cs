@@ -56,7 +56,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             }
 
             var artefact = GetFile(model.ProgramVersionId);
-            correspondenceModelAdapter.Parse(artefact);
+            correspondenceModelAdapter.Unparse(model, artefact);
             correspondenceModels.Add(model);
         }
 
