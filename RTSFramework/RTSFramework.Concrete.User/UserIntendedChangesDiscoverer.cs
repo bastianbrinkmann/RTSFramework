@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using RTSFramework.Contracts;
-using RTSFramework.Contracts.DeltaDiscoverer;
+﻿using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
@@ -10,14 +6,14 @@ using RTSFramework.Core.Models;
 namespace RTSFramework.Concrete.User
 {
     //TODO: This is a delta provider not a discoverer
-    public class UserIntendedChangesDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> where TP : IProgramModel
+    public class UserIntendedChangesDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> where TP : IProgramModel
     {
-        public StructuralDelta<FileElement> Discover(TP oldVersion, TP newVersion)
+        public StructuralDelta<TP, FileElement> Discover(TP oldVersion, TP newVersion)
         {
-            var delta = new StructuralDelta<FileElement>
+            var delta = new StructuralDelta<TP, FileElement>
             {
-                SourceModelId = oldVersion.VersionId,
-                TargetModelId = newVersion.VersionId
+                SourceModel = oldVersion,
+                TargetModel = newVersion
             };
 
             //TODO Should be Independent of console, so add additional interface

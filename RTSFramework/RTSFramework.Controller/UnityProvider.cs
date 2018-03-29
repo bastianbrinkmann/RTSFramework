@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using RTSFramework.Concrete.Adatpers.DeltaAdapters;
 using RTSFramework.Concrete.CSharp.Core;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest;
@@ -21,9 +20,10 @@ using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Models;
-using RTSFramework.RTSApproaches.Concrete;
+using RTSFramework.RTSApproaches.ClassSRTS;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 using RTSFramework.RTSApproaches.CorrespondenceModel.Models;
+using RTSFramework.RTSApproaches.Dynamic;
 using Unity;
 using Unity.Injection;
 using Unity.Resolution;
@@ -88,21 +88,41 @@ namespace RTSFramework.Controller
 
         private static void InitRTSApproaches()
         {
+            //Git
             //FileLevel
-            UnityContainer.RegisterType<IRTSApproach<CSharpFileElement, MSTestTestcase>, DynamicRTSApproach<CSharpFileElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-            UnityContainer.RegisterType<IRTSApproach<CSharpFileElement, MSTestTestcase>, RetestAllApproach<CSharpFileElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
-
-            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<CSharpFileElement, MSTestTestcase>>>(
+            UnityContainer.RegisterType<IRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>, DynamicRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+            UnityContainer.RegisterType<IRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>, RetestAllApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+            
+            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>>>(
                 new InjectionFactory(c =>
-                new Func<RTSApproachType, IRTSApproach<CSharpFileElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<CSharpFileElement, MSTestTestcase>>(name.ToString()))));
+                new Func<RTSApproachType, IRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<GitProgramModel, CSharpFileElement, MSTestTestcase>>(name.ToString()))));
 
             //ClassLevel
-            UnityContainer.RegisterType<IRTSApproach<CSharpClassElement, MSTestTestcase>, DynamicRTSApproach<CSharpClassElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-            UnityContainer.RegisterType<IRTSApproach<CSharpClassElement, MSTestTestcase>, RetestAllApproach<CSharpClassElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+            UnityContainer.RegisterType<IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>, DynamicRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+            UnityContainer.RegisterType<IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>, RetestAllApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+            UnityContainer.RegisterType<IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>, ClassSRTSApproach<GitProgramModel>>(RTSApproachType.ClassSRTS.ToString());
 
-            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<CSharpClassElement, MSTestTestcase>>>(
+            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>>>(
                 new InjectionFactory(c =>
-                new Func<RTSApproachType, IRTSApproach<CSharpClassElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<CSharpClassElement, MSTestTestcase>>(name.ToString()))));
+                new Func<RTSApproachType, IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<GitProgramModel, CSharpClassElement, MSTestTestcase>>(name.ToString()))));
+
+            //TFS2010
+            //FileLevel
+            UnityContainer.RegisterType<IRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>, DynamicRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+            UnityContainer.RegisterType<IRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>, RetestAllApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+
+            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>>>(
+                new InjectionFactory(c =>
+                new Func<RTSApproachType, IRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<TFS2010ProgramModel, CSharpFileElement, MSTestTestcase>>(name.ToString()))));
+
+            //ClassLevel
+            UnityContainer.RegisterType<IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>, DynamicRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+            UnityContainer.RegisterType<IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>, RetestAllApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+            UnityContainer.RegisterType<IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>, ClassSRTSApproach<TFS2010ProgramModel>>(RTSApproachType.ClassSRTS.ToString());
+
+            UnityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>>>(
+                new InjectionFactory(c =>
+                new Func<RTSApproachType, IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>>(name => c.Resolve<IRTSApproach<TFS2010ProgramModel, CSharpClassElement, MSTestTestcase>>(name.ToString()))));
         }
 
         private static void InitTestsDiscoverer()
@@ -112,70 +132,70 @@ namespace RTSFramework.Controller
 
         private static void InitDiscoverer()
         {
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>, LocalGitFilesDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>, UserIntendedChangesDiscoverer<GitProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>, UserIntendedChangesDiscoverer<TFS2010ProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, LocalGitFilesDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, UserIntendedChangesDiscoverer<GitProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>, UserIntendedChangesDiscoverer<TFS2010ProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
 
             //NestedDiscoverers
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>, CSharpFilesDeltaDiscoverer<GitProgramModel>>();
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpFileElement>>, CSharpFilesDeltaDiscoverer<TFS2010ProgramModel>>();
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpClassElement>>, CSharpClassDeltaDiscoverer<GitProgramModel>>();
-            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpClassElement>>, CSharpClassDeltaDiscoverer<TFS2010ProgramModel>>();
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>, CSharpFilesDeltaDiscoverer<GitProgramModel>>();
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>, CSharpFilesDeltaDiscoverer<TFS2010ProgramModel>>();
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>>, CSharpClassDeltaDiscoverer<GitProgramModel>>();
+            UnityContainer.RegisterType<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>, CSharpClassDeltaDiscoverer<TFS2010ProgramModel>>();
 
             InitDiscovererFactories();
         }
 
         private static void InitDiscovererFactories()
         {
-            UnityContainer.RegisterType<Action<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>>(
+            UnityContainer.RegisterType<Action<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>>(
                 new InjectionFactory(c =>
-                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<FileElement>>>(name.ToString()))));
-            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpFileElement>>>>(
+                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>(name.ToString()))));
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>>(
                 new InjectionFactory(c =>
-                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpFileElement>>>(name =>
+                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
-                    return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpFileElement>>>(
+                    return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>(
                         new ParameterOverride("internalDiscoverer", fileDeltaDiscoverer));
                 })));
-            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpClassElement>>>>(
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>>>(
                 new InjectionFactory(c =>
-                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpClassElement>>>(name =>
+                new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
-                    return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<CSharpClassElement>>>(
+                    return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>>(
                         new ParameterOverride("internalDiscoverer", fileDeltaDiscoverer));
                 })));
 
-            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>>(
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>>(
                new InjectionFactory(c =>
-               new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>(name.ToString()))));
-            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>>>(
+               new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>(name.ToString()))));
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>>(
                 new InjectionFactory(c =>
-                new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>>(name =>
+                new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
-                    return c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>>(
+                    return c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>(
                         new ParameterOverride("internalDiscoverer", fileDeltaDiscoverer));
                 })));
-            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpClassElement>>>>(
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>>>>(
                 new InjectionFactory(c =>
-                new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpClassElement>>>(name =>
+                new Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpFileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
-                    return c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<CSharpClassElement>>>(
+                    return c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>>>(
                         new ParameterOverride("internalDiscoverer", fileDeltaDiscoverer));
                 })));
         }
@@ -188,10 +208,6 @@ namespace RTSFramework.Controller
 
         private static void InitAdapters()
         {
-            //Trivial Adapters
-            UnityContainer.RegisterType<IDeltaAdapter<FileElement, FileElement>, TrivialDeltaAdapter<FileElement>>();
-            UnityContainer.RegisterType<IDeltaAdapter<CSharpFileElement, CSharpFileElement>, TrivialDeltaAdapter<CSharpFileElement>>();
-
             //Artefact Adapters
             UnityContainer.RegisterType<IArtefactAdapter<FileInfo, CorrespondenceModel>, JsonCorrespondenceModelAdapter>();
             UnityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();

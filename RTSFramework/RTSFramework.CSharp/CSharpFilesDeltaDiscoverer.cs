@@ -7,28 +7,28 @@ using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core
 {
-    public class CSharpFilesDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>>
+    public class CSharpFilesDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>>
         where TP : IProgramModel
     {
-        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> internalDiscoverer;
+        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer;
 
-        public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> internalDiscoverer)
+        public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer)
         {
             this.internalDiscoverer = internalDiscoverer;
         }
 
-        public StructuralDelta<CSharpFileElement> Discover(TP oldModel, TP newModel)
+        public StructuralDelta<TP, CSharpFileElement> Discover(TP oldModel, TP newModel)
         {
             var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
             return Convert(fileDelta);
         }
 
-        public StructuralDelta<CSharpFileElement> Convert(StructuralDelta<FileElement> delta)
+        public StructuralDelta<TP, CSharpFileElement> Convert(StructuralDelta<TP, FileElement> delta)
         {
-            StructuralDelta<CSharpFileElement> result = new StructuralDelta<CSharpFileElement>
+            StructuralDelta<TP, CSharpFileElement> result = new StructuralDelta<TP, CSharpFileElement>
             {
-                SourceModelId = delta.SourceModelId,
-                TargetModelId = delta.TargetModelId,
+                SourceModel = delta.SourceModel,
+                TargetModel = delta.TargetModel,
             };
 
             result.AddedElements.AddRange(delta.AddedElements.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id)));

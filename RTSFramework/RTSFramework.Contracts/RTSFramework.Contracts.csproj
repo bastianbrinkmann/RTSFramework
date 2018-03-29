@@ -91,7 +91,6 @@
     <Compile Include="Models\GranularityLevel.cs" />
     <Compile Include="Models\IProgramModelElement.cs" />
     <Compile Include="Models\ITestCaseResult.cs" />
-    <Compile Include="Adapter\IDeltaAdapter.cs" />
     <Compile Include="Models\Delta\StructuralDelta.cs" />
     <Compile Include="Models\TestCaseResultType.cs" />
     <Compile Include="IAutomatedTestsExecutorWithCoverageCollection.cs" />

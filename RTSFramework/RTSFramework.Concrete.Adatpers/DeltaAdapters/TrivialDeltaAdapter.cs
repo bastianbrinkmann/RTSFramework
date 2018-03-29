@@ -4,9 +4,9 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.Adatpers.DeltaAdapters
 {
-    public class TrivialDeltaAdapter<TPe> : IDeltaAdapter<TPe, TPe> where TPe : IProgramModelElement
+    public class TrivialDeltaAdapter<TP, TPe> : IDeltaAdapter<TPe, TPe> where TPe : IProgramModelElement
     {
-        public StructuralDelta<TPe> Convert(StructuralDelta<TPe> delta)
+        public StructuralDelta<TP, TPe> Convert(StructuralDelta<TP, TPe> delta)
         {
             return delta;
         }

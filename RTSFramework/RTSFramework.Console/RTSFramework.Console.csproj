@@ -96,10 +96,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RTSFramework.Concrete.Adatpers\RTSFramework.Concrete.Adatpers.csproj">
-      <Project>{24f91a87-f395-4fd5-8619-5a509715630e}</Project>
-      <Name>RTSFramework.Concrete.Adatpers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">
       <Project>{1a7501d7-db03-4f97-9d7d-d52193359c74}</Project>
       <Name>RTSFramework.Concrete.CSharp.MSTest</Name>
@@ -116,9 +112,9 @@
       <Project>{f8157510-d324-4c91-aa56-d68571b9d1c1}</Project>
       <Name>RTSFramework.Concrete.Reporting</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Concrete.csproj">
+    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Dynamic.csproj">
       <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
-      <Name>RTSFramework.RTSApproaches.Concrete</Name>
+      <Name>RTSFramework.RTSApproaches.Dynamic</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.TFS2010\RTSFramework.Concrete.TFS2010.csproj">
       <Project>{bfa8dbd3-1761-4660-a372-334482f08950}</Project>

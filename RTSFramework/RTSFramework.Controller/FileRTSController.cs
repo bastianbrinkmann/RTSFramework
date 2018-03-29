@@ -10,7 +10,7 @@ using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Models;
 using RTSFramework.Core.Utilities;
-using RTSFramework.RTSApproaches.Concrete;
+using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.Controller
 {
@@ -18,16 +18,16 @@ namespace RTSFramework.Controller
         where TTc : ITestCase
         where TP : IProgramModel
     {
-        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>>> filedeltaDiscovererFactory;
+        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
         private readonly ITestsDiscoverer<TTc> testsDiscoverer;
-        private readonly Func<RTSApproachType, IRTSApproach<TPe, TTc>> rtsApproachFactory;
+        private readonly Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory;
 
         public FileRTSController(
-            Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>>> filedeltaDiscovererFactory,
+            Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,
-            Func<RTSApproachType, IRTSApproach<TPe, TTc>> rtsApproachFactory)
+            Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory)
         {
             this.filedeltaDiscovererFactory = filedeltaDiscovererFactory;
             this.testProcessorFactory = testProcessorFactory;
@@ -70,17 +70,17 @@ namespace RTSFramework.Controller
             testsDiscoverer.Sources = testAssemblies;
         }
 
-        private IRTSApproach<TPe, TTc> InitializeRTSApproach(RunConfiguration<TP> configuration)
+        private IRTSApproach<TP, TPe, TTc> InitializeRTSApproach(RunConfiguration<TP> configuration)
         {
             return rtsApproachFactory(configuration.RTSApproachType);
         }
 
 
-        private StructuralDelta<TPe> PerformDeltaDiscovery(RunConfiguration<TP> configuration)
+        private StructuralDelta<TP, TPe> PerformDeltaDiscovery(RunConfiguration<TP> configuration)
         {
             var deltaDiscoverer = filedeltaDiscovererFactory(configuration.DiscoveryType);
 
-            StructuralDelta<TPe> delta = default(StructuralDelta<TPe>);
+            StructuralDelta<TP, TPe> delta = default(StructuralDelta<TP, TPe>);
             ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
                 () => delta = deltaDiscoverer.Discover(configuration.OldProgramModel, configuration.NewProgramModel), "DeltaDiscovery");
 
@@ -115,7 +115,7 @@ namespace RTSFramework.Controller
             var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
             if (coverageResults != null)
             {
-                var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TPe, TTc>;
+                var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TP, TPe, TTc>;
                 dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
             }
 

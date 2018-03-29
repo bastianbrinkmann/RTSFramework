@@ -6,9 +6,9 @@ using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.RTSApproach;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 
-namespace RTSFramework.RTSApproaches.Concrete
+namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class DynamicRTSApproach<TPe, TTc> : RTSApproachBase<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
+    public class DynamicRTSApproach<TP, TPe, TTc> : RTSApproachBase<TP, TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement where TP : IProgramModel
     {
         private readonly CorrespondenceModelManager correspondenceModelManager;
         public DynamicRTSApproach(CorrespondenceModelManager correspondenceModelManager)
@@ -17,14 +17,14 @@ namespace RTSFramework.RTSApproaches.Concrete
         }
 
         private IList<TTc> allTests;
-        private StructuralDelta<TPe> currentDelta;
+        private StructuralDelta<TP, TPe> currentDelta;
 
-        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe> delta)
+        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta)
         {
             allTests = testCases as IList<TTc> ?? testCases.ToList();
             currentDelta = delta;
 
-            var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModelId, GetGranularityLevel());
+            var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModel.VersionId, GetGranularityLevel());
 
             //TODO: Iterate over tests required as there could be new tests
             foreach (var testcase in allTests)
@@ -59,7 +59,7 @@ namespace RTSFramework.RTSApproaches.Concrete
 
         public void UpdateCorrespondenceModel(CoverageData coverageData)
         {
-            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, GetGranularityLevel(), allTests);
+            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModel.VersionId, currentDelta.TargetModel.VersionId, GetGranularityLevel(), allTests);
         }
     }
 }

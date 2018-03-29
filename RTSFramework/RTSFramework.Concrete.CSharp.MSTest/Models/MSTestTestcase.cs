@@ -5,16 +5,19 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
 	public class MSTestTestcase : ICSharpTestcase
     {
-		public MSTestTestcase(string id, string assemblyPath, string name)
+		public MSTestTestcase(string assemblyPath, string name, string className)
 		{
-			Id = id;
+		    Id = $"{className}.{name}"; 
 			AssemblyPath = assemblyPath;
 			Name = name;
+		    FullClassName = className;
 		}
 
 		public string Id { get; }
 
 		public string Name { get; }
+
+        public string FullClassName { get; }
 
         public bool Ignored { get; set; }
 

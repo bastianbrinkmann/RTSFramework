@@ -3,16 +3,15 @@ using System.IO;
 using System.Linq;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class LocalGitFilesDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<FileElement>>
+    public class LocalGitFilesDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel,FileElement>>
     {
-        public StructuralDelta<FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
+        public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {
             //TODO: Console Read for RepositoryPath
             if (oldModel.RepositoryPath != newModel.RepositoryPath)
@@ -22,10 +21,10 @@ namespace RTSFramework.Concrete.Git
 
             var repositoryPath = oldModel.RepositoryPath;
 
-            var delta = new StructuralDelta<FileElement>
+            var delta = new StructuralDelta<GitProgramModel, FileElement>
             {
-                SourceModelId = oldModel.VersionId,
-                TargetModelId = newModel.VersionId
+                SourceModel = oldModel,
+                TargetModel = newModel
             };
 
             using (Repository repo = new Repository(repositoryPath))

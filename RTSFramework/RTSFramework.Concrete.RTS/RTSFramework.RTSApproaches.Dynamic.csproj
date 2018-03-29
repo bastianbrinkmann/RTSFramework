@@ -7,8 +7,8 @@
     <ProjectGuid>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.RTSApproaches.Concrete</RootNamespace>
-    <AssemblyName>RTSFramework.RTSApproaches.Concrete</AssemblyName>
+    <RootNamespace>RTSFramework.RTSApproaches.Dynamic</RootNamespace>
+    <AssemblyName>RTSFramework.RTSApproaches.Dynamic</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

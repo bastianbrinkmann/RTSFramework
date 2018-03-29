@@ -3,6 +3,7 @@
     public enum RTSApproachType
     {
         RetestAll,
-        DynamicRTS
+        DynamicRTS,
+        ClassSRTS
     }
 }

@@ -5,7 +5,7 @@ using RTSFramework.Contracts.RTSApproach;
 
 namespace RTSFramework.Core.RTSApproach
 {
-    public abstract class RTSApproachBase<TPe, TTc> : IRTSApproach<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
+    public abstract class RTSApproachBase<TP, TPe, TTc> : IRTSApproach<TP, TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement where TP : IProgramModel
     {
         private readonly List<IRTSListener<TTc>> listeners = new List<IRTSListener<TTc>>();
 
@@ -27,6 +27,6 @@ namespace RTSFramework.Core.RTSApproach
             }
         }
 
-        public abstract void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TPe> delta);
+        public abstract void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta);
     }
 }

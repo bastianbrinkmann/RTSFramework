@@ -13,31 +13,31 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-    public class CSharpClassDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpClassElement>>
+    public class CSharpClassDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpClassElement>>
         where TP : IProgramModel
     {
-        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>> internalDiscoverer;
+        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer;
         private readonly IFilesProvider<TP> filesProvider;
 
-        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>> internalDiscoverer,
+        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer,
             IFilesProvider<TP> filesProvider)
         {
             this.internalDiscoverer = internalDiscoverer;
             this.filesProvider = filesProvider;
         }
 
-        public StructuralDelta<CSharpClassElement> Discover(TP oldModel, TP newModel)
+        public StructuralDelta<TP, CSharpClassElement> Discover(TP oldModel, TP newModel)
         {
             var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
             return Convert(fileDelta, oldModel);
         }
 
-        private StructuralDelta<CSharpClassElement> Convert(StructuralDelta<CSharpFileElement> delta, TP oldModel)
+        private StructuralDelta<TP, CSharpClassElement> Convert(StructuralDelta<TP, CSharpFileElement> delta, TP oldModel)
         {
-            StructuralDelta<CSharpClassElement> result = new StructuralDelta<CSharpClassElement>
+            StructuralDelta<TP, CSharpClassElement> result = new StructuralDelta<TP, CSharpClassElement>
             {
-                SourceModelId = delta.SourceModelId,
-                TargetModelId = delta.TargetModelId,
+                SourceModel = delta.SourceModel,
+                TargetModel = delta.TargetModel,
             };
 
             foreach (var cSharpFile in delta.ChangedElements)

@@ -7,16 +7,16 @@ using RTSFramework.Contracts.Models.Delta;
 namespace RTSFramework.Concrete.CSharp.Core
 {
     //TODO Remove?
-    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgramModel, IDelta>
+    public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgramModel, IDelta<CSharpProgramModel>>
     {
 
-        private StructuralDelta<CSharpFileElement> delta = new StructuralDelta<CSharpFileElement>();
+        private StructuralDelta<CSharpProgramModel, CSharpFileElement> delta = new StructuralDelta<CSharpProgramModel, CSharpFileElement>();
 
         private Solution solution;
         private MSBuildWorkspace workspace;
 
 
-        public IDelta GetCurrentDelta()
+        public IDelta<CSharpProgramModel> GetCurrentDelta()
         {
             return delta;
         }
@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.Core
         
         public void StartDiscovery(CSharpProgramModel startingVersion)
         {
-            delta.SourceModelId = startingVersion.VersionId;
+            delta.SourceModel = startingVersion;
             workspace = MSBuildWorkspace.Create();
             solution = workspace.OpenSolutionAsync(startingVersion.SolutionPath).Result;
             workspace.WorkspaceChanged += MSWorkspaceOnWorkspaceChanged;

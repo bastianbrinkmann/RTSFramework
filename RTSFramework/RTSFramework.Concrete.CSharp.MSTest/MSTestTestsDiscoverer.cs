@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                         {
                             if (method.CustomAttributes.Any(x => x.AttributeType.Name == MSTestConstants.TestMethodAttributeName))
                             {
-                                var testCase = new MSTestTestcase($"{type.FullName}.{method.Name}", modulePath, method.Name);
+                                var testCase = new MSTestTestcase(modulePath, method.Name, type.FullName);
 
                                 var categoryAttributes =
                                     method.CustomAttributes.Where(x => x.AttributeType.Name == MSTestConstants.TestCategoryAttributeName);
