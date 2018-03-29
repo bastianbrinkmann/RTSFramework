@@ -1,11 +1,11 @@
 ﻿using System.Linq;
-using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Core.Artefacts;
 
-namespace RTSFramework.Concrete.CSharp
+namespace RTSFramework.Concrete.CSharp.Core
 {
     public class CSharpFilesDeltaDiscoverer<TP> : INestedOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>, StructuralDelta<FileElement>>
         where TP : IProgramModel

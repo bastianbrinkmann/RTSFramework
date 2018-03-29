@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RTSFramework.Contracts.Artefacts;
 
-namespace RTSFramework.Concrete.CSharp.Artefacts
+namespace RTSFramework.Concrete.CSharp.Core.Artefacts
 {
     public class MSTestTestResult : ITestCaseResult<MSTestTestcase>
     {
@@ -12,8 +12,7 @@ namespace RTSFramework.Concrete.CSharp.Artefacts
         public double DurationInSeconds { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-
-        public MSTestTestcase AssociatedTestCase { get; set; }
+        public string TestCaseId { get; set; }
 
         public List<ITestCaseResult<MSTestTestcase>> ChildrenResults { get; } = new List<ITestCaseResult<MSTestTestcase>>();
     }

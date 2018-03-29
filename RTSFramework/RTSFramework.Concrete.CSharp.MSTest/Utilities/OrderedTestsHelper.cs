@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RTSFramework.Concrete.CSharp.Utilities
+namespace RTSFramework.Concrete.CSharp.MSTest.Utilities
 {
     public static class OrderedTestsHelper
     {

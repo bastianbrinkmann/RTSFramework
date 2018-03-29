@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{24F91A87-F395-4FD5-8619-5A509715630E}</ProjectGuid>
+    <ProjectGuid>{1A7501D7-DB03-4F97-9D7D-D52193359C74}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.Concrete.Adatpers</RootNamespace>
-    <AssemblyName>RTSFramework.Concrete.Adatpers</AssemblyName>
+    <RootNamespace>RTSFramework.Concrete.CSharp.MSTest</RootNamespace>
+    <AssemblyName>RTSFramework.Concrete.CSharp.MSTest</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,25 +29,22 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCover.Framework">
+      <HintPath>..\packages\OpenCover.4.6.519\tools\OpenCover.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -58,32 +55,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MSTestConstants.cs" />
+    <Compile Include="MSTestTestsDiscoverer.cs" />
+    <Compile Include="MSTestTestsExecutor.cs" />
+    <Compile Include="MSTestTestsExecutorWithOpenCoverage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DeltaAdapters\TrivialDeltaAdapter.cs" />
+    <Compile Include="Adapters\MSTestExecutionResultParameters.cs" />
+    <Compile Include="Adapters\OpenCoverXmlCoverageAdapter.cs" />
+    <Compile Include="Utilities\OrderedTestsHelper.cs" />
+    <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
-      <Project>{2B9BB9A5-DB75-4EC9-BE24-0F06619D3216}</Project>
-      <Name>RTSFramework.Concrete.Git</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
-      <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
+      <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
-      <Project>{ECDB3480-0CF5-4DED-8118-046F41CD4743}</Project>
-      <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
       <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
+      <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
+      <Name>RTSFramework.Concrete.CSharp.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ArtefactAdapters\" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

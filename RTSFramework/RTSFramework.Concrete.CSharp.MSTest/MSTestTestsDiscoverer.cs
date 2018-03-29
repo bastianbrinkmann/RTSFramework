@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
-using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Contracts;
 
 namespace RTSFramework.Concrete.CSharp.MSTest

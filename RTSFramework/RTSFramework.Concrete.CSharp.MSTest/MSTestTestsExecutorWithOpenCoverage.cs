@@ -2,8 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using RTSFramework.Concrete.CSharp.Artefacts;
-using RTSFramework.Concrete.CSharp.Utilities;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest.Adapters;
+using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 
@@ -11,10 +12,19 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 {
     public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor, IAutomatedTestsExecutorWithCoverageCollection<MSTestTestcase>
     {
+        private readonly IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData> openCoverArtefactAdapter;
+
+
         private const string OpenCoverExe = "OpenCover.Console.exe";
         private const string OpenCoverPath = "OpenCover";
 
         private ICoverageData coverageData;
+
+        public MSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
+                                                    IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
+        {
+            this.openCoverArtefactAdapter = openCoverArtefactAdapter;
+        }
 
         public override void ProcessTests(IEnumerable<MSTestTestcase> tests)
         {
@@ -30,7 +40,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
                 var executionResult = ParseVsTestsTrxAnswer();
 
-                coverageData = OpenCoverXmlParser.Parse(Path.GetFullPath(@"results.xml"), CurrentlyExecutedTests);
+                var executionResultParams = new MSTestExecutionResultParameters {File = new FileInfo(Path.GetFullPath(@"results.xml"))};
+                executionResultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
+                coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
 
                 ExecutionResults = executionResult.TestcasesResults;
             }
@@ -60,15 +72,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                     Arguments = arguments,
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    RedirectStandardOutput = true
+                    RedirectStandardOutput = false
                 }
             };
 
-            discovererProcess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
-
             discovererProcess.Start();
-            discovererProcess.BeginOutputReadLine();
-
             discovererProcess.WaitForExit();
         }
 

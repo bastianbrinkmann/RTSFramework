@@ -1,31 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using OpenCover.Framework.Model;
-using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Core;
 
-namespace RTSFramework.Concrete.CSharp.Utilities
+namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
-    public static class OpenCoverXmlParser
+    public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData>
     {
-
-
-        public static ICoverageData Parse(string filename, IEnumerable<MSTestTestcase> testcases)
+        public ICoverageData Parse(MSTestExecutionResultParameters resultParameters)
         {
             var serializer = new XmlSerializer(typeof(CoverageSession),
                                                     new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
-            using (var stream = new FileStream(filename, FileMode.Open))
+            using (var stream = new FileStream(resultParameters.File.FullName, FileMode.Open))
             {
                 using (var reader = new StreamReader(stream, new UTF8Encoding()))
                 {
                     var session = (CoverageSession)serializer.Deserialize(reader);
-
-                    var mstestcases = testcases as IList<MSTestTestcase> ?? testcases.ToList();
 
                     //Determine Ids of testcases
                     var coverageIdsTestCases = new Dictionary<uint, MSTestTestcase>();
@@ -38,14 +34,14 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                             {
                                 var fullName = trackedMethod.FullName.Replace("::", ".");
 
-                                var associatedTest = mstestcases.SingleOrDefault(x => fullName.Contains($" {x.Id}()"));
+                                var associatedTest = resultParameters.ExecutedTestcases.SingleOrDefault(x => fullName.Contains($" {x.Id}()"));
 
                                 coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
                             }
                         }
                     }
 
-                    var testCasesToElements = new Dictionary<string, HashSet<string>>(mstestcases.ToDictionary(
+                    var testCasesToElements = new Dictionary<string, HashSet<string>>(resultParameters.ExecutedTestcases.ToDictionary(
                             x => x.Id, x => new HashSet<string>()));
 
                     foreach (var module in session.Modules)
@@ -106,6 +102,11 @@ namespace RTSFramework.Concrete.CSharp.Utilities
                     return new CoverageData {TransitiveClosureTestsToProgramElements = testCasesToElements};
                 }
             }
+        }
+
+        public void Unparse(ICoverageData model, MSTestExecutionResultParameters artefact)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

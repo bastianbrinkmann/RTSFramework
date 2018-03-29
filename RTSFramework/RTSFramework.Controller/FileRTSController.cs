@@ -177,10 +177,10 @@ namespace RTSFramework.Controller
 
         private void ReportTestResult(ITestCaseResult<TTc> result, StreamWriter logWriter)
         {
-            Console.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome}");
+            Console.WriteLine($"{result.TestCaseId}: {result.Outcome}");
             if (result.Outcome != TestCaseResultType.Passed)
             {
-                logWriter.WriteLine($"{result.AssociatedTestCase.Id}: {result.Outcome} Message: {result.ErrorMessage} StackTrace: {result.StackTrace}");
+                logWriter.WriteLine($"{result.TestCaseId}: {result.Outcome} Message: {result.ErrorMessage} StackTrace: {result.StackTrace}");
             }
 
             int i = 0;

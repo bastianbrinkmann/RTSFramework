@@ -1,6 +1,6 @@
 ﻿using RTSFramework.Contracts.Artefacts;
 
-namespace RTSFramework.Concrete.CSharp.Artefacts
+namespace RTSFramework.Concrete.CSharp.Core.Artefacts
 {
     public class CSharpFileElement : IProgramModelElement
     {

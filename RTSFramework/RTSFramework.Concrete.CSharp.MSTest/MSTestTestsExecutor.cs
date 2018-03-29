@@ -5,8 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Xml.Serialization;
-using RTSFramework.Concrete.CSharp.Artefacts;
-using RTSFramework.Concrete.CSharp.Utilities;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest.Adapters;
+using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Artefacts;
 
@@ -14,6 +15,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 {
     public class MSTestTestsExecutor : IAutomatedTestsExecutor<MSTestTestcase>
     {
+        private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
+
+        public MSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter)
+        {
+            this.resultArtefactAdapter = resultArtefactAdapter;
+        }
+
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
         protected IEnumerable<ITestCaseResult<MSTestTestcase>> ExecutionResults = new List<ITestCaseResult<MSTestTestcase>>();
         public virtual void ProcessTests(IEnumerable<MSTestTestcase> tests)
@@ -51,9 +59,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             var trxFile = GetTrxFile();
             if (trxFile != null)
             {
-                var results = TrxFileParser.Parse(trxFile.FullName, CurrentlyExecutedTests);
+                var resultParams = new MSTestExecutionResultParameters {File = trxFile};
+                resultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
+                var results = resultArtefactAdapter.Parse(resultParams);
 
-	            bool cleanUpResultDirectory = false;
+	            bool cleanUpResultDirectory = false; //TODO: App Config Setting
 	            if (cleanUpResultDirectory)
 	            {
 					var resultsDirectory = trxFile.Directory;
@@ -101,38 +111,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                     Arguments = arguments,
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    RedirectStandardOutput = true
+                    RedirectStandardOutput = false
                 }
             };
 
-            executorProccess.OutputDataReceived += DiscovererProcessOnOutputDataReceived;
-
             executorProccess.Start();
-            executorProccess.BeginOutputReadLine();
-
             executorProccess.WaitForExit();
-        }
-
-        protected void DiscovererProcessOnOutputDataReceived(object sender, DataReceivedEventArgs dataReceivedEventArgs)
-        {
-            //TODO Report results on the fly instead of in the end -> use custom logger
-
-            var line = dataReceivedEventArgs.Data;
-            if (line != null)
-            {
-                Console.WriteLine(line);
-                if (line.StartsWith("Passed"))
-                {
-                    int number = OrderedTestsHelper.GetTestNumber(line);
-                    //TODO: This does not work as e.g. data row tests all get one extra element
-                    //var currentTest = CurrentlyExecutedTests.Single(x=> x.OrderedListPosition == number);
-                }
-                else if (line.StartsWith("Failed"))
-                {
-                    int number = OrderedTestsHelper.GetTestNumber(line);
-					//var currentTest = CurrentlyExecutedTests.Single(x => x.OrderedListPosition == number);
-				}
-            }
         }
 
         protected string BuildVsTestsArguments()

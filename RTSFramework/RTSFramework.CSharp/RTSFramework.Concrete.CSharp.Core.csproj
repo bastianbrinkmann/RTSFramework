@@ -8,8 +8,8 @@
     <ProjectGuid>{ECDB3480-0CF5-4DED-8118-046F41CD4743}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.Concrete.CSharp</RootNamespace>
-    <AssemblyName>RTSFramework.Concrete.CSharp</AssemblyName>
+    <RootNamespace>RTSFramework.Concrete.CSharp.Core</RootNamespace>
+    <AssemblyName>RTSFramework.Concrete.CSharp.Core</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -266,14 +266,7 @@
     <Compile Include="Artefacts\MSTestTestcase.cs" />
     <Compile Include="Artefacts\MSTestTestResult.cs" />
     <Compile Include="CSharpFilesDeltaDiscoverer.cs" />
-    <Compile Include="MSTest\MSTestConstants.cs" />
-    <Compile Include="MSTest\MSTestTestsExecutorWithOpenCoverage.cs" />
-    <Compile Include="MSTest\MSTestTestsDiscoverer.cs" />
-    <Compile Include="MSTest\MSTestTestsExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\OpenCoverXmlParser.cs" />
-    <Compile Include="Utilities\OrderedTestsHelper.cs" />
-    <Compile Include="Utilities\TrxParser.cs" />
     <Compile Include="VisualStudioDocumentOnlineDeltaDiscoverer.cs" />
     <Compile Include="VSTest\VsTestXmlClasses.cs" />
   </ItemGroup>

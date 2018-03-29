@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using RTSFramework.Concrete.Adatpers.DeltaAdapters;
-using RTSFramework.Concrete.CSharp;
-using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.Core;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest;
+using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Artefacts;
 using RTSFramework.Concrete.Reporting;
@@ -115,6 +116,8 @@ namespace RTSFramework.Controller
 
             //Artefact Adapters
             UnityContainer.RegisterType<IArtefactAdapter<FileInfo, CorrespondenceModel>, JsonCorrespondenceModelAdapter>();
+            UnityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();
+            UnityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData>, OpenCoverXmlCoverageAdapter>();
         }
     }
 }
