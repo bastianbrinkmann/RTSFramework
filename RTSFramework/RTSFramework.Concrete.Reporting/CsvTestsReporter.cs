@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.Reporting
 {

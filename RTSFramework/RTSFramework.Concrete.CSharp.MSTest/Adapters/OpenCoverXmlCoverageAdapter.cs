@@ -5,8 +5,10 @@ using System.Text;
 using System.Xml.Serialization;
 using OpenCover.Framework.Model;
 using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace RTSFramework.RTSApproaches.CorrespondenceModel
+namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 {
     public class CorrespondenceModel
     {

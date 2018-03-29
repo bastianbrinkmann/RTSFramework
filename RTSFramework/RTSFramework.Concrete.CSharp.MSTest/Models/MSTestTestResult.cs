@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Concrete.CSharp.Core.Artefacts
+namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
     public class MSTestTestResult : ITestCaseResult<MSTestTestcase>
     {

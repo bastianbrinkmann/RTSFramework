@@ -1,6 +1,4 @@
-﻿using RTSFramework.Contracts.Artefacts;
-
-namespace RTSFramework.Contracts.Delta
+﻿namespace RTSFramework.Contracts.Models.Delta
 {
     public interface IDelta
 	{

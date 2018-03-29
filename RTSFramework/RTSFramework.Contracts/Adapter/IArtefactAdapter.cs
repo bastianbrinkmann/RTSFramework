@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Contracts.Artefacts
+﻿namespace RTSFramework.Contracts.Adapter
 {
     public interface IArtefactAdapter<TArtefact, TModel>
     {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 
 namespace RTSFramework.Concrete.CSharp.MSTest

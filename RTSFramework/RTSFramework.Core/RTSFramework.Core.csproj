@@ -83,7 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artefacts\FileElement.cs" />
+    <Compile Include="Models\FileElement.cs" />
     <Compile Include="CoverageData.cs" />
     <Compile Include="RTSApproach\RTSApproachBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

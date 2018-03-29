@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Contracts.Delta;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core;
 using RTSFramework.Core.RTSApproach;
 using RTSFramework.RTSApproaches.CorrespondenceModel;

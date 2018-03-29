@@ -1,15 +1,16 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
-    public class JsonCorrespondenceModelAdapter : IArtefactAdapter<FileInfo, CorrespondenceModel>
+    public class JsonCorrespondenceModelAdapter : IArtefactAdapter<FileInfo, Models.CorrespondenceModel>
     {
         public const string FileExtension = ".json";
 
-        public CorrespondenceModel Parse(FileInfo artefact)
+        public Models.CorrespondenceModel Parse(FileInfo artefact)
         {
             if (artefact.Extension != FileExtension)
             {
@@ -25,16 +26,16 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
                         using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
                         {
                             var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
-                            return serializer.Deserialize<CorrespondenceModel>(jsonReader);
+                            return serializer.Deserialize<Models.CorrespondenceModel>(jsonReader);
                         }
                     }
                 }
             }
 
-            return new CorrespondenceModel { ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName) };
+            return new Models.CorrespondenceModel { ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName) };
         }
 
-        public void Unparse(CorrespondenceModel model, FileInfo artefact)
+        public void Unparse(Models.CorrespondenceModel model, FileInfo artefact)
         {
             using (FileStream stream = artefact.Open(FileMode.OpenOrCreate, FileAccess.Write))
             {

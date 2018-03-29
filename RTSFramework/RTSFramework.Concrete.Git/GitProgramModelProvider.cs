@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using LibGit2Sharp;
-using RTSFramework.Concrete.Git.Artefacts;
+using RTSFramework.Concrete.Git.Models;
 
 namespace RTSFramework.Concrete.Git
 {

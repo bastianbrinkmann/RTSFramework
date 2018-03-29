@@ -1,5 +1,6 @@
-﻿using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Contracts.Delta;
+﻿using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.Adatpers.DeltaAdapters
 {

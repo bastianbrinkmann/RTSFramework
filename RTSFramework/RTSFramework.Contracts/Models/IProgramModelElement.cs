@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Contracts.Artefacts
+﻿namespace RTSFramework.Contracts.Models
 {
     public interface IProgramModelElement
     {

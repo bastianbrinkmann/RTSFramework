@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {

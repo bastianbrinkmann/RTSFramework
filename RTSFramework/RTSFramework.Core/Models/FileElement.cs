@@ -1,6 +1,6 @@
-﻿using RTSFramework.Contracts.Artefacts;
+﻿using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Core.Artefacts
+namespace RTSFramework.Core.Models
 {
     public class FileElement : IProgramModelElement
     {

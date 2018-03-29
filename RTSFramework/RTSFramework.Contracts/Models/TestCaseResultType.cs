@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace RTSFramework.Contracts.Artefacts
+﻿namespace RTSFramework.Contracts.Models
 {
     public enum TestCaseResultType
     {

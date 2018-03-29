@@ -2,24 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
     public class CorrespondenceModelManager
     {
-        private readonly IArtefactAdapter<FileInfo, CorrespondenceModel> correspondenceModelAdapter;
-        private readonly List<CorrespondenceModel> correspondenceModels = new List<CorrespondenceModel>();
+        private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
+        private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
         private const string CorrespondenceModelsStoragePlace = "CorrespondenceModels";
 
-        public CorrespondenceModelManager(IArtefactAdapter<FileInfo, CorrespondenceModel> correspondenceModelAdapter)
+        public CorrespondenceModelManager(IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter)
         {
             this.correspondenceModelAdapter = correspondenceModelAdapter;
         }
 
-        public CorrespondenceModel GetCorrespondenceModel(string versionId)
+        public Models.CorrespondenceModel GetCorrespondenceModel(string versionId)
         {
-            CorrespondenceModel model = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == versionId);
+            Models.CorrespondenceModel model = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == versionId);
 
             if (model == null)
             {
@@ -41,7 +42,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             UpdateCorrespondenceModel(newModel);
         }
 
-        private void UpdateCorrespondenceModel(CorrespondenceModel model)
+        private void UpdateCorrespondenceModel(Models.CorrespondenceModel model)
         {
             var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 

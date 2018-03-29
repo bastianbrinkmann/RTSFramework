@@ -259,12 +259,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artefacts\CSharpProgramModel.cs" />
-    <Compile Include="Artefacts\CSharpFileElement.cs" />
-    <Compile Include="Artefacts\ICSharpTestcase.cs" />
-    <Compile Include="Artefacts\MSTestExectionResult.cs" />
-    <Compile Include="Artefacts\MSTestTestcase.cs" />
-    <Compile Include="Artefacts\MSTestTestResult.cs" />
+    <Compile Include="Models\CSharpProgramModel.cs" />
+    <Compile Include="Models\CSharpFileElement.cs" />
+    <Compile Include="Models\ICSharpTestcase.cs" />
     <Compile Include="CSharpFilesDeltaDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualStudioDocumentOnlineDeltaDiscoverer.cs" />

@@ -1,4 +1,4 @@
-﻿using RTSFramework.Contracts.Artefacts;
+﻿using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core.Artefacts
 {

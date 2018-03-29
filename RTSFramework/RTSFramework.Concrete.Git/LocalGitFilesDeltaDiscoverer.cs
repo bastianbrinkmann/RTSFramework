@@ -2,11 +2,11 @@
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
-using RTSFramework.Concrete.Git.Artefacts;
+using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.DeltaDiscoverer;
-using RTSFramework.Core.Artefacts;
+using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.Git
 {

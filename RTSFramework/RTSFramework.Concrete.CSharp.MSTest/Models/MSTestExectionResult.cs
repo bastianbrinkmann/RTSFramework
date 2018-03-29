@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
 
-namespace RTSFramework.Concrete.CSharp.Core.Artefacts
+namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
     public class MSTestExectionResult
     {

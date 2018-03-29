@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.DeltaDiscoverer;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
-using RTSFramework.Core.Artefacts;
+using RTSFramework.Core.Models;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Concrete;
 

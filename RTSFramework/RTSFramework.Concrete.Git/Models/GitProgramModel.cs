@@ -1,7 +1,6 @@
-﻿using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Core.Artefacts;
+﻿using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Concrete.Git.Artefacts
+namespace RTSFramework.Concrete.Git.Models
 {
     public class GitProgramModel : IProgramModel
     {

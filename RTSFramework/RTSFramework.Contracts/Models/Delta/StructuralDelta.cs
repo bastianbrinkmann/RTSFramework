@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using RTSFramework.Contracts.Artefacts;
 
-namespace RTSFramework.Contracts.Delta
+namespace RTSFramework.Contracts.Models.Delta
 {
     public class StructuralDelta<TPe> : IDelta where TPe : IProgramModelElement
     {

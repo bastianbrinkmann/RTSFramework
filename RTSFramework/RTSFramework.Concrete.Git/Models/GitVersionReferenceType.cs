@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Concrete.Git.Artefacts
+﻿namespace RTSFramework.Concrete.Git.Models
 {
     public enum GitVersionReferenceType
     {

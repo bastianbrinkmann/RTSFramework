@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using RTSFramework.Concrete.CSharp.Artefacts;
+using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.Git;
-using RTSFramework.Concrete.Git.Artefacts;
-using RTSFramework.Concrete.TFS2010.Artefacts;
-using RTSFramework.Contracts.Artefacts;
+using RTSFramework.Concrete.Git.Models;
+using RTSFramework.Concrete.TFS2010.Models;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Controller;
 using RTSFramework.Controller.RunConfigurations;
-using RTSFramework.Core.Artefacts;
 using Unity;
 
 namespace RTSFramework.Console
@@ -20,7 +19,7 @@ namespace RTSFramework.Console
             configuration.DiscoveryType = DiscoveryType.UserIntendedChangesDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject";
             configuration.TestAssemblyFolders = new[] { @"C:\Git\TIATestProject\MainProject.Test\bin\Debug" };
-            configuration.RTSApproachType = RTSApproachType.RetestAll;
+            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
         }
 
         static void Main(string[] args)

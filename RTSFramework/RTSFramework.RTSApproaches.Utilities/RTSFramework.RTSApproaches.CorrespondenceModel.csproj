@@ -89,7 +89,7 @@
     <Compile Include="CorrespondenceModelManager.cs" />
     <Compile Include="JsonCorrespondenceModelAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CorrespondenceModel.cs" />
+    <Compile Include="Models\CorrespondenceModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

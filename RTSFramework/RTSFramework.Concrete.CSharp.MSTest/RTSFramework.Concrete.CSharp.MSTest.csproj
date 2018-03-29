@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\MSTestExectionResult.cs" />
+    <Compile Include="Models\MSTestTestcase.cs" />
+    <Compile Include="Models\MSTestTestResult.cs" />
     <Compile Include="MSTestConstants.cs" />
     <Compile Include="MSTestTestsDiscoverer.cs" />
     <Compile Include="MSTestTestsExecutor.cs" />

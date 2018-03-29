@@ -1,6 +1,6 @@
-﻿using RTSFramework.Contracts.Artefacts;
+﻿using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Concrete.TFS2010.Artefacts
+namespace RTSFramework.Concrete.TFS2010.Models
 {
     public class TFS2010ProgramModel : IProgramModel
     {

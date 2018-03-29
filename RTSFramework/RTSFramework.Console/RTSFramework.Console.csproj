@@ -100,6 +100,10 @@
       <Project>{24f91a87-f395-4fd5-8619-5a509715630e}</Project>
       <Name>RTSFramework.Concrete.Adatpers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">
+      <Project>{1a7501d7-db03-4f97-9d7d-d52193359c74}</Project>
+      <Name>RTSFramework.Concrete.CSharp.MSTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj">
       <Project>{2b9bb9a5-db75-4ec9-be24-0f06619d3216}</Project>
       <Name>RTSFramework.Concrete.Git</Name>

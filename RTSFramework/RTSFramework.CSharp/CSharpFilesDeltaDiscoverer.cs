@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using RTSFramework.Concrete.CSharp.Core.Artefacts;
-using RTSFramework.Contracts.Artefacts;
-using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.DeltaDiscoverer;
-using RTSFramework.Core.Artefacts;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core
 {

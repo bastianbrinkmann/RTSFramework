@@ -1,11 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Core.Artefacts;
-using RTSFramework.Contracts;
-using RTSFramework.Contracts.Delta;
+using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
+using RTSFramework.Contracts.Models.Delta;
 
-namespace RTSFramework.Concrete.CSharp
+namespace RTSFramework.Concrete.CSharp.Core
 {
     //TODO Remove?
     public class VisualStudioDocumentOnlineDeltaDiscoverer : IOnlineDeltaDiscoverer<CSharpProgramModel, IDelta>
