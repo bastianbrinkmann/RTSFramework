@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts.Adapter;

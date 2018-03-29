@@ -5,6 +5,6 @@ namespace RTSFramework.Contracts
 {
 	public interface IAutomatedTestsExecutorWithCoverageCollection<TTc> : IAutomatedTestsExecutor<TTc> where TTc : ITestCase
 	{
-	    ICoverageData GetCollectedCoverageData();
+	    CoverageData GetCollectedCoverageData();
 	}
 }

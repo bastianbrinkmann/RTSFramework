@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
+using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -7,14 +7,19 @@ using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core
 {
-    public class CSharpFilesDeltaDiscoverer<TP> : INestedOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>, StructuralDelta<FileElement>>
+    public class CSharpFilesDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<CSharpFileElement>>
         where TP : IProgramModel
     {
-        public IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> IntermediateDeltaDiscoverer { get; set; }
+        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> internalDiscoverer;
+
+        public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>> internalDiscoverer)
+        {
+            this.internalDiscoverer = internalDiscoverer;
+        }
 
         public StructuralDelta<CSharpFileElement> Discover(TP oldModel, TP newModel)
         {
-            var fileDelta = IntermediateDeltaDiscoverer.Discover(oldModel, newModel);
+            var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
             return Convert(fileDelta);
         }
 

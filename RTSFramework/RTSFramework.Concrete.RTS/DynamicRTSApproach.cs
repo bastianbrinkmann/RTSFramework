@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Core;
 using RTSFramework.Core.RTSApproach;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 
@@ -25,7 +24,7 @@ namespace RTSFramework.RTSApproaches.Concrete
             allTests = testCases as IList<TTc> ?? testCases.ToList();
             currentDelta = delta;
 
-            var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModelId);
+            var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModelId, GetGranularityLevel());
 
             //TODO: Iterate over tests required as there could be new tests
             foreach (var testcase in allTests)
@@ -47,9 +46,20 @@ namespace RTSFramework.RTSApproaches.Concrete
             }
         }
 
-        public void UpdateCorrespondenceModel(ICoverageData coverageData)
+        //TODO Somewhere else and cleaner
+        private GranularityLevel GetGranularityLevel()
         {
-            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, allTests);
+            if (typeof(TPe).Name == "CSharpClassElement")
+            {
+                return GranularityLevel.Class;
+            }
+
+            return GranularityLevel.File;
+        }
+
+        public void UpdateCorrespondenceModel(CoverageData coverageData)
+        {
+            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, GetGranularityLevel(), allTests);
         }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 {
     public class CorrespondenceModel
     {
         public string ProgramVersionId { get; set; }
+
+        public GranularityLevel GranularityLevel { get; set; }
 
         public Dictionary<string, HashSet<string>> CorrespondenceModelLinks { get; set; }
             = new Dictionary<string, HashSet<string>>();
@@ -18,7 +21,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
                 clone.Add(testcaseRelatedElements.Key, new HashSet<string>(testcaseRelatedElements.Value));
             }
 
-            return new CorrespondenceModel {ProgramVersionId = newId, CorrespondenceModelLinks = clone};
+            return new CorrespondenceModel{ProgramVersionId = newId, CorrespondenceModelLinks = clone, GranularityLevel = GranularityLevel};
         }
 
         public void UpdateByNewLinks(Dictionary<string, HashSet<string>> newLinks)

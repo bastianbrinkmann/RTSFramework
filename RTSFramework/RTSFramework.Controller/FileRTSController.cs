@@ -18,21 +18,18 @@ namespace RTSFramework.Controller
         where TTc : ITestCase
         where TP : IProgramModel
     {
-        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>>> filedeltaDiscovererFactory;
-        private readonly INestedOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>, StructuralDelta<FileElement>> deltaDiscoverer;
+        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>>> filedeltaDiscovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
         private readonly ITestsDiscoverer<TTc> testsDiscoverer;
         private readonly Func<RTSApproachType, IRTSApproach<TPe, TTc>> rtsApproachFactory;
 
         public FileRTSController(
-            Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<FileElement>>> filedeltaDiscovererFactory,
-            INestedOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>, StructuralDelta<FileElement>> deltaDiscoverer, 
+            Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TPe>>> filedeltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,
             Func<RTSApproachType, IRTSApproach<TPe, TTc>> rtsApproachFactory)
         {
             this.filedeltaDiscovererFactory = filedeltaDiscovererFactory;
-            this.deltaDiscoverer = deltaDiscoverer;
             this.testProcessorFactory = testProcessorFactory;
             this.testsDiscoverer = testsDiscoverer;
             this.rtsApproachFactory = rtsApproachFactory;
@@ -81,9 +78,7 @@ namespace RTSFramework.Controller
 
         private StructuralDelta<TPe> PerformDeltaDiscovery(RunConfiguration<TP> configuration)
         {
-            var fileDeltaDiscoverer = filedeltaDiscovererFactory(configuration.DiscoveryType);
-            deltaDiscoverer.IntermediateDeltaDiscoverer = fileDeltaDiscoverer;
-
+            var deltaDiscoverer = filedeltaDiscovererFactory(configuration.DiscoveryType);
 
             StructuralDelta<TPe> delta = default(StructuralDelta<TPe>);
             ConsoleStopWatchTracker.ReportNeededTimeOnConsole(

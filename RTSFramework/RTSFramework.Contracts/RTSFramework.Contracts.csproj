@@ -83,10 +83,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\ICoverageData.cs" />
+    <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
-    <Compile Include="DeltaDiscoverer\INestedOfflineDeltaDiscoverer.cs" />
+    <Compile Include="Models\CoverageData.cs" />
+    <Compile Include="Models\CoverageDataEntry.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />
+    <Compile Include="Models\GranularityLevel.cs" />
     <Compile Include="Models\IProgramModelElement.cs" />
     <Compile Include="Models\ITestCaseResult.cs" />
     <Compile Include="Adapter\IDeltaAdapter.cs" />

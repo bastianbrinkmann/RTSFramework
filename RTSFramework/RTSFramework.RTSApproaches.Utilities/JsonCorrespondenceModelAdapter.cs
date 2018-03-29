@@ -32,7 +32,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
                 }
             }
 
-            return new Models.CorrespondenceModel { ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName) };
+            return null;
         }
 
         public void Unparse(Models.CorrespondenceModel model, FileInfo artefact)

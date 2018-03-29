@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Xml.Serialization;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;

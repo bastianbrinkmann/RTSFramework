@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models.Delta;

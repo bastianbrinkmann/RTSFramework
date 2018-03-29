@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters

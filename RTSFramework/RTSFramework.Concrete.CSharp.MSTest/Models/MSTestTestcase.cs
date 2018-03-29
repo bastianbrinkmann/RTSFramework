@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Models

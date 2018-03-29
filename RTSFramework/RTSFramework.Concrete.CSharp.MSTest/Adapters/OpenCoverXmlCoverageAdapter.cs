@@ -4,18 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using OpenCover.Framework.Model;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
-using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
-    public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData>
+    public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>
     {
-        public ICoverageData Parse(MSTestExecutionResultParameters resultParameters)
+        public CoverageData Parse(MSTestExecutionResultParameters resultParameters)
         {
             var serializer = new XmlSerializer(typeof(CoverageSession),
                                                     new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
@@ -43,14 +41,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                         }
                     }
 
-                    var testCasesToElements = new Dictionary<string, HashSet<string>>(resultParameters.ExecutedTestcases.ToDictionary(
-                            x => x.Id, x => new HashSet<string>()));
+                    var coverageEntries = new HashSet<CoverageDataEntry>();
 
                     foreach (var module in session.Modules)
                     {
                         var files = new Dictionary<uint, string>();
 
-                        
                         //Determine Ids of files
                         if (module.Files == null || module.Classes == null)
                         {
@@ -90,10 +86,19 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                                     {
 	                                    var associatedTestcase = coverageIdsTestCases[methodRef.UniqueId];
 
-
-                                        if (!testCasesToElements[associatedTestcase.Id].Contains(filePath))
+                                        if (!coverageEntries.Any(
+                                            x => x.ClassName == @class.FullName && 
+                                                 x.FileName == filePath &&
+                                                 x.MethodName == method.FullName &&
+                                                 x.TestCaseId == associatedTestcase.Id))//TODO Convert method name once required - format "ReturnType ClassFullName::MethodName(ParameterList)"
                                         {
-                                            testCasesToElements[associatedTestcase.Id].Add(filePath);
+                                            coverageEntries.Add(new CoverageDataEntry
+                                            {
+                                                ClassName = @class.FullName,
+                                                FileName = filePath,
+                                                MethodName = method.FullName,
+                                                TestCaseId = associatedTestcase.Id
+                                            });
                                         }
                                     }
                                 }
@@ -101,12 +106,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                         }
                     }
 
-                    return new CoverageData {TransitiveClosureTestsToProgramElements = testCasesToElements};
+                    return new CoverageData(coverageEntries);
                 }
             }
         }
 
-        public void Unparse(ICoverageData model, MSTestExecutionResultParameters artefact)
+        public void Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
         {
             throw new System.NotImplementedException();
         }

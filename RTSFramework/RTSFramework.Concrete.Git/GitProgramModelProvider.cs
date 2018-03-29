@@ -16,7 +16,7 @@ namespace RTSFramework.Concrete.Git
                 if (referenceType == GitVersionReferenceType.LatestCommit)
                 {
                     commitid = repo.Head.Tip.Id.Sha;
-                    gitProgramModelId = $"GitRepo_{Path.GetFileName(repositoryPath)}_{commitid}";
+                    gitProgramModelId = $"GitRepo_{new DirectoryInfo(repositoryPath).Name}_{commitid}";
                 }
                 if (referenceType == GitVersionReferenceType.CurrentChanges)
                 {

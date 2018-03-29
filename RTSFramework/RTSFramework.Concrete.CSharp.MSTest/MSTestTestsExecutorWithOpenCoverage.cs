@@ -2,28 +2,28 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using RTSFramework.Concrete.CSharp.Core.Artefacts;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
     public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor, IAutomatedTestsExecutorWithCoverageCollection<MSTestTestcase>
     {
-        private readonly IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData> openCoverArtefactAdapter;
+        private readonly IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter;
 
 
         private const string OpenCoverExe = "OpenCover.Console.exe";
         private const string OpenCoverPath = "OpenCover";
 
-        private ICoverageData coverageData;
+        private CoverageData coverageData;
 
         public MSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
-                                                    IArtefactAdapter<MSTestExecutionResultParameters, ICoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
+                                                    IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
         {
             this.openCoverArtefactAdapter = openCoverArtefactAdapter;
         }
@@ -82,7 +82,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             discovererProcess.WaitForExit();
         }
 
-        public ICoverageData GetCollectedCoverageData()
+        public CoverageData GetCollectedCoverageData()
         {
             return coverageData;
         }
