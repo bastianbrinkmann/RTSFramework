@@ -7,8 +7,8 @@
     <ProjectGuid>{8E0E2C16-376E-4465-AF69-E1B300726080}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.RTSApproaches.Utilities</RootNamespace>
-    <AssemblyName>RTSFramework.RTSApproaches.Utilities</AssemblyName>
+    <RootNamespace>RTSFramework.RTSApproaches.CorrespondenceModel</RootNamespace>
+    <AssemblyName>RTSFramework.RTSApproaches.CorrespondenceModel</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -86,10 +86,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicMapManager.cs" />
-    <Compile Include="DynamicMapPersistor.cs" />
+    <Compile Include="CorrespondenceModelManager.cs" />
+    <Compile Include="JsonCorrespondenceModelAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TransitiveClosureTestDependencies.cs" />
+    <Compile Include="CorrespondenceModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

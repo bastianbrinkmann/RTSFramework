@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using RTSFramework.Concrete.Adatpers.DeltaAdapters;
 using RTSFramework.Concrete.CSharp;
 using RTSFramework.Concrete.CSharp.Artefacts;
@@ -9,13 +10,14 @@ using RTSFramework.Concrete.Reporting;
 using RTSFramework.Concrete.TFS2010.Artefacts;
 using RTSFramework.Concrete.User;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Artefacts;
 using RTSFramework.RTSApproaches.Concrete;
-using RTSFramework.RTSApproaches.Utilities;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 using Unity;
 using Unity.Injection;
 
@@ -28,7 +30,7 @@ namespace RTSFramework.Controller
         public static void Initialize()
         {
             InitAdapters();
-            InitDynamicMapHandling();
+            InitCorrespondenceModelManager();
 
             InitDiscoverer();
             InitTestsDiscoverer();
@@ -48,9 +50,9 @@ namespace RTSFramework.Controller
             return UnityContainer.Resolve<FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
         }
 
-        private static void InitDynamicMapHandling()
+        private static void InitCorrespondenceModelManager()
         {
-            UnityContainer.RegisterInstance(typeof(DynamicMapManager), new DynamicMapManager());
+            UnityContainer.RegisterInstance(typeof(CorrespondenceModelManager));
         }
 
         private static void InitTestsProcessors()
@@ -110,6 +112,9 @@ namespace RTSFramework.Controller
             //Trivial Adapters
             UnityContainer.RegisterType<IDeltaAdapter<FileElement, FileElement>, TrivialDeltaAdapter<FileElement>>();
             UnityContainer.RegisterType<IDeltaAdapter<CSharpFileElement, CSharpFileElement>, TrivialDeltaAdapter<CSharpFileElement>>();
+
+            //Artefact Adapters
+            UnityContainer.RegisterType<IArtefactAdapter<FileInfo, CorrespondenceModel>, JsonCorrespondenceModelAdapter>();
         }
     }
 }

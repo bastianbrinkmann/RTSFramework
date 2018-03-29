@@ -15,11 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTSFramework.Concrete", "RT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Concrete.Git", "RTSFramework.Concrete.Git\RTSFramework.Concrete.Git.csproj", "{2B9BB9A5-DB75-4EC9-BE24-0F06619D3216}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Concrete.RTS", "RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj", "{748E5AC2-68C2-4B3F-9350-A02726C932A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.RTSApproaches.Concrete", "RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Concrete.csproj", "{748E5AC2-68C2-4B3F-9350-A02726C932A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTSFramework.RTSApproaches", "RTSFramework.RTSApproaches", "{5538FC18-CF2D-41F8-916A-86780FF3F115}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.RTSApproaches.Utilities", "RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.Utilities.csproj", "{8E0E2C16-376E-4465-AF69-E1B300726080}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.RTSApproaches.CorrespondenceModel", "RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj", "{8E0E2C16-376E-4465-AF69-E1B300726080}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSFramework.Concrete.User", "RTSFramework.Concrete.User\RTSFramework.Concrete.User.csproj", "{FD02117B-DD28-41C8-9A18-655AD2023445}"
 EndProject

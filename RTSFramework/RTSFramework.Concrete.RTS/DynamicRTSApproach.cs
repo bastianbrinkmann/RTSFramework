@@ -5,16 +5,16 @@ using RTSFramework.Contracts.Artefacts;
 using RTSFramework.Contracts.Delta;
 using RTSFramework.Core;
 using RTSFramework.Core.RTSApproach;
-using RTSFramework.RTSApproaches.Utilities;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Concrete
 {
     public class DynamicRTSApproach<TPe, TTc> : RTSApproachBase<TPe, TTc> where TTc : ITestCase where TPe : IProgramModelElement
     {
-        private readonly DynamicMapManager dynamicMapManager;
-        public DynamicRTSApproach(DynamicMapManager dynamicMapManager)
+        private readonly CorrespondenceModelManager correspondenceModelManager;
+        public DynamicRTSApproach(CorrespondenceModelManager correspondenceModelManager)
         {
-            this.dynamicMapManager = dynamicMapManager;
+            this.correspondenceModelManager = correspondenceModelManager;
         }
 
         private IList<TTc> allTests;
@@ -25,13 +25,13 @@ namespace RTSFramework.RTSApproaches.Concrete
             allTests = testCases as IList<TTc> ?? testCases.ToList();
             currentDelta = delta;
 
-            var map = dynamicMapManager.GetMap(delta.SourceModelId);
+            var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModelId);
 
             //TODO: Iterate over tests required as there could be new tests
             foreach (var testcase in allTests)
             {
                 HashSet<string> linkedElements;
-                if (map.TransitiveClosureTestsToProgramElements.TryGetValue(testcase.Id, out linkedElements))
+                if (correspondenceModel.CorrespondenceModelLinks.TryGetValue(testcase.Id, out linkedElements))
                 {
                     if (delta.ChangedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))) || 
                         delta.DeletedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))))
@@ -47,9 +47,9 @@ namespace RTSFramework.RTSApproaches.Concrete
             }
         }
 
-        public void UpdateMap(ICoverageData coverageData)
+        public void UpdateCorrespondenceModel(ICoverageData coverageData)
         {
-            dynamicMapManager.UpdateDynamicMap(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, allTests);
+            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModelId, currentDelta.TargetModelId, allTests);
         }
     }
 }

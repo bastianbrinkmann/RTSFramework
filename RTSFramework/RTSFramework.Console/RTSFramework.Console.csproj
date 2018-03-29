@@ -108,9 +108,9 @@
       <Project>{f8157510-d324-4c91-aa56-d68571b9d1c1}</Project>
       <Name>RTSFramework.Concrete.Reporting</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.Concrete.RTS.csproj">
+    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Concrete.csproj">
       <Project>{748e5ac2-68c2-4b3f-9350-a02726c932a9}</Project>
-      <Name>RTSFramework.Concrete.RTS</Name>
+      <Name>RTSFramework.RTSApproaches.Concrete</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.TFS2010\RTSFramework.Concrete.TFS2010.csproj">
       <Project>{bfa8dbd3-1761-4660-a372-334482f08950}</Project>
@@ -136,9 +136,9 @@
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.Utilities.csproj">
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
       <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>
-      <Name>RTSFramework.RTSApproaches.Utilities</Name>
+      <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

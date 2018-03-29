@@ -1,7 +1,9 @@
 ﻿namespace RTSFramework.Contracts.Artefacts
 {
-    public interface IArtefactAdapter<TPFrom, TPTo> where TPFrom : IProgramModel where TPTo : IProgramModel
+    public interface IArtefactAdapter<TArtefact, TModel>
     {
-        TPTo Convert(TPFrom model);
+        TModel Parse(TArtefact artefact);
+
+        void Unparse(TModel model, TArtefact artefact);
     }
 }

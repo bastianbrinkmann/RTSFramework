@@ -121,7 +121,7 @@ namespace RTSFramework.Controller
             if (coverageResults != null)
             {
                 var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TPe, TTc>;
-                dynamicRtsApproach?.UpdateMap(coverageResults);
+                dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
             }
 
             var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
