@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
@@ -28,6 +30,16 @@ namespace RTSFramework.Concrete.Git
                 {
                     return tr.ReadToEnd();
                 }
+            }
+        }
+
+        public List<string> GetAllFiles(GitProgramModel programModel)
+        {
+            using (var repo = new Repository(programModel.RepositoryPath))
+            {
+                var commit = repo.Lookup<Commit>(programModel.CommitId);
+
+                return commit.Tree.Select(x => Path.Combine(programModel.RepositoryPath, x.Path)).ToList();
             }
         }
     }

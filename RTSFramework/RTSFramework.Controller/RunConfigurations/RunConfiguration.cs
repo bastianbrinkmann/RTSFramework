@@ -10,11 +10,12 @@ namespace RTSFramework.Controller.RunConfigurations
 
         public RTSApproachType RTSApproachType { get; set; }
 
-        public string[] TestAssemblyFolders { get; set; }
-
         public TPe OldProgramModel { get; set; }
 
         public TPe NewProgramModel { get; set; }
+
         public string GitRepositoryPath { get; set; }
+
+        public string AbsoluteSolutionPath { get; set; }
     }
 }

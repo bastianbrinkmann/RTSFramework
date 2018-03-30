@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -22,35 +24,20 @@ namespace RTSFramework.Controller
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
         private readonly ITestsDiscoverer<TTc> testsDiscoverer;
         private readonly Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory;
+        private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
         public FileRTSController(
             Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,
-            Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory)
+            Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory,
+            IArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
         {
             this.filedeltaDiscovererFactory = filedeltaDiscovererFactory;
             this.testProcessorFactory = testProcessorFactory;
             this.testsDiscoverer = testsDiscoverer;
             this.rtsApproachFactory = rtsApproachFactory;
-        }
-
-        private static void GetTestAssemblies(string folder, List<string> testAssemblies)
-        {
-            //TODO More advanced filtering for test assemblies?
-            foreach (var assembly in Directory.GetFiles(folder, "*Test.dll"))
-            {
-                var fileName = Path.GetFileName(assembly);
-                if (testAssemblies.All(x => !x.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    testAssemblies.Add(assembly);
-                }
-            }
-
-            foreach (var subFolder in Directory.GetDirectories(folder))
-            {
-                GetTestAssemblies(subFolder, testAssemblies);
-            }
+            this.assembliesAdapter = assembliesAdapter;
         }
 
         private ITestProcessor<TTc> InitializeTestProcessor(RunConfiguration<TP> configuration)
@@ -60,14 +47,9 @@ namespace RTSFramework.Controller
 
         private void InitializeTestFramework(RunConfiguration<TP> configuration)
         {
-            var testAssemblies = new List<string>();
-
-            foreach (var folder in configuration.TestAssemblyFolders)
-            {
-                GetTestAssemblies(folder, testAssemblies);
-            }
-
-            testsDiscoverer.Sources = testAssemblies;
+            //TODO Filtering of Test dlls?
+            testsDiscoverer.Sources = assembliesAdapter.Parse(configuration.AbsoluteSolutionPath).Select(x => x.AbsolutePath)
+                .Where(x => x.EndsWith("Test.dll"));
         }
 
         private IRTSApproach<TP, TPe, TTc> InitializeRTSApproach(RunConfiguration<TP> configuration)

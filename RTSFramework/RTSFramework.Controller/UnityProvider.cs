@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using RTSFramework.Concrete.CSharp.Core;
 using RTSFramework.Concrete.CSharp.Core.Models;
@@ -6,6 +7,7 @@ using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn;
+using RTSFramework.Concrete.CSharp.Roslyn.Adapters;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
@@ -212,6 +214,7 @@ namespace RTSFramework.Controller
             UnityContainer.RegisterType<IArtefactAdapter<FileInfo, CorrespondenceModel>, JsonCorrespondenceModelAdapter>();
             UnityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();
             UnityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>, OpenCoverXmlCoverageAdapter>();
+            UnityContainer.RegisterType<IArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace RTSFramework.Console
             configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
             configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
-            configuration.TestAssemblyFolders = new[] { @"C:\Git\TIATestProject\MainProject.Test\bin\Debug" };
+            configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
             configuration.RTSApproachType = RTSApproachType.DynamicRTS;
         }
 
@@ -58,9 +58,9 @@ namespace RTSFramework.Console
             SetConfig(configuration);
 
             var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-                GitVersionReferenceType.LatestCommit);
+                GitVersionReferenceType.LatestCommit, configuration.AbsoluteSolutionPath);
             var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-                GitVersionReferenceType.CurrentChanges);
+                GitVersionReferenceType.CurrentChanges, configuration.AbsoluteSolutionPath);
             configuration.OldProgramModel = oldProgramModel;
             configuration.NewProgramModel = newProgramModel;
 

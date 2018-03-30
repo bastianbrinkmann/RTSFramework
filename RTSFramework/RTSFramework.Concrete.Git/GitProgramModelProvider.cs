@@ -7,7 +7,8 @@ namespace RTSFramework.Concrete.Git
 {
     public static class GitProgramModelProvider
     {
-        public static GitProgramModel GetGitProgramModel(string repositoryPath, GitVersionReferenceType referenceType)
+
+        public static GitProgramModel GetGitProgramModel(string repositoryPath, GitVersionReferenceType referenceType, string solutionPath)
         {
             string gitProgramModelId = null, commitid = null;
 
@@ -29,7 +30,8 @@ namespace RTSFramework.Concrete.Git
                 VersionId = gitProgramModelId,
                 GitVersionReferenceType = referenceType,
                 CommitId = commitid,
-                RepositoryPath = repositoryPath
+                RepositoryPath = repositoryPath,
+                AbsoluteSolutionPath = solutionPath
             };
         }
     }
