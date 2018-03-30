@@ -9,14 +9,14 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
     {
         public IList<CSharpAssembly> Parse(string artefact)
         {
-            //var workspace = MSBuildWorkspace.Create();
-            //var solution = workspace.OpenSolutionAsync(artefact).Result;
+            var workspace = MSBuildWorkspace.Create();
+            var solution = workspace.OpenSolutionAsync(artefact).Result;
             var result = new List<CSharpAssembly>();
 
-            //foreach (var project in solution.Projects)
-            //{
+            foreach (var project in solution.Projects)
+            {
                 
-            //}
+            }
 
             return result;
         }
