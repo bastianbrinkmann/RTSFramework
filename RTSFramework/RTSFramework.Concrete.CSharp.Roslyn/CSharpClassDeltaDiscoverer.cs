@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,17 +41,11 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 
             foreach (var cSharpFile in delta.ChangedElements)
             {
-                using (StreamReader reader = new StreamReader(File.OpenRead(cSharpFile.Id)))
-                {
-                    result.ChangedElements.AddRange(GetContainedClasses(reader.ReadToEnd()));
-                }
+                result.ChangedElements.AddRange(GetContainedClasses(filesProvider.GetFileContent(oldModel, cSharpFile.Id)));
             }
             foreach (var cSharpFile in delta.AddedElements)
             {
-                using (StreamReader reader = new StreamReader(File.OpenRead(cSharpFile.Id)))
-                {
-                    result.AddedElements.AddRange(GetContainedClasses(reader.ReadToEnd()));
-                }
+                result.AddedElements.AddRange(GetContainedClasses(filesProvider.GetFileContent(oldModel, cSharpFile.Id)));
             }
             foreach (var cSharpFile in delta.DeletedElements)
             {
