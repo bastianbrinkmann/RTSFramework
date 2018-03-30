@@ -55,6 +55,12 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
             return result;
         }
 
+        /// <summary>
+        /// Note that changed interfaces can not cause tests to be impacted as tests are executed on classes not interfaces
+        /// That's why interface definitions are omitted here
+        /// </summary>
+        /// <param name="fileContent"></param>
+        /// <returns></returns>
         private IEnumerable<CSharpClassElement> GetContainedClasses(string fileContent)
         {
             var classes = new List<CSharpClassElement>();
@@ -83,7 +89,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
             return classes;
         }
 
-        public static string GetFullNamespaceName(NamespaceDeclarationSyntax node)
+        private string GetFullNamespaceName(NamespaceDeclarationSyntax node)
         {
             var parent = node.Parent as NamespaceDeclarationSyntax;
             if (parent != null)

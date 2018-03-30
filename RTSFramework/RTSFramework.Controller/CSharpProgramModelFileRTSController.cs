@@ -113,6 +113,7 @@ namespace RTSFramework.Controller
 
         public void NotifyImpactedTest(TTc impactedTest)
         {
+            Console.WriteLine($"Impacted Test: {impactedTest.Id}");
             impactedTests.Add(impactedTest);
         }
 
