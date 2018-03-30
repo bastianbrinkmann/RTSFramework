@@ -6,6 +6,7 @@ using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
@@ -37,20 +38,21 @@ namespace RTSFramework.Concrete.Git
                     {
                         var filePath = change.Path;
                         var fullPath = Path.Combine(repositoryPath, filePath);
+                        var relativePathToSolution = RelativePathHelper.GetRelativePath(newModel, fullPath);
 
                         switch (change.Status)
                         {
                             case ChangeKind.Added:
-                                if (delta.AddedElements.All(x => !x.Id.Equals(fullPath, StringComparison.Ordinal)))
-                                    delta.AddedElements.Add(new FileElement(fullPath));
+                                if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+                                    delta.AddedElements.Add(new FileElement(relativePathToSolution));
                                 break;
                             case ChangeKind.Deleted:
-                                if (delta.DeletedElements.All(x => !x.Id.Equals(fullPath, StringComparison.Ordinal)))
-                                    delta.DeletedElements.Add(new FileElement(fullPath));
+                                if (delta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+                                    delta.DeletedElements.Add(new FileElement(relativePathToSolution));
                                 break;
                             case ChangeKind.Modified:
-                                if (delta.ChangedElements.All(x => !x.Id.Equals(fullPath, StringComparison.Ordinal)))
-                                    delta.ChangedElements.Add(new FileElement(fullPath));
+                                if (delta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+                                    delta.ChangedElements.Add(new FileElement(relativePathToSolution));
                                 break;
                         }
                     }

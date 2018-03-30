@@ -1,7 +1,9 @@
-﻿using RTSFramework.Contracts.DeltaDiscoverer;
+﻿using System;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
@@ -25,8 +27,11 @@ namespace RTSFramework.Concrete.User
             //    delta.ChangedElements.Add(new FileElement(line));
             //    line = Console.ReadLine();
             //} 
+            var relativePathToSolution = RelativePathHelper.GetRelativePath(newVersion, @"C:\Git\TIATestProject\MainProject\Calculator.cs");
 
-            delta.ChangedElements.Add(new FileElement(@"C:\Git\TIATestProject\MainProject\Calculator.cs"));
+            delta.ChangedElements.Add(new FileElement(relativePathToSolution));
+
+            
 
             return delta;
         }

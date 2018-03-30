@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
@@ -36,17 +38,20 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             return model;
         }
 
-        public void UpdateCorrespondenceModel<TTc>(CoverageData coverageData, string oldVersionId, string newVersionId, GranularityLevel granularityLevel, IEnumerable<TTc> allTests) where TTc : ITestCase
+        public void UpdateCorrespondenceModel<TTc, TP>(CoverageData coverageData, IDelta<TP> delta, GranularityLevel granularityLevel, IEnumerable<TTc> allTests) 
+            where TTc : ITestCase 
+            where TP : IProgramModel
         {
-            var oldModel = GetCorrespondenceModel(oldVersionId, granularityLevel);
-            var newModel = oldModel.CloneModel(newVersionId);
-            newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, granularityLevel));
+            var oldModel = GetCorrespondenceModel(delta.SourceModel.VersionId, granularityLevel);
+            var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);
+            newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, granularityLevel, delta.TargetModel));
             newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
 
             UpdateCorrespondenceModel(newModel);
         }
 
-        private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, GranularityLevel granularityLevel)
+        private Dictionary<string, HashSet<string>> GetLinksByCoverageData<TP>(CoverageData coverageData, GranularityLevel granularityLevel, TP targetModel)
+            where TP : IProgramModel
         {
             var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
@@ -65,15 +70,18 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 
                 foreach (var coverageEntry in coverageData.CoverageDataEntries)
                 {
-                    if (!links[coverageEntry.TestCaseId].Contains(coverageEntry.FileName))
+                    var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
+                    if (!links[coverageEntry.TestCaseId].Contains(relativePath))
                     {
-                        links[coverageEntry.TestCaseId].Add(coverageEntry.FileName);
+                        links[coverageEntry.TestCaseId].Add(relativePath);
                     }
                 }
             }
 
             return links;
         }
+
+        
 
         private void UpdateCorrespondenceModel(Models.CorrespondenceModel model)
         {

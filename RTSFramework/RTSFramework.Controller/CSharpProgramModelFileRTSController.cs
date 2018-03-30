@@ -18,7 +18,7 @@ namespace RTSFramework.Controller
 {
     public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
         where TTc : ITestCase
-        where TP : ICSharpProgramModel
+        where TP : CSharpProgramModel
     {
         private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;

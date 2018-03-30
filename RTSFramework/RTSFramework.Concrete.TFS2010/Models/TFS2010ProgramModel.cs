@@ -3,9 +3,8 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.TFS2010.Models
 {
-    public class TFS2010ProgramModel : ICSharpProgramModel
+    public class TFS2010ProgramModel : CSharpProgramModel
     {
-        public string VersionId { get; set; }
-        public string AbsoluteSolutionPath { get; set; }
+
     }
 }

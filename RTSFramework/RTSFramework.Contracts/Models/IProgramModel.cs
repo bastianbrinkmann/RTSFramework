@@ -3,5 +3,7 @@
 	public interface IProgramModel
 	{
         string VersionId { get; }
+
+        string RootPath { get; }
 	}
 }

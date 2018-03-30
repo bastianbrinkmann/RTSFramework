@@ -87,9 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\CSharpAssembly.cs" />
-    <Compile Include="Models\CSharpProgramModel.cs" />
     <Compile Include="Models\CSharpFileElement.cs" />
-    <Compile Include="Models\ICSharpProgramModel.cs" />
+    <Compile Include="Models\CSharpProgramModel.cs" />
     <Compile Include="Models\ICSharpTestcase.cs" />
     <Compile Include="CSharpFilesDeltaDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -3,8 +3,10 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Controller.RunConfigurations
 {
-    public class RunConfiguration<TPe> where TPe : ICSharpProgramModel
+    public class RunConfiguration<TPe> where TPe : CSharpProgramModel
     {
+
+        public GranularityLevel GranularityLevel { get; set; }
         public ProcessingType ProcessingType { get; set; }
 
         public DiscoveryType DiscoveryType { get; set; }

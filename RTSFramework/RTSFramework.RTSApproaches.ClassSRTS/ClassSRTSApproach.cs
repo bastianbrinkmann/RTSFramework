@@ -13,7 +13,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     /// An extensive study of static regression test selection in modern software evolution
     /// https://dl.acm.org/citation.cfm?id=2950361
     /// </summary>
-    public class ClassSRTSApproach<TP> : RTSApproachBase<TP, CSharpClassElement, MSTestTestcase> where TP : ICSharpProgramModel
+    public class ClassSRTSApproach<TP> : RTSApproachBase<TP, CSharpClassElement, MSTestTestcase> where TP : CSharpProgramModel
     {
         private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
         private readonly IntertypeRelationGraphBuilder intertypeRelationGraphBuilder;

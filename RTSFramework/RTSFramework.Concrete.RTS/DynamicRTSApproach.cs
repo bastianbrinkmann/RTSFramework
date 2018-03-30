@@ -59,7 +59,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
         public void UpdateCorrespondenceModel(CoverageData coverageData)
         {
-            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta.SourceModel.VersionId, currentDelta.TargetModel.VersionId, GetGranularityLevel(), allTests);
+            correspondenceModelManager.UpdateCorrespondenceModel(coverageData, currentDelta, GetGranularityLevel(), allTests);
         }
     }
 }

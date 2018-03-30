@@ -13,13 +13,14 @@ namespace RTSFramework.Console
 {
     class Program
     {
-        private static void SetConfig<T>(RunConfiguration<T> configuration) where T : ICSharpProgramModel
+        private static void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
         {
-            configuration.ProcessingType = ProcessingType.MSTestExecutionWithoutCoverage;
-            configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
+            configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
+            configuration.DiscoveryType = DiscoveryType.UserIntendedChangesDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
             configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
-            configuration.RTSApproachType = RTSApproachType.ClassSRTS;
+            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
+            configuration.GranularityLevel = GranularityLevel.File;
         }
 
         static void Main(string[] args)
@@ -69,10 +70,16 @@ namespace RTSFramework.Console
             configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
             configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
-            //var controller = UnityProvider.GetGitCSharpFileController();
-            var controller = UnityProvider.GetGitCSharpClassController();
-
-            controller.ExecuteImpactedTests(configuration);
+            if (configuration.GranularityLevel == GranularityLevel.File)
+            {
+                var controller = UnityProvider.GetGitCSharpFileController();
+                controller.ExecuteImpactedTests(configuration);
+            }
+            else
+            {
+                var controller = UnityProvider.GetGitCSharpClassController();
+                controller.ExecuteImpactedTests(configuration);
+            }
         }
 
         
