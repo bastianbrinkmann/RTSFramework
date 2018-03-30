@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="FileRTSController.cs" />
+    <Compile Include="CSharpProgramModelFileRTSController.cs" />
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
     <Compile Include="RunConfigurations\ProcessingType.cs" />
     <Compile Include="RunConfigurations\ProgramModelType.cs" />

@@ -39,7 +39,7 @@ namespace RTSFramework.Controller
         public static void Initialize()
         {
             InitAdapters();
-            InitDeletedFilesProvider();
+            InitHelper();
 
             InitCorrespondenceModelManager();
 
@@ -52,24 +52,25 @@ namespace RTSFramework.Controller
 
         }
 
-        public static FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010CSharpFileController()
+        public static CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010CSharpFileController()
         {
-            return UnityContainer.Resolve<FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
-        public static FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitCSharpFileController()
+        public static CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitCSharpFileController()
         {
-            return UnityContainer.Resolve<FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
         }
 
-        public static FileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase> GetGitCSharpClassController()
+        public static CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase> GetGitCSharpClassController()
         {
-            return UnityContainer.Resolve<FileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>>();
+            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>>();
         }
 
-        private static void InitDeletedFilesProvider()
+        private static void InitHelper()
         {
             UnityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
+            UnityContainer.RegisterType<IntertypeRelationGraphBuilder>();
         }
 
         private static void InitCorrespondenceModelManager()
@@ -204,8 +205,8 @@ namespace RTSFramework.Controller
 
         private static void InitController()
         {
-            UnityContainer.RegisterType<FileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
-            UnityContainer.RegisterType<FileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
+            UnityContainer.RegisterType<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
+            UnityContainer.RegisterType<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
         private static void InitAdapters()

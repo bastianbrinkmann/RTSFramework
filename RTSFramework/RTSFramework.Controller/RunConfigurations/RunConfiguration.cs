@@ -1,8 +1,9 @@
-﻿using RTSFramework.Contracts.Models;
+﻿using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Controller.RunConfigurations
 {
-    public class RunConfiguration<TPe> where TPe : IProgramModel
+    public class RunConfiguration<TPe> where TPe : ICSharpProgramModel
     {
         public ProcessingType ProcessingType { get; set; }
 

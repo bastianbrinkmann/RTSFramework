@@ -16,9 +16,9 @@ using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.Controller
 {
-    public class FileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
+    public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
         where TTc : ITestCase
-        where TP : IProgramModel
+        where TP : ICSharpProgramModel
     {
         private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
@@ -26,7 +26,7 @@ namespace RTSFramework.Controller
         private readonly Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory;
         private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
-        public FileRTSController(
+        public CSharpProgramModelFileRTSController(
             Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,

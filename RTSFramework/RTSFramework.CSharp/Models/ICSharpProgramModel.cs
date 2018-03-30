@@ -4,6 +4,6 @@ namespace RTSFramework.Concrete.CSharp.Core.Models
 {
     public interface ICSharpProgramModel : IProgramModel
     {
-        string AbsoluteSolutionPath { get; }
+        string AbsoluteSolutionPath { get; set;  }
     }
 }

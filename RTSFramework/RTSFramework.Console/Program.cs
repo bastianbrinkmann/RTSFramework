@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.TFS2010.Models;
@@ -12,13 +13,13 @@ namespace RTSFramework.Console
 {
     class Program
     {
-        private static void SetConfig<T>(RunConfiguration<T> configuration) where T : IProgramModel
+        private static void SetConfig<T>(RunConfiguration<T> configuration) where T : ICSharpProgramModel
         {
-            configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
+            configuration.ProcessingType = ProcessingType.MSTestExecutionWithoutCoverage;
             configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
             configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
-            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
+            configuration.RTSApproachType = RTSApproachType.ClassSRTS;
         }
 
         static void Main(string[] args)
@@ -46,6 +47,8 @@ namespace RTSFramework.Console
             };
             configuration.OldProgramModel = oldProgramModel;
             configuration.NewProgramModel = newProgramModel;
+            configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
+            configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
             var controller = UnityProvider.GetTfs2010CSharpFileController();
 
@@ -58,11 +61,13 @@ namespace RTSFramework.Console
             SetConfig(configuration);
 
             var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-                GitVersionReferenceType.LatestCommit, configuration.AbsoluteSolutionPath);
+                GitVersionReferenceType.LatestCommit);
             var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-                GitVersionReferenceType.CurrentChanges, configuration.AbsoluteSolutionPath);
+                GitVersionReferenceType.CurrentChanges);
             configuration.OldProgramModel = oldProgramModel;
             configuration.NewProgramModel = newProgramModel;
+            configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
+            configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
             //var controller = UnityProvider.GetGitCSharpFileController();
             var controller = UnityProvider.GetGitCSharpClassController();
