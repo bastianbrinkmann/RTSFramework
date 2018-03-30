@@ -15,7 +15,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 
             foreach (var project in solution.Projects)
             {
-                
+                result.Add(new CSharpAssembly{AbsolutePath = project.OutputFilePath});
             }
 
             return result;
