@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using RTSFramework.Concrete.CSharp.Core.Models;
 
 namespace RTSFramework.RTSApproaches.ClassSRTS
@@ -219,6 +220,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
                 {
                     graph.AddUseEdgeIfBothExist(currentType, variableDefinition.VariableType);
                 }
+
+                foreach (var instruction in methodDefinition.Body.Instructions)
+                {
+                    ProcessInstruction(instruction, graph, currentType);
+                }
             }
 
             if (methodDefinition.HasGenericParameters)
@@ -235,6 +241,24 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
                 {
                     graph.AddUseEdgeIfBothExist(currentType, attribute.AttributeType);
                 }
+            }
+        }
+
+        private void ProcessInstruction(Instruction instruction, IntertypeRelationGraph graph, TypeDefinition currentType)
+        {
+            if (instruction.Operand == null)
+                return;
+
+            var typeRef = instruction.Operand as TypeReference;
+            if (typeRef != null)
+            {
+                graph.AddUseEdgeIfBothExist(currentType, typeRef);
+            }
+
+            var memberRef = instruction.Operand as MemberReference;
+            if (memberRef != null)
+            {
+                graph.AddUseEdgeIfBothExist(currentType, memberRef.DeclaringType);
             }
         }
     }

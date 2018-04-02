@@ -15,12 +15,12 @@ namespace RTSFramework.Console
     {
         private static void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
         {
-            configuration.ProcessingType = ProcessingType.MSTestExecutionWithCoverage;
-            configuration.DiscoveryType = DiscoveryType.UserIntendedChangesDiscovery;
+            configuration.ProcessingType = ProcessingType.MSTestExecutionWithoutCoverage;
+            configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
             configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
-            configuration.RTSApproachType = RTSApproachType.DynamicRTS;
-            configuration.GranularityLevel = GranularityLevel.File;
+            configuration.RTSApproachType = RTSApproachType.ClassSRTS;
+            configuration.GranularityLevel = GranularityLevel.Class;
         }
 
         static void Main(string[] args)

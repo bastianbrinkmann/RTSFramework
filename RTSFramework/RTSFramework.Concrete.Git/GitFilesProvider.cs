@@ -6,20 +6,31 @@ using System.Text;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
     public class GitFilesProvider : IFilesProvider<GitProgramModel>
     {
-        public string GetFileContent(GitProgramModel programModel, string fullPath)
+        public string GetFileContent(GitProgramModel programModel, string path)
         {
             using (var repo = new Repository(programModel.RepositoryPath))
             {
                 var commit = repo.Lookup<Commit>(programModel.CommitId);
-                Uri fullUri = new Uri(fullPath, UriKind.Absolute);
-                Uri relRoot = new Uri(programModel.RepositoryPath, UriKind.Absolute);
 
-                string relPath = relRoot.MakeRelativeUri(fullUri).ToString();
+
+
+                string relPath;
+                Uri fullUri, relRoot = new Uri(programModel.RepositoryPath, UriKind.Absolute);
+                if (Uri.TryCreate(path, UriKind.Absolute, out fullUri))
+                {
+                    relPath = relRoot.MakeRelativeUri(fullUri).ToString();
+                }
+                else
+                {
+                    var absolutePath = RelativePathHelper.GetAbsolutePath(programModel, path);
+                    relPath = relRoot.MakeRelativeUri(new Uri(absolutePath, UriKind.Absolute)).ToString();
+                }
 
                 var treeEntry = commit[relPath];
 

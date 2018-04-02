@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Core.Utilities
@@ -11,6 +12,11 @@ namespace RTSFramework.Core.Utilities
             Uri relRoot = new Uri(targetModel.RootPath, UriKind.Absolute);
 
             return relRoot.MakeRelativeUri(fullUri).ToString();
+        }
+
+        public static string GetAbsolutePath<TP>(TP targetModel, string relativePath) where TP : IProgramModel
+        {
+            return Path.Combine(targetModel.RootPath, relativePath);
         }
     }
 }

@@ -6,6 +6,7 @@ using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.RTSApproach;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.RTSApproaches.ClassSRTS
 {
@@ -29,7 +30,9 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
         {
             var assemblies = assembliesArtefactAdapter.Parse(delta.SourceModel.AbsoluteSolutionPath);
 
-            IntertypeRelationGraph graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies);
+            IntertypeRelationGraph graph = null;
+            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies),
+                "Building IntertypeRelationGraph");
 
             var changedTypes = new List<string>();
 
@@ -38,12 +41,14 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
             var msTestTestcases = testCases as IList<MSTestTestcase> ?? testCases.ToList();
 
-            //Extend Delta
             var affectedTypes = new List<string>(changedTypes);
-            foreach (var type in changedTypes)
-            {
-                ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, msTestTestcases);
-            }
+            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() =>
+                {
+                    foreach (var type in changedTypes)
+                    {
+                        ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, msTestTestcases);
+                    }
+                }, "Extend AffectedTypes and report ImpactedTests");
         }
 
         private void ReportImpactedTests(string type, IList<MSTestTestcase> testcases)

@@ -38,6 +38,9 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
         private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> edges)
         {
+            if (from == null || to == null)
+                return;
+
             var genericType = to as GenericInstanceType;
             if (genericType != null && genericType.HasGenericArguments)
             {
