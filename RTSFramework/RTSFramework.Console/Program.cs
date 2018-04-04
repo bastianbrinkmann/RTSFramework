@@ -51,10 +51,17 @@ namespace RTSFramework.Console
             configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
             configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
-            var controller = UnityProvider.GetTfs2010CSharpFileController();
-
-            controller.ExecuteImpactedTests(configuration);
-        }
+			if (configuration.GranularityLevel == GranularityLevel.File)
+			{
+				var controller = UnityProvider.GetTfs2010CSharpFileController();
+				controller.ExecuteImpactedTests(configuration);
+			}
+			else
+			{
+				var controller = UnityProvider.GetTfs2010CSharpClassController();
+				controller.ExecuteImpactedTests(configuration);
+			}
+		}
 
         private static void GitExampleRun()
         {

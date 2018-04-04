@@ -57,7 +57,12 @@ namespace RTSFramework.Controller
             return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
-        public static CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitCSharpFileController()
+		public static CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010CSharpClassController()
+		{
+			return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>>();
+		}
+
+		public static CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitCSharpFileController()
         {
             return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
         }
@@ -150,7 +155,7 @@ namespace RTSFramework.Controller
 
         private static void InitDiscovererFactories()
         {
-            UnityContainer.RegisterType<Action<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>>(
+            UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>>(
                 new InjectionFactory(c =>
                 new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>(name => c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>(name.ToString()))));
             UnityContainer.RegisterType<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>>(
@@ -158,7 +163,7 @@ namespace RTSFramework.Controller
                 new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
                     return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>(
@@ -169,7 +174,7 @@ namespace RTSFramework.Controller
                 new Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>>(name =>
                 {
                     var fileDeltaDiscovererFactory =
-                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>>>>();
+                        c.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>>>>();
                     var fileDeltaDiscoverer = fileDeltaDiscovererFactory(name);
 
                     return c.Resolve<IOfflineDeltaDiscoverer<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>>>(
