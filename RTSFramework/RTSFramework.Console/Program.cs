@@ -4,6 +4,7 @@ using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.TFS2010.Models;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Controller;
 using RTSFramework.Controller.RunConfigurations;
