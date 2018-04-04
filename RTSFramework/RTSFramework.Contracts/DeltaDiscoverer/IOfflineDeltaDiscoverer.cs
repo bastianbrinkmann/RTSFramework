@@ -5,6 +5,8 @@ namespace RTSFramework.Contracts.DeltaDiscoverer
 {
 	public interface IOfflineDeltaDiscoverer<TP, TD> : IDeltaDiscoverer<TP, TD> where TD : IDelta<TP> where TP : IProgramModel
 	{
+		DiscoveryType DiscoveryType { get; }
+
 		TD Discover(TP oldVersion, TP newVersion);
 	}
 }

@@ -12,7 +12,9 @@ namespace RTSFramework.Concrete.Git
 {
     public class LocalGitFilesDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel,FileElement>>
     {
-        public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
+		public DiscoveryType DiscoveryType => DiscoveryType.LocalDiscovery;
+
+		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {
             //TODO: Console Read for RepositoryPath
             if (oldModel.RepositoryPath != newModel.RepositoryPath)

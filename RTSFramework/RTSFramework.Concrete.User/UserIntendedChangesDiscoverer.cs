@@ -7,10 +7,11 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-    //TODO: This is a delta provider not a discoverer
     public class UserIntendedChangesDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> where TP : IProgramModel
     {
-        public StructuralDelta<TP, FileElement> Discover(TP oldVersion, TP newVersion)
+		public DiscoveryType DiscoveryType => DiscoveryType.UserIntendedChangesDiscovery;
+
+		public StructuralDelta<TP, FileElement> Discover(TP oldVersion, TP newVersion)
         {
             var delta = new StructuralDelta<TP, FileElement>
             {

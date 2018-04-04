@@ -1,4 +1,5 @@
 ﻿using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Controller.RunConfigurations

@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Controller.RunConfigurations
+﻿namespace RTSFramework.Contracts.DeltaDiscoverer
 {
     public enum DiscoveryType
     {

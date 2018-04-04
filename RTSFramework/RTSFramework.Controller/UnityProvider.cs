@@ -74,9 +74,24 @@ namespace RTSFramework.Controller
 
         private static void InitHelper()
         {
-            UnityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
-            UnityContainer.RegisterType<IntertypeRelationGraphBuilder>();
+			//FilesProvider
+            UnityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>(DiscoveryType.LocalDiscovery.ToString());
+			UnityContainer.RegisterType<IFilesProvider<GitProgramModel>, LocalFilesProvider<GitProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
+			UnityContainer.RegisterType<IFilesProvider<TFS2010ProgramModel>, LocalFilesProvider<TFS2010ProgramModel>>(DiscoveryType.UserIntendedChangesDiscovery.ToString());
+
+			//FilesProviderFactory
+	        InitFileProdiverFactories<GitProgramModel>();
+			InitFileProdiverFactories<TFS2010ProgramModel>();
+
+			UnityContainer.RegisterType<IntertypeRelationGraphBuilder>();
         }
+
+	    private static void InitFileProdiverFactories<TP>() where TP : IProgramModel
+	    {
+			UnityContainer.RegisterType<Func<DiscoveryType, IFilesProvider<TP>>>(
+			   new InjectionFactory(c =>
+			   new Func<DiscoveryType, IFilesProvider<TP>>(name => c.Resolve<IFilesProvider<TP>>(name.ToString()))));
+		}
 
         private static void InitCorrespondenceModelManager()
         {

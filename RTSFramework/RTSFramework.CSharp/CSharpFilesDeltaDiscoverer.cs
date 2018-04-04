@@ -12,7 +12,9 @@ namespace RTSFramework.Concrete.CSharp.Core
     {
         private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer;
 
-        public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer)
+		public DiscoveryType DiscoveryType => internalDiscoverer.DiscoveryType;
+
+		public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer)
         {
             this.internalDiscoverer = internalDiscoverer;
         }

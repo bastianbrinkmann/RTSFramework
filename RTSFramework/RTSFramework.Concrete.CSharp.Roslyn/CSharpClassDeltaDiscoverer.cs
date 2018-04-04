@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,13 +17,15 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
         where TP : IProgramModel
     {
         private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer;
-        private readonly IFilesProvider<TP> filesProvider;
+        private readonly Func<DiscoveryType, IFilesProvider<TP>> filesProviderFactory;
+
+		public DiscoveryType DiscoveryType => internalDiscoverer.DiscoveryType;
 
         public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer,
-            IFilesProvider<TP> filesProvider)
+            Func<DiscoveryType, IFilesProvider<TP>> filesProviderFactory)
         {
             this.internalDiscoverer = internalDiscoverer;
-            this.filesProvider = filesProvider;
+            this.filesProviderFactory = filesProviderFactory;
         }
 
         public StructuralDelta<TP, CSharpClassElement> Discover(TP oldModel, TP newModel)
@@ -38,6 +41,8 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
                 SourceModel = delta.SourceModel,
                 TargetModel = delta.TargetModel,
             };
+
+	        var filesProvider = filesProviderFactory(DiscoveryType);
 
             foreach (var cSharpFile in delta.ChangedElements)
             {
@@ -93,8 +98,13 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
         {
             var parent = node.Parent as NamespaceDeclarationSyntax;
             if (parent != null)
-                return $"{GetFullNamespaceName(parent)}.{((IdentifierNameSyntax)node.Name).Identifier}";
-            return ((IdentifierNameSyntax)node.Name).Identifier.ToString();
+                return $"{GetFullNamespaceName(parent)}.{GetNamespaceName(node)}";
+            return GetNamespaceName(node);
         }
+
+	    private string GetNamespaceName(NamespaceDeclarationSyntax node)
+	    {
+		    return node.Name.ToString();
+	    }
     }
 }

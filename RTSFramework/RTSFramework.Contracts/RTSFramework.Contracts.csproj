@@ -83,6 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeltaDiscoverer\DiscoveryType.cs" />
     <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="Models\CoverageData.cs" />
