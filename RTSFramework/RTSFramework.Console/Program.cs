@@ -16,7 +16,7 @@ namespace RTSFramework.Console
     {
         private static void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
         {
-            configuration.ProcessingType = ProcessingType.MSTestExecutionWithoutCoverage;
+            configuration.ProcessingType = ProcessingType.MSTestExecution;
             configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
             configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
             configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
