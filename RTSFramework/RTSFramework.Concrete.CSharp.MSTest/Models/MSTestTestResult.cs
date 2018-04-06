@@ -10,8 +10,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
         public string ErrorMessage { get; set; }
         public string StackTrace { get; set; }
         public double DurationInSeconds { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTimeOffset StartTime { get; set; }
+        public DateTimeOffset EndTime { get; set; }
         public string TestCaseId { get; set; }
 
         public List<ITestCaseResult<MSTestTestcase>> ChildrenResults { get; } = new List<ITestCaseResult<MSTestTestcase>>();

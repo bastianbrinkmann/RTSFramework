@@ -86,6 +86,7 @@
     <Compile Include="DeltaDiscoverer\DiscoveryType.cs" />
     <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
+    <Compile Include="ITestResultListener.cs" />
     <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\CoverageDataEntry.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />

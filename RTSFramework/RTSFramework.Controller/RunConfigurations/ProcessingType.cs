@@ -2,8 +2,9 @@
 {
     public enum ProcessingType
     {
-        MSTestExecutionWithoutCoverage,
-        MSTestExecutionWithCoverage,
+        MSTestExecution,
+		MSTestExecutionWithCustomLogger,
+		MSTestExecutionWithCoverage,
         Reporting
     }
 }

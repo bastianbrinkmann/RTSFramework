@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Concrete.CSharp.MSTest;
+using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
@@ -16,7 +18,7 @@ using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.Controller
 {
-    public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
+    public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc>, ITestResultListener<MSTestTestcase> where TPe : IProgramModelElement
         where TTc : ITestCase
         where TP : CSharpProgramModel
     {
@@ -89,9 +91,12 @@ namespace RTSFramework.Controller
             rtsApproach.UnregisterImpactedTestObserver(this);
             Console.WriteLine($"{impactedTests.Count} Tests impacted");
 
+	        var customLogger = testProcessor as MSTestTestsExecutorWithCustomLogger;
+			customLogger?.RegisterListener(this);
+
             ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
                 () => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
-
+			customLogger?.DeregisterListener(this);
 
             var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
             var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
@@ -102,12 +107,14 @@ namespace RTSFramework.Controller
             }
 
             var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
-            if (automatedTestsProcessor != null)
+            if (automatedTestsProcessor != null && customLogger == null)
             {
                 var testResults = automatedTestsProcessor.GetResults();
                 ReportFinalResults(testResults);
             }
-        }
+
+			Console.ReadKey();
+		}
 
         private readonly List<TTc> impactedTests = new List<TTc>();
 
@@ -149,8 +156,6 @@ namespace RTSFramework.Controller
             Console.WriteLine(numberOfTestsNotPassed == 0
                 ? $"All {testCaseResults.Count} tests passed!"
                 : $"{numberOfTestsNotPassed} of {testCaseResults.Count} did not pass!");
-
-            Console.ReadKey();
         }
 
         private void ReportTestResult(ITestCaseResult<TTc> result, StreamWriter logWriter)
@@ -169,5 +174,10 @@ namespace RTSFramework.Controller
                 i++;
             }
         }
+
+	    public void NotifyTestResult(ITestCaseResult<MSTestTestcase> result)
+	    {
+			Console.WriteLine($"{result.TestCaseId}: {result.Outcome}");
+		}
     }
 }

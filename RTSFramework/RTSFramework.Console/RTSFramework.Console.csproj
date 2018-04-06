@@ -53,6 +53,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.7.3\lib\net46\CommonServiceLocator.dll</HintPath>
@@ -254,6 +261,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTestLogger\RTSFramework.Concrete.CSharp.MSTestLogger.csproj">
+      <Project>{6b9870e8-1c11-4616-9861-e67e0766a06b}</Project>
+      <Name>RTSFramework.Concrete.CSharp.MSTestLogger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">
       <Project>{1a7501d7-db03-4f97-9d7d-d52193359c74}</Project>
       <Name>RTSFramework.Concrete.CSharp.MSTest</Name>
@@ -298,6 +309,10 @@
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.ClassSRTS\RTSFramework.RTSApproaches.ClassSRTS.csproj">
+      <Project>{67114157-0f76-4031-bf1e-5acdc88c19ce}</Project>
+      <Name>RTSFramework.RTSApproaches.ClassSRTS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
       <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>
       <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>
@@ -306,6 +321,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Settings.runsettings">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -313,7 +331,8 @@
 if not exist "$(TargetDir)\MSTestAdapter" mkdir "$(TargetDir)\MSTestAdapter"
 
 xcopy /E /Y /I /c "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"
-xcopy /E /Y /I /c "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)\MSTestAdapter"</PostBuildEvent>
+xcopy /E /Y /I /c "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)\MSTestAdapter"
+xcopy /E /Y /I /c "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
