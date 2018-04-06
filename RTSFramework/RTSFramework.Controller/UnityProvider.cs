@@ -102,7 +102,8 @@ namespace RTSFramework.Controller
         {
             UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.Reporting.ToString());
             UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
-            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutor>(ProcessingType.MSTestExecutionWithoutCoverage.ToString());
+            UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+	        UnityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutorWithCustomDataCollector>(ProcessingType.MSTestExecutionWithCustomCollector.ToString());
 
             UnityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase>>>(
                 new InjectionFactory(c =>

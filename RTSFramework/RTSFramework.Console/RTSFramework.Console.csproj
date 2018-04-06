@@ -254,6 +254,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTestDataCollector\RTSFramework.Concrete.CSharp.MSTestDataCollector.csproj">
+      <Project>{2edbc493-bd56-4c60-85e1-3c8e4a9c6fb9}</Project>
+      <Name>RTSFramework.Concrete.CSharp.MSTestDataCollector</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">
       <Project>{1a7501d7-db03-4f97-9d7d-d52193359c74}</Project>
       <Name>RTSFramework.Concrete.CSharp.MSTest</Name>
@@ -306,6 +310,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Settings.runsettings">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -10,8 +10,8 @@ namespace RTSFramework.Contracts.Models
 		string ErrorMessage { get; }
 		string StackTrace { get; }
 		double DurationInSeconds { get; }
-		DateTime StartTime { get; }
-		DateTime EndTime { get; }
+		DateTimeOffset StartTime { get; }
+		DateTimeOffset EndTime { get; }
 
 		TestCaseResultType Outcome { get; }
 

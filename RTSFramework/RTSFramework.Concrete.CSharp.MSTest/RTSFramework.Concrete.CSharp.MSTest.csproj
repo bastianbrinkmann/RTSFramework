@@ -82,6 +82,7 @@
     <Compile Include="MSTestConstants.cs" />
     <Compile Include="MSTestTestsDiscoverer.cs" />
     <Compile Include="MSTestTestsExecutor.cs" />
+    <Compile Include="MSTestTestsExecutorWithCustomDataCollector.cs" />
     <Compile Include="MSTestTestsExecutorWithOpenCoverage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Adapters\MSTestExecutionResultParameters.cs" />
@@ -90,6 +91,10 @@
     <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTestDataCollector\RTSFramework.Concrete.CSharp.MSTestDataCollector.csproj">
+      <Project>{2edbc493-bd56-4c60-85e1-3c8e4a9c6fb9}</Project>
+      <Name>RTSFramework.Concrete.CSharp.MSTestDataCollector</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>

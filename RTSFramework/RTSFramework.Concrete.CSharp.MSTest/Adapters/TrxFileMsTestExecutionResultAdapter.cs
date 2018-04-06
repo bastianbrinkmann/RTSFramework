@@ -29,8 +29,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                                let executionId = utr.Attribute("executionId")?.Value
                                let message = utr.Descendants(ns + "Message").FirstOrDefault()
                                let stackTrace = utr.Descendants(ns + "StackTrace").FirstOrDefault()
-                               let st = DateTime.Parse(utr.Attribute("startTime")?.Value).ToUniversalTime()
-                               let et = DateTime.Parse(utr.Attribute("endTime")?.Value).ToUniversalTime()
+                               let st = DateTimeOffset.Parse(utr.Attribute("startTime")?.Value).ToUniversalTime()
+                               let et = DateTimeOffset.Parse(utr.Attribute("endTime")?.Value).ToUniversalTime()
                                join testDefinition in testDefinitions on executionId equals testDefinition.executionId
                                select new
                                {

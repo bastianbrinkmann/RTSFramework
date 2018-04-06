@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<DataCollectionRunSettings>
+		<DataCollectors>
+			<DataCollector friendlyName="rtsframeworkcollector" uri="datacollector://rtsframeworkcollector/1.0" assemblyQualifiedName="RTSFramework.Concrete.CSharp.MSTestDataCollector.MSTestRTSFrameworkDataCollector, RTSFramework.Concrete.CSharp.MSTestDataCollector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+				<Configuration>
+					<PipeClientHandle>1234</PipeClientHandle>
+				</Configuration>
+			</DataCollector>
+		</DataCollectors>
+	</DataCollectionRunSettings>
+</RunSettings>
