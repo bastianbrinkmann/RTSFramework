@@ -20,6 +20,7 @@ using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
+using RTSFramework.Controller;
 using RTSFramework.Controller.RunConfigurations;
 using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.ClassSRTS;
@@ -30,9 +31,9 @@ using Unity;
 using Unity.Injection;
 using Unity.Resolution;
 
-namespace RTSFramework.Controller
+namespace RTSFramework.GUI.DependencyInjection
 {
-    public static class UnityProvider
+    internal static class UnityProvider
     {
         private static IUnityContainer UnityContainer { get; } = new UnityContainer();
 
@@ -48,29 +49,13 @@ namespace RTSFramework.Controller
             InitRTSApproaches();
             InitTestsProcessors();
 
-            InitController();
-
+			GUIInitializer.InitializeGUI(UnityContainer);
         }
 
-        public static CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010CSharpFileController()
-        {
-            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
-        }
-
-		public static CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase> GetTfs2010CSharpClassController()
-		{
-			return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>>();
-		}
-
-		public static CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase> GetGitCSharpFileController()
-        {
-            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
-        }
-
-        public static CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase> GetGitCSharpClassController()
-        {
-            return UnityContainer.Resolve<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>>();
-        }
+		internal static MainWindow GetMainWindow()
+	    {
+		    return UnityContainer.Resolve<MainWindow>();
+	    }
 
         private static void InitHelper()
         {
@@ -221,12 +206,6 @@ namespace RTSFramework.Controller
                     return c.Resolve<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>>>(
                         new ParameterOverride("internalDiscoverer", fileDeltaDiscoverer));
                 })));
-        }
-
-        private static void InitController()
-        {
-            UnityContainer.RegisterType<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>>();
-            UnityContainer.RegisterType<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>>();
         }
 
         private static void InitAdapters()

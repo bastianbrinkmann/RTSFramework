@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using RTSFramework.Controller;
+using RTSFramework.GUI.DependencyInjection;
 
 namespace RTSFramework.GUI
 {
@@ -18,7 +19,10 @@ namespace RTSFramework.GUI
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			base.OnStartup(e);
+
 			UnityProvider.Initialize();
+			var mainWindow = UnityProvider.GetMainWindow();
+			mainWindow.Show();
 		}
 	}
 }

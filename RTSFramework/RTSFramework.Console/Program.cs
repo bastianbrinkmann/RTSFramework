@@ -8,6 +8,7 @@ using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Controller;
 using RTSFramework.Controller.RunConfigurations;
+using RTSFramework.GUI.DependencyInjection;
 using Unity;
 
 namespace RTSFramework.Console

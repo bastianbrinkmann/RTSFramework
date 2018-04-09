@@ -96,7 +96,6 @@
     <Compile Include="RunConfigurations\ProgramModelType.cs" />
     <Compile Include="RunConfigurations\RTSApproachType.cs" />
     <Compile Include="RunConfigurations\RunConfiguration.cs" />
-    <Compile Include="UnityProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">

@@ -298,6 +298,10 @@
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.GUI\RTSFramework.GUI.csproj">
+      <Project>{4268BE9D-9DFB-478D-AF8A-D11CB4421AC4}</Project>
+      <Name>RTSFramework.GUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
       <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>
       <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>

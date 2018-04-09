@@ -72,50 +72,50 @@ namespace RTSFramework.Controller
             return delta;
         }
 
-		public async Task<string> ExecuteImpactedTests(RunConfiguration<TP> configuration)
-        {
+		public string ExecuteImpactedTests(RunConfiguration<TP> configuration)
+		{
 			StringBuilder resultBuilder = new StringBuilder();
 
-            var testProcessor = InitializeTestProcessor(configuration);
-            var rtsApproach = InitializeRTSApproach(configuration);
-            InitializeTestFramework(configuration);
+			var testProcessor = InitializeTestProcessor(configuration);
+			var rtsApproach = InitializeRTSApproach(configuration);
+			InitializeTestFramework(configuration);
 
-            var delta = PerformDeltaDiscovery(configuration);
+			var delta = PerformDeltaDiscovery(configuration);
 
-            IEnumerable<TTc> allTests = null;
-            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => allTests = testsDiscoverer.GetTestCases(),
-                "TestsDiscovery");
-            //TODO Filtering of tests
-            //var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
+			IEnumerable<TTc> allTests = null;
+			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => allTests = testsDiscoverer.GetTestCases(),
+				"TestsDiscovery");
+			//TODO Filtering of tests
+			//var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
-            rtsApproach.RegisterImpactedTestObserver(this);
-            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta),
-                "RTSApproach");
-            rtsApproach.UnregisterImpactedTestObserver(this);
+			rtsApproach.RegisterImpactedTestObserver(this);
+			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta),
+				"RTSApproach");
+			rtsApproach.UnregisterImpactedTestObserver(this);
 			resultBuilder.AppendLine($"{impactedTests.Count} Tests impacted");
 
-            DebugStopWatchTracker.ReportNeededTimeOnDebug(
-                () => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
+			DebugStopWatchTracker.ReportNeededTimeOnDebug(
+				() => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
 
 
-            var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
-            var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
-            if (coverageResults != null)
-            {
-                var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TP, TPe, TTc>;
-                dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
-            }
+			var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
+			var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
+			if (coverageResults != null)
+			{
+				var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TP, TPe, TTc>;
+				dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
+			}
 
-            var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
-            if (automatedTestsProcessor != null)
-            {
-                var testResults = automatedTestsProcessor.GetResults();
-                ReportFinalResults(testResults, resultBuilder);
-            }
+			var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
+			if (automatedTestsProcessor != null)
+			{
+				var testResults = automatedTestsProcessor.GetResults();
+				ReportFinalResults(testResults, resultBuilder);
+			}
 			return resultBuilder.ToString();
-        }
+		}
 
-        private readonly List<TTc> impactedTests = new List<TTc>();
+		private readonly List<TTc> impactedTests = new List<TTc>();
 
         public void NotifyImpactedTest(TTc impactedTest)
         {

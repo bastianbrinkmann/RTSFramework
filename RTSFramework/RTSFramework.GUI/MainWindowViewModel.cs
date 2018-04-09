@@ -5,6 +5,8 @@ using Prism.Commands;
 using Prism.Interactivity.InteractionRequest;
 using Prism.Mvvm;
 using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Concrete.CSharp.MSTest.Models;
+using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.TFS2010.Models;
@@ -17,17 +19,31 @@ namespace RTSFramework.GUI
 {
 	public class MainWindowViewModel :BindableBase
 	{
+		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController;
+		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController;
+		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController;
+		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController;
+
 		private string myTestValue;
 		private string result;
 		private ICommand startRunCommand;
 		private InteractionRequest<INotification> notificationRequest;
 
-		public MainWindowViewModel()
+		public MainWindowViewModel(
+			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController,
+			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController,
+			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController,
+			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController)
 		{
+			this.gitFileController = gitFileController;
+			this.gitClassController = gitClassController;
+			this.tfsFileController = tfsFileController;
+			this.tfsClassController = tfsClassController;
 			StartRunCommand = new DelegateCommand(StartRun);
 			MyTestValue = "Test";
 			NotificationRequest = new InteractionRequest<INotification>();
 		}
+
 		public InteractionRequest<INotification> NotificationRequest
 		{
 			get { return notificationRequest; }
@@ -114,14 +130,11 @@ namespace RTSFramework.GUI
 
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
-				var controller = UnityProvider.GetTfs2010CSharpFileController();
-
-				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
+				Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration));
 			}
 			else
 			{
-				var controller = UnityProvider.GetTfs2010CSharpClassController();
-				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
+				Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration));
 			}
 		}
 
@@ -141,13 +154,11 @@ namespace RTSFramework.GUI
 
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
-				var controller = UnityProvider.GetGitCSharpFileController();
-				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
+				Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration));
 			}
 			else
 			{
-				var controller = UnityProvider.GetGitCSharpClassController();
-				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
+				Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration));
 			}
 		}
 
