@@ -31,7 +31,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             var assemblies = assembliesArtefactAdapter.Parse(delta.SourceModel.AbsoluteSolutionPath);
 
             IntertypeRelationGraph graph = null;
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies),
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies),
                 "Building IntertypeRelationGraph");
 
             var changedTypes = new List<string>();
@@ -42,7 +42,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             var msTestTestcases = testCases as IList<MSTestTestcase> ?? testCases.ToList();
 
             var affectedTypes = new List<string>(changedTypes);
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() =>
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() =>
                 {
                     foreach (var type in changedTypes)
                     {

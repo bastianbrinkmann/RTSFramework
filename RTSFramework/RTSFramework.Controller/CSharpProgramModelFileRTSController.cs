@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
@@ -63,14 +65,16 @@ namespace RTSFramework.Controller
             var deltaDiscoverer = filedeltaDiscovererFactory(configuration.DiscoveryType);
 
             StructuralDelta<TP, TPe> delta = default(StructuralDelta<TP, TPe>);
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(
                 () => delta = deltaDiscoverer.Discover(configuration.OldProgramModel, configuration.NewProgramModel), "DeltaDiscovery");
 
             return delta;
         }
 
-        public void ExecuteImpactedTests(RunConfiguration<TP> configuration)
+        public string ExecuteImpactedTests(RunConfiguration<TP> configuration)
         {
+			StringBuilder resultBuilder = new StringBuilder();
+
             var testProcessor = InitializeTestProcessor(configuration);
             var rtsApproach = InitializeRTSApproach(configuration);
             InitializeTestFramework(configuration);
@@ -78,18 +82,18 @@ namespace RTSFramework.Controller
             var delta = PerformDeltaDiscovery(configuration);
 
             IEnumerable<TTc> allTests = null;
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => allTests = testsDiscoverer.GetTestCases(),
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => allTests = testsDiscoverer.GetTestCases(),
                 "TestsDiscovery");
             //TODO Filtering of tests
             //var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
             rtsApproach.RegisterImpactedTestObserver(this);
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(() => rtsApproach.ExecuteRTS(allTests, delta),
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta),
                 "RTSApproach");
             rtsApproach.UnregisterImpactedTestObserver(this);
-            Console.WriteLine($"{impactedTests.Count} Tests impacted");
+			resultBuilder.AppendLine($"{impactedTests.Count} Tests impacted");
 
-            ConsoleStopWatchTracker.ReportNeededTimeOnConsole(
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(
                 () => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
 
 
@@ -105,22 +109,23 @@ namespace RTSFramework.Controller
             if (automatedTestsProcessor != null)
             {
                 var testResults = automatedTestsProcessor.GetResults();
-                ReportFinalResults(testResults);
+                ReportFinalResults(testResults, resultBuilder);
             }
+			return resultBuilder.ToString();
         }
 
         private readonly List<TTc> impactedTests = new List<TTc>();
 
         public void NotifyImpactedTest(TTc impactedTest)
         {
-            Console.WriteLine($"Impacted Test: {impactedTest.Id}");
+            Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
             impactedTests.Add(impactedTest);
         }
 
-        private void ReportFinalResults(IEnumerable<ITestCaseResult<TTc>> results)
+        private void ReportFinalResults(IEnumerable<ITestCaseResult<TTc>> results, StringBuilder resultBuilder)
         {
-            Console.WriteLine();
-            Console.WriteLine("Final more detailed Test Results:");
+			resultBuilder.AppendLine();
+			resultBuilder.AppendLine("Final more detailed Test Results:");
 
             var testCaseResults = results as IList<ITestCaseResult<TTc>> ?? results.ToList();
 
@@ -137,7 +142,7 @@ namespace RTSFramework.Controller
 
                     foreach (var result in testCaseResults)
                     {
-                        ReportTestResult(result, logWriter);
+                        ReportTestResult(result, logWriter, resultBuilder);
                     }
                 }
             }
@@ -145,17 +150,15 @@ namespace RTSFramework.Controller
             int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
 
 
-            Console.WriteLine();
-            Console.WriteLine(numberOfTestsNotPassed == 0
+			resultBuilder.AppendLine();
+			resultBuilder.AppendLine(numberOfTestsNotPassed == 0
                 ? $"All {testCaseResults.Count} tests passed!"
                 : $"{numberOfTestsNotPassed} of {testCaseResults.Count} did not pass!");
-
-            Console.ReadKey();
         }
 
-        private void ReportTestResult(ITestCaseResult<TTc> result, StreamWriter logWriter)
+        private void ReportTestResult(ITestCaseResult<TTc> result, StreamWriter logWriter, StringBuilder resultBuilder)
         {
-            Console.WriteLine($"{result.TestCaseId}: {result.Outcome}");
+			resultBuilder.AppendLine($"{result.TestCaseId}: {result.Outcome}");
             if (result.Outcome != TestCaseResultType.Passed)
             {
                 logWriter.WriteLine($"{result.TestCaseId}: {result.Outcome} Message: {result.ErrorMessage} StackTrace: {result.StackTrace}");
@@ -164,8 +167,8 @@ namespace RTSFramework.Controller
             int i = 0;
             foreach (var childResult in result.ChildrenResults)
             {
-                Console.Write($"Data Row {i} - ");
-                ReportTestResult(childResult, logWriter);
+				resultBuilder.Append($"Data Row {i} - ");
+                ReportTestResult(childResult, logWriter, resultBuilder);
                 i++;
             }
         }

@@ -47,7 +47,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, granularityLevel, delta.TargetModel));
             newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
 
-            UpdateCorrespondenceModel(newModel);
+            PersistCorrespondenceModel(newModel);
         }
 
         private Dictionary<string, HashSet<string>> GetLinksByCoverageData<TP>(CoverageData coverageData, GranularityLevel granularityLevel, TP targetModel)
@@ -83,7 +83,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 
         
 
-        private void UpdateCorrespondenceModel(Models.CorrespondenceModel model)
+        private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
         {
             var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 
