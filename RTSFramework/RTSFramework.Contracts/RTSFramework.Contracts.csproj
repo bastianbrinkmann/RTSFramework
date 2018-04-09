@@ -114,6 +114,7 @@
     <Compile Include="ITestsDiscoverer.cs" />
     <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\EnumDescriptionTypeConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

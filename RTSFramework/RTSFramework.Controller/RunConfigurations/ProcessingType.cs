@@ -1,9 +1,16 @@
-﻿namespace RTSFramework.Controller.RunConfigurations
+﻿using System.ComponentModel;
+using RTSFramework.Contracts.Utilities;
+
+namespace RTSFramework.Controller.RunConfigurations
 {
-    public enum ProcessingType
+	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
+	public enum ProcessingType
     {
-        MSTestExecutionWithoutCoverage,
-        MSTestExecutionWithCoverage,
-        Reporting
+		[Description("MSTest")]
+        MSTestExecution,
+		[Description("MSTest + Coverage")]
+		MSTestExecutionWithCoverage,
+		[Description("CSV File")]
+		CsvReporting
     }
 }

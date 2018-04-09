@@ -1,8 +1,14 @@
-﻿namespace RTSFramework.Contracts.DeltaDiscoverer
+﻿using System.ComponentModel;
+using RTSFramework.Contracts.Utilities;
+
+namespace RTSFramework.Contracts.DeltaDiscoverer
 {
-    public enum DiscoveryType
+	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
+	public enum DiscoveryType
     {
+		[Description("Local Discovery")]
         LocalDiscovery,
-        UserIntendedChangesDiscovery
+		[Description("Intended Changes")]
+		UserIntendedChangesDiscovery
     }
 }
