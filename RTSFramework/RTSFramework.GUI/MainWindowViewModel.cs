@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Interactivity.InteractionRequest;
@@ -37,23 +38,18 @@ namespace RTSFramework.GUI
 			}
 		}
 
-		private void StartRun()
+		private async void StartRun()
 		{
 			var notification = new Notification
 			{
-				Content = "Notification Message",
+				Content = "Starting Run!",
 				Title = "Notification"
 			};
 
-			NotificationRequest.Raise(notification, x =>
-			{
-				//TODO Move!
-				UnityProvider.Initialize();
-
-				GitExampleRun();
-				//TFS2010ExampleRun();
-				MyTestValue = "Done!";
-			});
+			NotificationRequest.Raise(notification);
+			await GitExampleRun();
+			//TFS2010ExampleRun();
+			MyTestValue = "Done!";
 		}
 
 		public string Result
@@ -98,7 +94,7 @@ namespace RTSFramework.GUI
 			configuration.GranularityLevel = GranularityLevel.Class;
 		}
 
-		private void TFS2010ExampleRun()
+		private async Task TFS2010ExampleRun()
 		{
 			var configuration = new RunConfiguration<TFS2010ProgramModel>();
 			SetConfig(configuration);
@@ -119,16 +115,17 @@ namespace RTSFramework.GUI
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
 				var controller = UnityProvider.GetTfs2010CSharpFileController();
-				Result = controller.ExecuteImpactedTests(configuration);
+
+				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
 			}
 			else
 			{
 				var controller = UnityProvider.GetTfs2010CSharpClassController();
-				Result = controller.ExecuteImpactedTests(configuration);
+				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
 			}
 		}
 
-		private void GitExampleRun()
+		private async Task GitExampleRun()
 		{
 			var configuration = new RunConfiguration<GitProgramModel>();
 			SetConfig(configuration);
@@ -145,12 +142,12 @@ namespace RTSFramework.GUI
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
 				var controller = UnityProvider.GetGitCSharpFileController();
-				Result = controller.ExecuteImpactedTests(configuration);
+				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
 			}
 			else
 			{
 				var controller = UnityProvider.GetGitCSharpClassController();
-				Result = controller.ExecuteImpactedTests(configuration);
+				Result = await Task.Run(() => controller.ExecuteImpactedTests(configuration));
 			}
 		}
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
@@ -71,7 +72,7 @@ namespace RTSFramework.Controller
             return delta;
         }
 
-        public string ExecuteImpactedTests(RunConfiguration<TP> configuration)
+		public async Task<string> ExecuteImpactedTests(RunConfiguration<TP> configuration)
         {
 			StringBuilder resultBuilder = new StringBuilder();
 
