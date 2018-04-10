@@ -2,7 +2,7 @@
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Controller.RunConfigurations
+namespace RTSFramework.ViewModels.RunConfigurations
 {
     public class RunConfiguration<TPe> where TPe : CSharpProgramModel
     {

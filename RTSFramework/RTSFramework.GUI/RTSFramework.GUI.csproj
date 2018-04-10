@@ -256,6 +256,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="DependencyInjection\UnityProvider.cs" />
     <Compile Include="Utilities\EnumBindingSourceExtension.cs" />
     <Page Include="MainWindow.xaml">
@@ -273,7 +274,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -334,10 +334,6 @@
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.Controller\RTSFramework.Controller.csproj">
-      <Project>{328014c3-3efc-4db8-9212-ae13b5542d66}</Project>
-      <Name>RTSFramework.Controller</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
       <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
@@ -353,6 +349,10 @@
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
       <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>
       <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.ViewModels\RTSFramework.ViewModels.csproj">
+      <Project>{ad651244-6bf9-49f2-a4fe-4216dbd2fe72}</Project>
+      <Name>RTSFramework.ViewModels</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

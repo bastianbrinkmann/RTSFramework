@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.Controller.RunConfigurations
+﻿namespace RTSFramework.ViewModels.RunConfigurations
 {
     public enum ProgramModelType
     {

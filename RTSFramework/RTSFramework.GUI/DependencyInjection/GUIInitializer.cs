@@ -1,10 +1,11 @@
-﻿using Unity;
+﻿using RTSFramework.ViewModels;
+using Unity;
 
 namespace RTSFramework.GUI.DependencyInjection
 {
 	internal static class GUIInitializer
 	{
-		internal static void InitializeGUI(IUnityContainer container)
+		internal static void InitializeGUIClasses(IUnityContainer container)
 		{
 			InitializeViewModels(container);
 			InitializeViews(container);
@@ -13,7 +14,6 @@ namespace RTSFramework.GUI.DependencyInjection
 		private static void InitializeViewModels(IUnityContainer container)
 		{
 			container.RegisterType<MainWindowViewModel>();
-			
 		}
 
 		private static void InitializeViews(IUnityContainer container)

@@ -1,6 +1,6 @@
 ﻿namespace RTSFramework.Contracts.Models
 {
-    public enum GranularityLevel
+	public enum GranularityLevel
     {
         Class,
         File

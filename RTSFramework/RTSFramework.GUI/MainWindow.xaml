@@ -3,27 +3,46 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:gui="clr-namespace:RTSFramework.GUI"
-		xmlns:contractsDelta="clr-namespace:RTSFramework.Contracts.DeltaDiscoverer;assembly=RTSFramework.Contracts"
-		xmlns:runConfig="clr-namespace:RTSFramework.Controller.RunConfigurations;assembly=RTSFramework.Controller"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:interactionRequest="http://prismlibrary.com/"
         xmlns:utilities="clr-namespace:RTSFramework.GUI.Utilities"
+        xmlns:deltaDiscoverer="clr-namespace:RTSFramework.Contracts.DeltaDiscoverer;assembly=RTSFramework.Contracts"
+        xmlns:models="clr-namespace:RTSFramework.Contracts.Models;assembly=RTSFramework.Contracts"
+        xmlns:converters="clr-namespace:RTSFramework.GUI.Converters"
+        xmlns:viewModels="clr-namespace:RTSFramework.ViewModels;assembly=RTSFramework.ViewModels"
+        xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
         mc:Ignorable="d"
-        Title="RTS Framework" Height="350" Width="525" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" WindowStyle="ToolWindow">
+		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
+        Title="RTS Framework" Height="378" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
 	<i:Interaction.Triggers>
 		<interactionRequest:InteractionRequestTrigger SourceObject="{Binding NotificationRequest, Mode=OneWay}">
 			<interactionRequest:PopupWindowAction IsModal="True" CenterOverAssociatedObject="True"/>
 		</interactionRequest:InteractionRequestTrigger>
 	</i:Interaction.Triggers>
 	<Grid>
-		<Button x:Name="BtnGitLocalRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="100" Command="{Binding StartRunCommand}" />
-		<Label x:Name="LblTest" Content="{Binding MyTestValue, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="110,5,0,0" />
-		<Label x:Name="LblProcessingType" Content="Processing Type:" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top"/>
-		<ComboBox x:Name="CbProcessingType" HorizontalAlignment="Left" Margin="129,36,0,0" VerticalAlignment="Top" Width="200" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProcessingType}}}" />
-		<Label x:Name="LblDiscoveryType" Content="Discovery Type:" HorizontalAlignment="Left" Margin="0,58,0,0" VerticalAlignment="Top"/>
-		<ComboBox x:Name="CbDiscoveryType" HorizontalAlignment="Left" Margin="129,62,0,0" VerticalAlignment="Top" Width="200" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type contractsDelta:DiscoveryType}}}" />
-		<TextBox x:Name="TbResult" HorizontalAlignment="Stretch" Margin="5,157,5,5" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding Result}" IsReadOnly="True"  />
-		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="5,131,0,0" VerticalAlignment="Top"/>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="115"/>
+			<ColumnDefinition Width="200*"/>
+			<ColumnDefinition Width="115"/>
+			<ColumnDefinition Width="200*"/>
+		</Grid.ColumnDefinitions>
+		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding StartRunCommand}" Height="20" Grid.Column="0" />
+
+		<Label x:Name="LblProcessingType" Content="Processing:" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top" Height="26" Width="69" Grid.Column="0" />
+		<Label x:Name="LblDiscoveryType" Content="Delta Discovery:" HorizontalAlignment="Left" Margin="0,58,0,0" VerticalAlignment="Top" Height="26" Width="95" Grid.Column="0" />
+		<Label x:Name="LblRTSApproachType" Content="RTS Approach:" HorizontalAlignment="Left" Margin="0,84,0,0" VerticalAlignment="Top" Height="26" Width="86" Grid.Column="0" />
+		<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" Margin="0,110,0,0" VerticalAlignment="Top" Height="26" Width="86" Grid.Column="0" />
+
+		<ComboBox x:Name="CbProcessingType" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top" Width="166" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProcessingType}}}" SelectedItem="{Binding ProcessingType}" Grid.Column="1" Height="22" />
+		<ComboBox x:Name="CbDiscoveryType" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top" Width="166" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type deltaDiscoverer:DiscoveryType}}}" SelectedItem="{Binding DiscoveryType}" Grid.Column="1" Height="22" />
+		<ComboBox x:Name="CbRTSApproachType" HorizontalAlignment="Left" Margin="10,89,0,0" VerticalAlignment="Top" Width="166" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Grid.Column="1" Height="22" />
+		<TextBox x:Name="TbSolutionFilePath" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="10,116,0,0" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Top" Width="136" Text="{Binding SolutionFilePath}"/>
+		<Button x:Name="BtnSelectFile" Content="..." Grid.Column="1" HorizontalAlignment="Left" Margin="151,117,0,0" VerticalAlignment="Top" Width="25" Height="21" Click="SelectSolutionFile"/>
+
+		<Label x:Name="LblGranularityLevel" Content="Granularity Level:" HorizontalAlignment="Left" Margin="9,84,0,0" VerticalAlignment="Top" Grid.Column="2" Height="26" Width="116" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.ColumnSpan="2"/>
+		<ComboBox x:Name="CbGranularityLevel" HorizontalAlignment="Left" Margin="10,89,0,0" VerticalAlignment="Top" Width="165" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type models:GranularityLevel}}}" SelectedItem="{Binding GranularityLevel}" Grid.Column="3" Height="22" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" />
+
+		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,148,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Column="0"/>
+		<TextBox x:Name="TbResult" HorizontalAlignment="Stretch" Margin="10,179,10,10" TextWrapping="Wrap" VerticalAlignment="Stretch" Text="{Binding Result}" IsReadOnly="True" Grid.Column="0" Grid.ColumnSpan="4"  />
 	</Grid>
 </Window>

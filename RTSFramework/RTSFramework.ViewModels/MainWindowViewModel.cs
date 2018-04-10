@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Commands;
@@ -12,22 +13,26 @@ using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
-using RTSFramework.Controller;
-using RTSFramework.Controller.RunConfigurations;
+using RTSFramework.ViewModels.RunConfigurations;
 
-namespace RTSFramework.GUI
+namespace RTSFramework.ViewModels
 {
-	public class MainWindowViewModel :BindableBase
+	public class MainWindowViewModel : BindableBase
 	{
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController;
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController;
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController;
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController;
 
-		private string myTestValue;
 		private string result;
 		private ICommand startRunCommand;
 		private InteractionRequest<INotification> notificationRequest;
+		private ProcessingType processingType;
+		private DiscoveryType discoveryType;
+		private RTSApproachType rtsApproachType;
+		private GranularityLevel granularityLevel;
+		private bool isGranularityLevelChangable;
+		private string solutionFilePath;
 
 		public MainWindowViewModel(
 			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController,
@@ -39,9 +44,50 @@ namespace RTSFramework.GUI
 			this.gitClassController = gitClassController;
 			this.tfsFileController = tfsFileController;
 			this.tfsClassController = tfsClassController;
+
 			StartRunCommand = new DelegateCommand(StartRun);
-			MyTestValue = "Test";
 			NotificationRequest = new InteractionRequest<INotification>();
+
+			//Defaults
+			DiscoveryType = DiscoveryType.LocalDiscovery;
+			ProcessingType = ProcessingType.MSTestExecution;
+			RTSApproachType = RTSApproachType.ClassSRTS;
+			GranularityLevel = GranularityLevel.Class;
+			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
+
+			PropertyChanged += OnPropertyChanged;
+		}
+
+		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+		{
+			if (propertyChangedEventArgs.PropertyName == nameof(RTSApproachType))
+			{
+				if (RTSApproachType == RTSApproachType.ClassSRTS)
+				{
+					GranularityLevel = GranularityLevel.Class;
+				}
+				IsGranularityLevelChangable = RTSApproachType != RTSApproachType.ClassSRTS;
+			}
+		}
+
+		public string SolutionFilePath
+		{
+			get { return solutionFilePath; }
+			set
+			{
+				solutionFilePath = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool IsGranularityLevelChangable
+		{
+			get { return isGranularityLevelChangable; }
+			set
+			{
+				isGranularityLevelChangable = value;
+				RaisePropertyChanged();
+			}
 		}
 
 		public InteractionRequest<INotification> NotificationRequest
@@ -65,7 +111,46 @@ namespace RTSFramework.GUI
 			NotificationRequest.Raise(notification);
 			await GitExampleRun();
 			//TFS2010ExampleRun();
-			MyTestValue = "Done!";
+		}
+
+		public GranularityLevel GranularityLevel
+		{
+			get { return granularityLevel; }
+			set
+			{
+				granularityLevel = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public RTSApproachType RTSApproachType
+		{
+			get { return rtsApproachType; }
+			set
+			{
+				rtsApproachType = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public DiscoveryType DiscoveryType
+		{
+			get { return discoveryType; }
+			set
+			{
+				discoveryType = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ProcessingType ProcessingType
+		{
+			get { return processingType; }
+			set
+			{
+				processingType = value;
+				RaisePropertyChanged();
+			}
 		}
 
 		public string Result
@@ -88,26 +173,16 @@ namespace RTSFramework.GUI
 			}
 		}
 
-		public string MyTestValue
-		{
-			get { return myTestValue; }
-			set
-			{
-				myTestValue = value;
-				RaisePropertyChanged();
-			}
-		}
-
 		#region ToDelete
 
-		private static void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
+		private void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
 		{
-			configuration.ProcessingType = ProcessingType.MSTestExecution;
-			configuration.DiscoveryType = DiscoveryType.LocalDiscovery;
+			configuration.ProcessingType = ProcessingType;
+			configuration.DiscoveryType = DiscoveryType;
 			configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
-			configuration.AbsoluteSolutionPath = @"C:\Git\TIATestProject\TIATestProject.sln";
-			configuration.RTSApproachType = RTSApproachType.ClassSRTS;
-			configuration.GranularityLevel = GranularityLevel.Class;
+			configuration.AbsoluteSolutionPath = SolutionFilePath;
+			configuration.RTSApproachType = RTSApproachType;
+			configuration.GranularityLevel = GranularityLevel;
 		}
 
 		private async Task TFS2010ExampleRun()

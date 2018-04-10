@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
@@ -12,12 +11,11 @@ using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
-using RTSFramework.Controller.RunConfigurations;
-using RTSFramework.Core.Models;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Dynamic;
+using RTSFramework.ViewModels.RunConfigurations;
 
-namespace RTSFramework.Controller
+namespace RTSFramework.ViewModels
 {
     public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
         where TTc : ITestCase
