@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
@@ -26,13 +27,17 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             this.intertypeRelationGraphBuilder = intertypeRelationGraphBuilder;
         }
 
-        public override void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta<TP, CSharpClassElement> delta)
+        public override void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta<TP, CSharpClassElement> delta, CancellationToken cancellationToken = default(CancellationToken))
         {
             var assemblies = assembliesArtefactAdapter.Parse(delta.SourceModel.AbsoluteSolutionPath);
 
             IntertypeRelationGraph graph = null;
-            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies),
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies, cancellationToken),
                 "Building IntertypeRelationGraph");
+	        if (cancellationToken.IsCancellationRequested)
+	        {
+		        return;
+	        }
 
             var changedTypes = new List<string>();
 
@@ -46,7 +51,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
                 {
                     foreach (var type in changedTypes)
                     {
-                        ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, msTestTestcases);
+						if (cancellationToken.IsCancellationRequested)
+						{
+							return;
+						}
+						ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, msTestTestcases, cancellationToken);
                     }
                 }, "Extend AffectedTypes and report ImpactedTests");
         }
@@ -60,7 +69,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             }
         }
 
-        private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> testCases)
+        private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> testCases, CancellationToken cancellationToken = default(CancellationToken))
         {
             ReportImpactedTests(type, testCases);
 
@@ -68,7 +77,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
             foreach (string usedByType in usedByTypes)
             {
-                if (!affectedTypes.Contains(usedByType))
+				if (cancellationToken.IsCancellationRequested)
+				{
+					return;
+				}
+				if (!affectedTypes.Contains(usedByType))
                 {
                     affectedTypes.Add(usedByType);
                     ExtendAffectedTypesAndReportImpactedTests(usedByType, graph, affectedTypes, testCases);
@@ -83,7 +96,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
             foreach (string subtype in subTypes)
             {
-                if (!affectedTypes.Contains(subtype))
+				if (cancellationToken.IsCancellationRequested)
+				{
+					return;
+				}
+				if (!affectedTypes.Contains(subtype))
                 {
                     affectedTypes.Add(subtype);
                     ExtendAffectedTypesAndReportImpactedTests(subtype, graph, affectedTypes, testCases);

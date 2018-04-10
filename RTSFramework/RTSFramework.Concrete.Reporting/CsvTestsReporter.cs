@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 
@@ -7,7 +9,7 @@ namespace RTSFramework.Concrete.Reporting
 {
     public class CsvTestsReporter<TTc> : ITestProcessor<TTc> where TTc : ITestCase
     {
-        public void ProcessTests(IEnumerable<TTc> tests)
+        public Task ProcessTests(IEnumerable<TTc> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
             FileInfo csvFile = new FileInfo("Results.csv");
 
@@ -19,10 +21,16 @@ namespace RTSFramework.Concrete.Reporting
                     writer.WriteLine("Name;Categories");
                     foreach (var test in tests)
                     {
+	                    if (cancellationToken.IsCancellationRequested)
+	                    {
+		                    return Task.CompletedTask;
+	                    }
                         writer.WriteLine($"{test.Id};" + string.Join(",", test.Categories));
                     }
                 }
             }
-        }
+
+			return Task.CompletedTask;
+		}
     }
 }

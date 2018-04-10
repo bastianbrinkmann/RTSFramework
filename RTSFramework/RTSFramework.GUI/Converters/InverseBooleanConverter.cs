@@ -4,17 +4,17 @@ using System.Windows.Markup;
 
 namespace RTSFramework.GUI.Converters
 {
-	public class BooleanNegationConverter : MarkupExtension, IValueConverter
+	public class InverseBooleanConverter : MarkupExtension, IValueConverter
 	{
-		private static BooleanNegationConverter booleanNegationConverter;
+		private static InverseBooleanConverter inverseBooleanConverter;
 		public override object ProvideValue(IServiceProvider serviceProvider)
 		{
-			if (booleanNegationConverter == null)
+			if (inverseBooleanConverter == null)
 			{
-				booleanNegationConverter = new BooleanNegationConverter();
+				inverseBooleanConverter = new InverseBooleanConverter();
 			}
 
-			return booleanNegationConverter;
+			return inverseBooleanConverter;
 		}
 
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

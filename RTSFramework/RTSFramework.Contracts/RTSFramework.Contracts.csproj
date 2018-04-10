@@ -91,6 +91,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
     <Compile Include="DeltaDiscoverer\DiscoveryType.cs" />
     <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />

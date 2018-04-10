@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using RTSFramework.Concrete.CSharp.Core.Models;
@@ -9,7 +10,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     {
         private const string MonoModuleTyp = "<Module>";
 
-        public IntertypeRelationGraph BuildIntertypeRelationGraph(IList<CSharpAssembly> assemblies)
+        public IntertypeRelationGraph BuildIntertypeRelationGraph(IList<CSharpAssembly> assemblies, CancellationToken cancellationToken = default(CancellationToken))
         {
             var graph = new IntertypeRelationGraph();
             var typeDefinitions = new List<TypeDefinition>();
@@ -21,6 +22,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
                 foreach (var type in moduleDefinition.Types)
                 {
+	                if (cancellationToken.IsCancellationRequested)
+	                {
+		                return null;
+	                }
+
                     if (type.Name == MonoModuleTyp)
                     {
                         continue;
@@ -36,7 +42,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             //Second, Build Edges
             foreach (var type in typeDefinitions)
             {
-                ProcessTypeDefinition(type, graph);
+				if (cancellationToken.IsCancellationRequested)
+				{
+					return null;
+				}
+				ProcessTypeDefinition(type, graph);
             }
 
             return graph;

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
@@ -11,6 +13,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
@@ -25,7 +28,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
         protected IEnumerable<ITestCaseResult<MSTestTestcase>> ExecutionResults = new List<ITestCaseResult<MSTestTestcase>>();
-        public virtual void ProcessTests(IEnumerable<MSTestTestcase> tests)
+        public virtual async Task ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
             CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             CurrentlyExecutedTests = CurrentlyExecutedTests.Where(x => !x.Ignored).ToList();
@@ -33,9 +36,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             {
                 var arguments = BuildVsTestsArguments();
 
-                ExecuteVsTestsByArguments(arguments);
+                await ExecuteVsTestsByArguments(arguments, cancellationToken);
+				if (cancellationToken.IsCancellationRequested)
+				{
+					return;
+				}
 
-                ExecutionResults = ParseVsTestsTrxAnswer().TestcasesResults;
+				ExecutionResults = ParseVsTestsTrxAnswer().TestcasesResults;
             }
         }
 
@@ -102,7 +109,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             throw new ArgumentException("Test Execution Failed as no trx file was created!");
         }
 
-        protected void ExecuteVsTestsByArguments(string arguments)
+        protected async Task ExecuteVsTestsByArguments(string arguments, CancellationToken cancellationToken)
         {
             var executorProccess = new Process
             {
@@ -117,7 +124,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             };
 
             executorProccess.Start();
-            executorProccess.WaitForExit();
+	        try
+	        {
+				await executorProccess.WaitForExitAsync(cancellationToken);
+			}
+			catch (OperationCanceledException) { }
         }
 
         protected string BuildVsTestsArguments()

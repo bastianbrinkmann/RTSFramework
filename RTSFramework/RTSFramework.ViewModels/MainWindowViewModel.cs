@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Commands;
@@ -38,6 +39,7 @@ namespace RTSFramework.ViewModels
 		private bool isGitRepositoryPathChangable;
 		private ProgramModelType programModelType;
 		private bool isRunning;
+		private ICommand cancelRunCommand;
 
 		public MainWindowViewModel(
 			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController,
@@ -53,6 +55,7 @@ namespace RTSFramework.ViewModels
 			this.dialogService = dialogService;
 
 			StartRunCommand = new DelegateCommand(StartRun);
+			CancelRunCommand = new DelegateCommand(CancelRun);
 			IsRunning = false;
 
 			//Defaults
@@ -67,6 +70,13 @@ namespace RTSFramework.ViewModels
 			IsGitRepositoryPathChangable = true;
 
 			PropertyChanged += OnPropertyChanged;
+		}
+
+		private CancellationTokenSource cancellationTokenSource;
+
+		private void CancelRun()
+		{
+			cancellationTokenSource?.Cancel();
 		}
 
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -87,6 +97,16 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public ICommand CancelRunCommand
+		{
+			get { return cancelRunCommand; }
+			set
+			{
+				cancelRunCommand = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public bool IsRunning
 		{
@@ -213,6 +233,8 @@ namespace RTSFramework.ViewModels
 		private async void StartRun()
 		{
 			IsRunning = true;
+			cancellationTokenSource = new CancellationTokenSource();
+
 			if (ProgramModelType == ProgramModelType.GitProgramModel)
 			{
 				await GitExampleRun();
@@ -262,11 +284,11 @@ namespace RTSFramework.ViewModels
 			{
 				if (configuration.GranularityLevel == GranularityLevel.File)
 				{
-					Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration));
+					Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
 				}
 				else
 				{
-					Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration));
+					Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
 				}
 			}
 			catch (Exception e)
@@ -293,11 +315,11 @@ namespace RTSFramework.ViewModels
 			{
 				if (configuration.GranularityLevel == GranularityLevel.File)
 				{
-					Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration));
+					Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
 				}
 				else
 				{
-					Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration));
+					Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
 				}
 			}
 			catch (Exception e)

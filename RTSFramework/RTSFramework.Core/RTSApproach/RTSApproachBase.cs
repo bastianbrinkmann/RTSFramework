@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
@@ -27,6 +28,6 @@ namespace RTSFramework.Core.RTSApproach
             }
         }
 
-        public abstract void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta);
+        public abstract void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

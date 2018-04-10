@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.RTSApproach;
@@ -19,7 +20,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
         private IList<TTc> allTests;
         private StructuralDelta<TP, TPe> currentDelta;
 
-        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta)
+        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta, CancellationToken cancellationToken = default(CancellationToken))
         {
             allTests = testCases as IList<TTc> ?? testCases.ToList();
             currentDelta = delta;
@@ -29,6 +30,11 @@ namespace RTSFramework.RTSApproaches.Dynamic
             //TODO: Iterate over tests required as there could be new tests
             foreach (var testcase in allTests)
             {
+	            if (cancellationToken.IsCancellationRequested)
+	            {
+		            return;
+	            }
+
                 HashSet<string> linkedElements;
                 if (correspondenceModel.CorrespondenceModelLinks.TryGetValue(testcase.Id, out linkedElements))
                 {

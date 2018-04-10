@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 
@@ -10,7 +11,7 @@ namespace RTSFramework.Contracts.RTSApproach
 
         void UnregisterImpactedTestObserver(IRTSListener<TTc> listener);
 
-        void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta);
+        void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta, CancellationToken token = default(CancellationToken));
 
     }
 }

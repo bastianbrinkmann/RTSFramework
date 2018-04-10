@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;
@@ -9,6 +12,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Core;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
@@ -28,7 +32,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             this.openCoverArtefactAdapter = openCoverArtefactAdapter;
         }
 
-        public override void ProcessTests(IEnumerable<MSTestTestcase> tests)
+        public override async Task ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
             CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             if (CurrentlyExecutedTests.Any())
@@ -38,7 +42,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 var sources = CurrentlyExecutedTests.Select(x => x.AssemblyPath).Distinct();
 				var openCoverArguments = BuildOpenCoverArguments(vsTestArguments, sources);
 
-                ExecuteOpenCoverByArguments(openCoverArguments);
+                await ExecuteOpenCoverByArguments(openCoverArguments, cancellationToken);
+	            if (cancellationToken.IsCancellationRequested)
+	            {
+		            return;
+	            }
 
                 var executionResult = ParseVsTestsTrxAnswer();
 
@@ -64,9 +72,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             return arguments;
         }
 
-        private void ExecuteOpenCoverByArguments(string arguments)
+        private async Task ExecuteOpenCoverByArguments(string arguments, CancellationToken cancellationToken)
         {
-            var discovererProcess = new Process
+            var executorProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -78,9 +86,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 }
             };
 
-            discovererProcess.Start();
-            discovererProcess.WaitForExit();
-        }
+            executorProcess.Start();
+			try
+			{
+				await executorProcess.WaitForExitAsync(cancellationToken);
+			}
+			catch (OperationCanceledException) { }
+		}
 
         public CoverageData GetCollectedCoverageData()
         {

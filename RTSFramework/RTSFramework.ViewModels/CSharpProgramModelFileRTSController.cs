@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
@@ -25,14 +27,14 @@ namespace RTSFramework.ViewModels
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
         private readonly ITestsDiscoverer<TTc> testsDiscoverer;
         private readonly Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory;
-        private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
+        private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
         public CSharpProgramModelFileRTSController(
             Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,
             Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory,
-            IArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+			CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
         {
             this.filedeltaDiscovererFactory = filedeltaDiscovererFactory;
             this.testProcessorFactory = testProcessorFactory;
@@ -46,18 +48,10 @@ namespace RTSFramework.ViewModels
             return testProcessorFactory(configuration.ProcessingType);
         }
 
-        private void InitializeTestFramework(RunConfiguration<TP> configuration)
-        {
-            //TODO Filtering of Test dlls?
-            testsDiscoverer.Sources = assembliesAdapter.Parse(configuration.AbsoluteSolutionPath).Select(x => x.AbsolutePath)
-                .Where(x => x.EndsWith("Test.dll"));
-        }
-
         private IRTSApproach<TP, TPe, TTc> InitializeRTSApproach(RunConfiguration<TP> configuration)
         {
             return rtsApproachFactory(configuration.RTSApproachType);
         }
-
 
         private StructuralDelta<TP, TPe> PerformDeltaDiscovery(RunConfiguration<TP> configuration)
         {
@@ -70,31 +64,60 @@ namespace RTSFramework.ViewModels
             return delta;
         }
 
-		public string ExecuteImpactedTests(RunConfiguration<TP> configuration)
+	    private const string Cancelled = "Cancelled";
+		public async Task<string> ExecuteImpactedTests(RunConfiguration<TP> configuration, CancellationToken token)
 		{
 			StringBuilder resultBuilder = new StringBuilder();
 
 			var testProcessor = InitializeTestProcessor(configuration);
 			var rtsApproach = InitializeRTSApproach(configuration);
-			InitializeTestFramework(configuration);
+
+			var parsingResult = await assembliesAdapter.Parse(configuration.AbsoluteSolutionPath, token);
+			if (token.IsCancellationRequested)
+			{
+				resultBuilder.AppendLine(Cancelled);
+				return resultBuilder.ToString();
+			}
+
+			//TODO Filtering of Test dlls?
+			testsDiscoverer.Sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith("Test.dll"));
 
 			var delta = PerformDeltaDiscovery(configuration);
+			if (token.IsCancellationRequested)
+			{
+				resultBuilder.AppendLine(Cancelled);
+				return resultBuilder.ToString();
+			}
 
 			IEnumerable<TTc> allTests = null;
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => allTests = testsDiscoverer.GetTestCases(),
 				"TestsDiscovery");
+			if (token.IsCancellationRequested)
+			{
+				resultBuilder.AppendLine(Cancelled);
+				return resultBuilder.ToString();
+			}
 			//TODO Filtering of tests
 			//var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
+			impactedTests = new List<TTc>();
 			rtsApproach.RegisterImpactedTestObserver(this);
-			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta),
+			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta, token),
 				"RTSApproach");
 			rtsApproach.UnregisterImpactedTestObserver(this);
 			resultBuilder.AppendLine($"{impactedTests.Count} Tests impacted");
+			if (token.IsCancellationRequested)
+			{
+				resultBuilder.AppendLine(Cancelled);
+				return resultBuilder.ToString();
+			}
 
-			DebugStopWatchTracker.ReportNeededTimeOnDebug(
-				() => testProcessor.ProcessTests(impactedTests), "ProcessingOfImpactedTests");
-
+			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testProcessor.ProcessTests(impactedTests, token), "ProcessingOfImpactedTests");
+			if (token.IsCancellationRequested)
+			{
+				resultBuilder.AppendLine(Cancelled);
+				return resultBuilder.ToString();
+			}
 
 			var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
 			var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
@@ -113,7 +136,7 @@ namespace RTSFramework.ViewModels
 			return resultBuilder.ToString();
 		}
 
-		private readonly List<TTc> impactedTests = new List<TTc>();
+	    private List<TTc> impactedTests;
 
         public void NotifyImpactedTest(TTc impactedTest)
         {
