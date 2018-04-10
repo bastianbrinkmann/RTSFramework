@@ -14,6 +14,7 @@ using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.ViewModels.RunConfigurations;
+using RTSFramework.ViewModels.Utilities;
 
 namespace RTSFramework.ViewModels
 {
@@ -23,37 +24,47 @@ namespace RTSFramework.ViewModels
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController;
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController;
 		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController;
+		private readonly IDialogService dialogService;
 
 		private string result;
 		private ICommand startRunCommand;
-		private InteractionRequest<INotification> notificationRequest;
 		private ProcessingType processingType;
 		private DiscoveryType discoveryType;
 		private RTSApproachType rtsApproachType;
 		private GranularityLevel granularityLevel;
 		private bool isGranularityLevelChangable;
 		private string solutionFilePath;
+		private string gitRepositoryPath;
+		private bool isGitRepositoryPathChangable;
+		private ProgramModelType programModelType;
+		private bool isRunning;
 
 		public MainWindowViewModel(
 			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController,
 			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController,
 			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController,
-			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController)
+			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController,
+			IDialogService dialogService)
 		{
 			this.gitFileController = gitFileController;
 			this.gitClassController = gitClassController;
 			this.tfsFileController = tfsFileController;
 			this.tfsClassController = tfsClassController;
+			this.dialogService = dialogService;
 
 			StartRunCommand = new DelegateCommand(StartRun);
-			NotificationRequest = new InteractionRequest<INotification>();
+			IsRunning = false;
 
 			//Defaults
 			DiscoveryType = DiscoveryType.LocalDiscovery;
 			ProcessingType = ProcessingType.MSTestExecution;
 			RTSApproachType = RTSApproachType.ClassSRTS;
 			GranularityLevel = GranularityLevel.Class;
+			IsGranularityLevelChangable = false;
 			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
+			ProgramModelType = ProgramModelType.GitProgramModel;
+			GitRepositoryPath = @"C:\Git\TIATestProject\";
+			IsGitRepositoryPathChangable = true;
 
 			PropertyChanged += OnPropertyChanged;
 		}
@@ -66,7 +77,54 @@ namespace RTSFramework.ViewModels
 				{
 					GranularityLevel = GranularityLevel.Class;
 				}
-				IsGranularityLevelChangable = RTSApproachType != RTSApproachType.ClassSRTS;
+				IsGranularityLevelChangable = RTSApproachType == RTSApproachType.RetestAll || RTSApproachType == RTSApproachType.DynamicRTS;
+			}
+
+			if (propertyChangedEventArgs.PropertyName == nameof(ProgramModelType))
+			{
+				IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
+			}
+		}
+
+		#region Properties
+
+		public bool IsRunning
+		{
+			get { return isRunning; }
+			set
+			{
+				isRunning = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ProgramModelType ProgramModelType
+		{
+			get { return programModelType; }
+			set
+			{
+				programModelType = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool IsGitRepositoryPathChangable
+		{
+			get { return isGitRepositoryPathChangable; }
+			set
+			{
+				isGitRepositoryPathChangable = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public string GitRepositoryPath
+		{
+			get { return gitRepositoryPath; }
+			set
+			{
+				gitRepositoryPath = value;
+				RaisePropertyChanged();
 			}
 		}
 
@@ -88,29 +146,6 @@ namespace RTSFramework.ViewModels
 				isGranularityLevelChangable = value;
 				RaisePropertyChanged();
 			}
-		}
-
-		public InteractionRequest<INotification> NotificationRequest
-		{
-			get { return notificationRequest; }
-			set
-			{
-				notificationRequest = value;
-				RaisePropertyChanged();
-			}
-		}
-
-		private async void StartRun()
-		{
-			var notification = new Notification
-			{
-				Content = "Starting Run!",
-				Title = "Notification"
-			};
-
-			NotificationRequest.Raise(notification);
-			await GitExampleRun();
-			//TFS2010ExampleRun();
 		}
 
 		public GranularityLevel GranularityLevel
@@ -173,13 +208,31 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		#region ToDelete
+		#endregion
+
+		private async void StartRun()
+		{
+			if (ProgramModelType == ProgramModelType.GitProgramModel)
+			{
+				await GitExampleRun();
+			}
+			else
+			{
+				if (DiscoveryType == DiscoveryType.LocalDiscovery)
+				{
+					dialogService.ShowErrorMessage("Local Discovery combined with TFS 2010 is not supported yet!");
+					return;
+				}
+
+				await TFS2010ExampleRun();
+			}
+		}
 
 		private void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
 		{
 			configuration.ProcessingType = ProcessingType;
 			configuration.DiscoveryType = DiscoveryType;
-			configuration.GitRepositoryPath = @"C:\Git\TIATestProject\";
+			configuration.GitRepositoryPath = GitRepositoryPath;
 			configuration.AbsoluteSolutionPath = SolutionFilePath;
 			configuration.RTSApproachType = RTSApproachType;
 			configuration.GranularityLevel = GranularityLevel;
@@ -203,13 +256,20 @@ namespace RTSFramework.ViewModels
 			configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 			configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
-			if (configuration.GranularityLevel == GranularityLevel.File)
+			try
 			{
-				Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration));
+				if (configuration.GranularityLevel == GranularityLevel.File)
+				{
+					Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration));
+				}
+				else
+				{
+					Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration));
+				}
 			}
-			else
+			catch (Exception e)
 			{
-				Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration));
+				dialogService.ShowErrorMessage(e.Message);
 			}
 		}
 
@@ -227,16 +287,21 @@ namespace RTSFramework.ViewModels
 			configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 			configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
 
-			if (configuration.GranularityLevel == GranularityLevel.File)
+			try
 			{
-				Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration));
+				if (configuration.GranularityLevel == GranularityLevel.File)
+				{
+					Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration));
+				}
+				else
+				{
+					Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration));
+				}
 			}
-			else
+			catch (Exception e)
 			{
-				Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration));
+				dialogService.ShowErrorMessage(e.Message);
 			}
 		}
-
-		#endregion
 	}
 }

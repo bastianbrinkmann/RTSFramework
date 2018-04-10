@@ -9,6 +9,6 @@ namespace RTSFramework.Contracts.DeltaDiscoverer
 		[Description("Local Discovery")]
         LocalDiscovery,
 		[Description("Intended Changes")]
-		UserIntendedChangesDiscovery
-    }
+		UserIntendedChangesDiscovery,
+	}
 }
