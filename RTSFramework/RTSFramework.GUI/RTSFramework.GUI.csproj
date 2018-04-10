@@ -256,6 +256,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BooleanNegationConverter.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="DependencyInjection\UnityProvider.cs" />
     <Compile Include="Utilities\DialogService.cs" />

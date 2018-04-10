@@ -77,7 +77,7 @@ namespace RTSFramework.ViewModels
 				{
 					GranularityLevel = GranularityLevel.Class;
 				}
-				IsGranularityLevelChangable = RTSApproachType == RTSApproachType.RetestAll || RTSApproachType == RTSApproachType.DynamicRTS;
+				IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;
 			}
 
 			if (propertyChangedEventArgs.PropertyName == nameof(ProgramModelType))
@@ -212,6 +212,7 @@ namespace RTSFramework.ViewModels
 
 		private async void StartRun()
 		{
+			IsRunning = true;
 			if (ProgramModelType == ProgramModelType.GitProgramModel)
 			{
 				await GitExampleRun();
@@ -226,6 +227,7 @@ namespace RTSFramework.ViewModels
 
 				await TFS2010ExampleRun();
 			}
+			IsRunning = false;
 		}
 
 		private void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
