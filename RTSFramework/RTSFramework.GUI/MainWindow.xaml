@@ -11,17 +11,19 @@
         xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="514" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
+        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="95*"/>
+			<ColumnDefinition Width="95"/>
 			<ColumnDefinition Width="506*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="153"/>
 			<RowDefinition Height="21"/>
-			<RowDefinition Height="115*"/>
+			<RowDefinition Height="278*"/>
+			<RowDefinition Height="25"/>
+			<RowDefinition/>
 		</Grid.RowDefinitions>
 		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding StartRunCommand}" Height="20" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
 		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding CancelRunCommand}" Height="20" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
@@ -64,7 +66,7 @@
 
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
-		<ListView x:Name="TestsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}">
+		<ListView x:Name="TestsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
 			<ListView.View>
 				<GridView>
 					<GridViewColumn Width="350" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
@@ -72,6 +74,27 @@
 				</GridView>
 			</ListView.View>
 		</ListView>
+		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+			<StatusBar.ItemsPanel>
+				<ItemsPanelTemplate>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+					</Grid>
+				</ItemsPanelTemplate>
+			</StatusBar.ItemsPanel>
+			<StatusBarItem>
+				<TextBlock x:Name="TbStatus" Text="{Binding RunStatus}" />
+			</StatusBarItem>
+			<Separator Grid.Column="1" />
+			<StatusBarItem Grid.Column="4">
+				<ProgressBar x:Name="PbStatus" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsIndeterminate="{Binding IsRunning}" Height="20" Width="100" />
+			</StatusBarItem>
+		</StatusBar>
 	</Grid>
 </Window>
 

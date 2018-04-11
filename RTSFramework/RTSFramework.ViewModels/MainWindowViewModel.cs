@@ -51,7 +51,7 @@ namespace RTSFramework.ViewModels
 			StartRunCommand = new DelegateCommand(StartRun);
 			CancelRunCommand = new DelegateCommand(CancelRun);
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
-			IsRunning = false;
+			RunStatus = RunStatus.Ready;
 
 			//Defaults
 			DiscoveryType = DiscoveryType.LocalDiscovery;
@@ -69,10 +69,12 @@ namespace RTSFramework.ViewModels
 
 		private CancellationTokenSource cancellationTokenSource;
 		private ObservableCollection<TestResultListViewItemViewModel> testResults;
+		private RunStatus runStatus;
 
 		private void CancelRun()
 		{
 			cancellationTokenSource?.Cancel();
+			RunStatus = RunStatus.Cancelled;
 		}
 
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -89,6 +91,11 @@ namespace RTSFramework.ViewModels
 			if (propertyChangedEventArgs.PropertyName == nameof(ProgramModelType))
 			{
 				IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
+			}
+
+			if (propertyChangedEventArgs.PropertyName == nameof(RunStatus))
+			{
+				IsRunning = RunStatus == RunStatus.Running;
 			}
 		}
 
@@ -110,6 +117,16 @@ namespace RTSFramework.ViewModels
 			set
 			{
 				cancelRunCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public RunStatus RunStatus
+		{
+			get { return runStatus; }
+			set
+			{
+				runStatus = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -238,7 +255,7 @@ namespace RTSFramework.ViewModels
 
 		private async void StartRun()
 		{
-			IsRunning = true;
+			RunStatus = RunStatus.Running;
 			cancellationTokenSource = new CancellationTokenSource();
 
 			try
@@ -263,14 +280,12 @@ namespace RTSFramework.ViewModels
 
 					await ExecuteRunForModel(oldProgramModel, newProgramModel);
 				}
+
+				RunStatus = RunStatus.Completed;
 			}
 			catch (Exception e)
 			{
 				dialogService.ShowError(e.Message);
-			}
-			finally
-			{
-				IsRunning = false;
 			}
 		}
 
