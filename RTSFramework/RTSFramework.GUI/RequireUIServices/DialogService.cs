@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using RTSFramework.ViewModels.Utilities;
+using RTSFramework.ViewModels.RequireUIServices;
 
-namespace RTSFramework.GUI.Utilities
+namespace RTSFramework.GUI.RequireUIServices
 {
 	public class DialogService : IDialogService
 	{
@@ -18,6 +18,13 @@ namespace RTSFramework.GUI.Utilities
 		public void ShowInformation(string message, string title = "Information")
 		{
 			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+		}
+
+		public bool ShowQuestion(string message, string title = "Question")
+		{
+			var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+			return result == MessageBoxResult.Yes;
 		}
 	}
 }

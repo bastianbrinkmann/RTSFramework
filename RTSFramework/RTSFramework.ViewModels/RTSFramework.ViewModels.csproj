@@ -97,7 +97,7 @@
     <Compile Include="RunConfigurations\RunConfiguration.cs" />
     <Compile Include="TestResultListViewItemViewModel.cs" />
     <Compile Include="UnityModelInitializer.cs" />
-    <Compile Include="Utilities\IDialogService.cs" />
+    <Compile Include="RequireUIServices\IDialogService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">

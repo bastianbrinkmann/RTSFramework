@@ -260,7 +260,7 @@
     <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="DependencyInjection\UnityGUIInitializer.cs" />
     <Compile Include="DependencyInjection\UnityProvider.cs" />
-    <Compile Include="Utilities\DialogService.cs" />
+    <Compile Include="RequireUIServices\DialogService.cs" />
     <Compile Include="Utilities\EnumBindingSourceExtension.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

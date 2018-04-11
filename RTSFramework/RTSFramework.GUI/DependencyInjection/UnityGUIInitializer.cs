@@ -1,6 +1,7 @@
-﻿using RTSFramework.GUI.Utilities;
+﻿using RTSFramework.GUI.RequireUIServices;
+using RTSFramework.GUI.Utilities;
 using RTSFramework.ViewModels;
-using RTSFramework.ViewModels.Utilities;
+using RTSFramework.ViewModels.RequireUIServices;
 using Unity;
 
 namespace RTSFramework.GUI.DependencyInjection

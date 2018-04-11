@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +21,8 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
-using RTSFramework.ViewModels.Utilities;
 
 namespace RTSFramework.ViewModels
 {
@@ -325,6 +327,11 @@ namespace RTSFramework.ViewModels
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, FileProcessingResult>(configuration);
+					bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?","CSV File Created");
+					if (openFile)
+					{
+						Process.Start(csvCreationResult.FilePath);
+					}
 
 					break;
 				case ProcessingType.ListReporting:
