@@ -3,8 +3,8 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-	public interface IAutomatedTestsExecutor<TTc> : ITestProcessor<TTc> where TTc : ITestCase
+	public interface IAutomatedTestsExecutor<TTestCase> : ITestProcessor<TTestCase> where TTestCase : ITestCase
 	{
-	    IEnumerable<ITestCaseResult<TTc>> GetResults();
+	    IEnumerable<ITestCaseResult<TTestCase>> GetResults();
 	}
 }

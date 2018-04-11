@@ -6,6 +6,18 @@ namespace RTSFramework.Core.Utilities
 {
     public static class DebugStopWatchTracker
     {
+		public static T ReportNeededTimeOnDebug<T>(Func<T> action, string actionName)
+		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			T result = action();
+			stopwatch.Stop();
+
+			Debug.WriteLine($"{actionName} took {stopwatch.Elapsed.TotalSeconds} Seconds");
+
+			return result;
+		}
+
 		public static void ReportNeededTimeOnDebug(Action action, string actionName)
 		{
 			var stopwatch = new Stopwatch();
@@ -13,10 +25,7 @@ namespace RTSFramework.Core.Utilities
 			action();
 			stopwatch.Stop();
 
-			//var oldColor = Console.ForegroundColor;
-			//Console.ForegroundColor = ConsoleColor.Blue; ;
 			Debug.WriteLine($"{actionName} took {stopwatch.Elapsed.TotalSeconds} Seconds");
-			//Console.ForegroundColor = oldColor;
 		}
 
 		public static async Task ReportNeededTimeOnDebug(Task action, string actionName)
@@ -26,10 +35,19 @@ namespace RTSFramework.Core.Utilities
 			await action;
 			stopwatch.Stop();
 
-			//var oldColor = Console.ForegroundColor;
-			//Console.ForegroundColor = ConsoleColor.Blue; ;
 			Debug.WriteLine($"{actionName} took {stopwatch.Elapsed.TotalSeconds} Seconds");
-			//Console.ForegroundColor = oldColor;
+		}
+
+		public static async Task<T> ReportNeededTimeOnDebug<T>(Task<T> action, string actionName)
+		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			var result = await action;
+			stopwatch.Stop();
+
+			Debug.WriteLine($"{actionName} took {stopwatch.Elapsed.TotalSeconds} Seconds");
+
+			return result;
 		}
 	}
 }

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -21,10 +24,10 @@ namespace RTSFramework.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-		private readonly Lazy<CSharpProgramModelFileRTSController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController;
+		private readonly Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController;
+		private readonly Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController;
+		private readonly Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController;
+		private readonly Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController;
 		private readonly IDialogService dialogService;
 
 		private string result;
@@ -42,10 +45,10 @@ namespace RTSFramework.ViewModels
 		private ICommand cancelRunCommand;
 
 		public MainWindowViewModel(
-			Lazy<CSharpProgramModelFileRTSController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController, 
-			Lazy<CSharpProgramModelFileRTSController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController, 
-			Lazy<CSharpProgramModelFileRTSController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController, 
-			Lazy<CSharpProgramModelFileRTSController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController,
+			Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController, 
+			Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController, 
+			Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController, 
+			Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController,
 			IDialogService dialogService)
 		{
 			this.gitFileController = gitFileController;
@@ -73,6 +76,7 @@ namespace RTSFramework.ViewModels
 		}
 
 		private CancellationTokenSource cancellationTokenSource;
+		private ObservableCollection<TestResultListViewItemViewModel> testResults;
 
 		private void CancelRun()
 		{
@@ -97,6 +101,16 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public ObservableCollection<TestResultListViewItemViewModel> TestResults
+		{
+			get { return testResults; }
+			set
+			{
+				testResults = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public ICommand CancelRunCommand
 		{
@@ -262,6 +276,7 @@ namespace RTSFramework.ViewModels
 				IsRunning = false;
 			}
 		}
+
 		private async Task ExecuteTFS2010Run()
 		{
 			var oldProgramModel = new TFS2010ProgramModel {VersionId = "Test"};
@@ -273,11 +288,19 @@ namespace RTSFramework.ViewModels
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
 				Result = await Task.Run(() => tfs2010FileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
+				SetImpactedTests(tfs2010FileController.Value.ImpactedTests);
+
 			}
 			else if (configuration.GranularityLevel == GranularityLevel.Class)
 			{
 				Result = await Task.Run(() => tfs2010ClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
+				SetImpactedTests(tfs2010ClassController.Value.ImpactedTests);
 			}
+		}
+
+		private void SetImpactedTests(List<MSTestTestcase> impactedTests)
+		{
+			TestResults = new ObservableCollection<TestResultListViewItemViewModel>(impactedTests.Select(x => new TestResultListViewItemViewModel {FullyQualifiedName = x.Id}));
 		}
 
 		private async Task ExecuteGitRun()
@@ -290,13 +313,13 @@ namespace RTSFramework.ViewModels
 
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
-				Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),
-					cancellationTokenSource.Token);
+				Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),cancellationTokenSource.Token);
+				SetImpactedTests(gitFileController.Value.ImpactedTests);
 			}
 			else if (configuration.GranularityLevel == GranularityLevel.Class)
 			{
-				Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),
-					cancellationTokenSource.Token);
+				Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),cancellationTokenSource.Token);
+				SetImpactedTests(gitClassController.Value.ImpactedTests);
 			}
 		}
 

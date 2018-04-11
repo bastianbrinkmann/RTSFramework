@@ -29,6 +29,7 @@ using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.ViewModels.RunConfigurations;
 using Unity;
 using Unity.Injection;
+using Unity.Lifetime;
 using Unity.Resolution;
 
 namespace RTSFramework.ViewModels
@@ -52,9 +53,7 @@ namespace RTSFramework.ViewModels
 		{
 			//FilesProvider
 			unityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
-			//TODO Replace by TFS 2010 FilesProvider
 			unityContainer.RegisterType<IFilesProvider<TFS2010ProgramModel>, LocalFilesProvider>();
-			
 
 			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
 		}
@@ -63,10 +62,21 @@ namespace RTSFramework.ViewModels
 		{
 			unityContainer.RegisterInstance(typeof(CorrespondenceModelManager));
 		}
+
+		#region TestDiscoverer
+
 		private static void InitTestsDiscoverer(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<ITestsDiscoverer<MSTestTestcase>, MSTestTestsDiscoverer>();
+			InitTestsDiscovererForModel<GitProgramModel>(unityContainer);
+			InitTestsDiscovererForModel<TFS2010ProgramModel>(unityContainer);
 		}
+
+		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
+		{
+			unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, MSTestTestsDiscoverer<TModel>>();
+		}
+
+		#endregion
 
 		#region DeltaDiscoverer
 		private static void InitDeltaDiscoverer(IUnityContainer unityContainer)
@@ -149,6 +159,7 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, TestCaseListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 
 			unityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase>>>(
 				new InjectionFactory(c =>

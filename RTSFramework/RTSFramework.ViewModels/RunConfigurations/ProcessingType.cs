@@ -11,6 +11,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
 		[Description("MSTest + Coverage")]
 		MSTestExecutionWithCoverage,
 		[Description("CSV File")]
-		CsvReporting
+		CsvReporting,
+		[Description("Only Identify")]
+		ListReporting
     }
 }

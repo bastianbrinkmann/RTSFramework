@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestsDiscoverer<TTC> where TTC : ITestCase
+	public interface ITestsDiscoverer<TModel, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel
 	{
-        IEnumerable<string> Sources { set; }
-
-        IEnumerable<TTC> GetTestCases();
+        Task<IEnumerable<TTestCase>> GetTestCasesForModel(TModel model, CancellationToken token = default(CancellationToken));
 	}
 }

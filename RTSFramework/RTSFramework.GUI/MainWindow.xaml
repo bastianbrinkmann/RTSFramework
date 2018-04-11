@@ -64,9 +64,14 @@
 
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
-		<DataGrid x:Name="TestsDataGrid" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
-			
-		</DataGrid>
+		<ListView x:Name="TestsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}">
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Width="350" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
+					<GridViewColumn Width="140" Header="Outcome" DisplayMemberBinding="{Binding TestOutcome}" />
+				</GridView>
+			</ListView.View>
+		</ListView>
 	</Grid>
 </Window>
 
