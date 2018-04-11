@@ -7,11 +7,12 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.Reporting
 {
-    public class CsvTestsReporter<TTestCase> : ITestProcessor<TTestCase> where TTestCase : ITestCase
+    public class CsvTestsReporter<TTestCase> : ITestProcessor<TTestCase, FileProcessingResult> where TTestCase : ITestCase
     {
-        public Task ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<FileProcessingResult> ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
             FileInfo csvFile = new FileInfo("Results.csv");
+			var result = new FileProcessingResult();
 
             using (var stream = csvFile.OpenWrite())
             {
@@ -23,14 +24,15 @@ namespace RTSFramework.Concrete.Reporting
                     {
 	                    if (cancellationToken.IsCancellationRequested)
 	                    {
-		                    return Task.CompletedTask;
+		                    return Task.FromResult(result);
 	                    }
                         writer.WriteLine($"{test.Id};" + string.Join(",", test.Categories));
                     }
                 }
             }
+	        result.FilePath = csvFile.FullName;
 
-			return Task.CompletedTask;
+			return Task.FromResult(result);
 		}
     }
 }

@@ -7,16 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
-using RTSFramework.Concrete.CSharp.MSTest.Utilities;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
-using RTSFramework.Core;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor, IAutomatedTestsExecutorWithCoverageCollection<MSTestTestcase>
+    public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter;
 
@@ -24,17 +21,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
         private const string OpenCoverExe = "OpenCover.Console.exe";
         private const string OpenCoverPath = "OpenCover";
 
-        private CoverageData coverageData;
-
         public MSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
                                                     IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
         {
             this.openCoverArtefactAdapter = openCoverArtefactAdapter;
         }
 
-        public override async Task ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
-            CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+	        var result = new MSTestExectionResult();
+
+			CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             if (CurrentlyExecutedTests.Any())
             {
 				var vsTestArguments = BuildVsTestsArguments();
@@ -45,17 +42,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 await ExecuteOpenCoverByArguments(openCoverArguments, cancellationToken);
 	            if (cancellationToken.IsCancellationRequested)
 	            {
-		            return;
+		            return result;
 	            }
 
-                var executionResult = ParseVsTestsTrxAnswer();
+				result = ParseVsTestsTrxAnswer();
 
                 var executionResultParams = new MSTestExecutionResultParameters {File = new FileInfo(Path.GetFullPath(@"results.xml"))};
                 executionResultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
-                coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
-
-                ExecutionResults = executionResult.TestcasesResults;
+                result.CoverageData = openCoverArtefactAdapter.Parse(executionResultParams);
             }
+
+	        return result;
         }
 
         private  string BuildOpenCoverArguments(string vstestargs, IEnumerable<string> sources)
@@ -93,10 +90,5 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 			catch (OperationCanceledException) { }
 		}
-
-        public CoverageData GetCollectedCoverageData()
-        {
-            return coverageData;
-        }
     }
 }

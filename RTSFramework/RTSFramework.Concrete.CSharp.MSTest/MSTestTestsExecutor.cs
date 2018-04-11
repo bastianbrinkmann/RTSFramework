@@ -9,15 +9,13 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
-using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
-using RTSFramework.Contracts.Models;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class MSTestTestsExecutor : IAutomatedTestsExecutor<MSTestTestcase>
+    public class MSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
 
@@ -27,10 +25,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
         }
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
-        protected IEnumerable<ITestCaseResult<MSTestTestcase>> ExecutionResults = new List<ITestCaseResult<MSTestTestcase>>();
-        public virtual async Task ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
+
+        public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
-            CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+	        var executionResult = new MSTestExectionResult();
+
+			CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
             CurrentlyExecutedTests = CurrentlyExecutedTests.Where(x => !x.Ignored).ToList();
             if (CurrentlyExecutedTests.Any())
             {
@@ -39,14 +39,16 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 await ExecuteVsTestsByArguments(arguments, cancellationToken);
 				if (cancellationToken.IsCancellationRequested)
 				{
-					return;
+					return executionResult;
 				}
 
-				ExecutionResults = ParseVsTestsTrxAnswer().TestcasesResults;
+				executionResult = ParseVsTestsTrxAnswer();
             }
+
+	        return executionResult;
         }
 
-        //TODO Read filepath from console instead!
+        //TODO Read filepath from console instead?
         protected FileInfo GetTrxFile()
         {
             var directory = new DirectoryInfo(MSTestConstants.TestResultsFolder);
@@ -193,11 +195,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             }
 
             return fullPath;
-        }
-
-        public IEnumerable<ITestCaseResult<MSTestTestcase>> GetResults()
-        {
-            return ExecutionResults;
         }
     }
 }

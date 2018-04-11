@@ -11,7 +11,7 @@
         xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="335" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
+        Title="RTS Framework" Height="514" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="95*"/>

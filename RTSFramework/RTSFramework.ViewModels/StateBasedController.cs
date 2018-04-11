@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -19,13 +15,14 @@ using RTSFramework.ViewModels.RunConfigurations;
 
 namespace RTSFramework.ViewModels
 {
-    public class StateBasedController<TModel, TDelta, TTestCase> 
+    public class StateBasedController<TModel, TDelta, TTestCase, TResult> 
         where TTestCase : ITestCase 
 		where TModel : IProgramModel 
 		where TDelta : IDelta
+		where TResult : ITestProcessingResult
     {
         private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> deltaDiscovererFactory;
-        private readonly Func<ProcessingType, ITestProcessor<TTestCase>> testProcessorFactory;
+        private readonly Func<ProcessingType, ITestProcessor<TTestCase, TResult>> testProcessorFactory;
         private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
         private readonly Func<RTSApproachType, IRTSApproach<TDelta,TTestCase>> rtsApproachFactory;
 
@@ -33,7 +30,7 @@ namespace RTSFramework.ViewModels
 			Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> deltaDiscovererFactory,
             ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
             Func<RTSApproachType, IRTSApproach<TDelta, TTestCase>> rtsApproachFactory,
-			Func<ProcessingType, ITestProcessor<TTestCase>> testProcessorFactory)
+			Func<ProcessingType, ITestProcessor<TTestCase, TResult>> testProcessorFactory)
         {
             this.deltaDiscovererFactory = deltaDiscovererFactory;
             this.testProcessorFactory = testProcessorFactory;
@@ -49,124 +46,55 @@ namespace RTSFramework.ViewModels
 
             return delta;
         }
-
-	    private const string Cancelled = "Cancelled";
-		public async Task<string> ExecuteImpactedTests(RunConfiguration<TModel> configuration, CancellationToken token)
+		public async Task<TResult> ExecuteImpactedTests(RunConfiguration<TModel> configuration, CancellationToken token)
 		{
-			StringBuilder resultBuilder = new StringBuilder();
-
 			var testProcessor = testProcessorFactory(configuration.ProcessingType);
 			var rtsApproach = rtsApproachFactory(configuration.RTSApproachType);
 
 			var delta = PerformDeltaDiscovery(configuration);
 			if (token.IsCancellationRequested)
 			{
-				resultBuilder.AppendLine(Cancelled);
-				return resultBuilder.ToString();
+				return default(TResult);
 			}
 
 			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(configuration.NewProgramModel, token), "TestsDiscovery");
 			if (token.IsCancellationRequested)
 			{
-				resultBuilder.AppendLine(Cancelled);
-				return resultBuilder.ToString();
+				return default(TResult);
 			}
 
-			ImpactedTests = new List<TTestCase>();
-			rtsApproach.ImpactedTest += NotifyImpactedTest;
+			var impactedTests = new List<TTestCase>();
+			rtsApproach.ImpactedTest += (sender, args) =>
+			{
+				var impactedTest = args.TestCase;
+
+				Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
+				impactedTests.Add(impactedTest);
+			};
+
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta, token), "RTSApproach");
-			rtsApproach.ImpactedTest -= NotifyImpactedTest;
 
-			resultBuilder.AppendLine($"{ImpactedTests.Count} Tests impacted");
+			Debug.WriteLine($"{impactedTests.Count} Tests impacted");
+
 			if (token.IsCancellationRequested)
 			{
-				resultBuilder.AppendLine(Cancelled);
-				return resultBuilder.ToString();
+				return default(TResult);
 			}
 
-			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testProcessor.ProcessTests(ImpactedTests, token), "ProcessingOfImpactedTests");
+			var processingResult = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testProcessor.ProcessTests(impactedTests, token), "ProcessingOfImpactedTests");
 			if (token.IsCancellationRequested)
 			{
-				resultBuilder.AppendLine(Cancelled);
-				return resultBuilder.ToString();
+				return default(TResult);
 			}
 
-			var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTestCase>;
-			var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
-			if (coverageResults != null)
+			var testExecutionResult = processingResult as MSTestExectionResult;
+			if (testExecutionResult != null && testExecutionResult.CoverageData != null)
 			{
 				var dynamicRtsApproach = rtsApproach as IDynamicRTSApproach;
-				dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
+				dynamicRtsApproach?.UpdateCorrespondenceModel(testExecutionResult.CoverageData);
 			}
 
-			var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTestCase>;
-			if (automatedTestsProcessor != null)
-			{
-				var testResults = automatedTestsProcessor.GetResults();
-				ReportFinalResults(testResults, resultBuilder);
-			}
-			return resultBuilder.ToString();
+			return processingResult;
 		}
-
-	    public List<TTestCase> ImpactedTests { get; private set; }
-
-        public void NotifyImpactedTest(object sender, ImpactedTestEventArgs<TTestCase> args)
-        {
-	        var impactedTest = args.TestCase;
-
-			Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
-            ImpactedTests.Add(impactedTest);
-        }
-
-        private void ReportFinalResults(IEnumerable<ITestCaseResult<TTestCase>> results, StringBuilder resultBuilder)
-        {
-			resultBuilder.AppendLine();
-			resultBuilder.AppendLine("Final more detailed Test Results:");
-
-            var testCaseResults = results as IList<ITestCaseResult<TTestCase>> ?? results.ToList();
-
-            if (File.Exists("Error.log"))
-            {
-                File.Delete("Error.log");
-            }
-
-            using (var errorLog = File.Open("Error.log", FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                using (StreamWriter logWriter = new StreamWriter(errorLog))
-                {
-                    logWriter.WriteLine("Failed Tests:");
-
-                    foreach (var result in testCaseResults)
-                    {
-                        ReportTestResult(result, logWriter, resultBuilder);
-                    }
-                }
-            }
-
-            int numberOfTestsNotPassed = testCaseResults.Count(x => x.Outcome != TestCaseResultType.Passed);
-
-
-			resultBuilder.AppendLine();
-			resultBuilder.AppendLine(numberOfTestsNotPassed == 0
-                ? $"All {testCaseResults.Count} tests passed!"
-                : $"{numberOfTestsNotPassed} of {testCaseResults.Count} did not pass!");
-        }
-
-        private void ReportTestResult(ITestCaseResult<TTestCase> result, StreamWriter logWriter, StringBuilder resultBuilder)
-        {
-			resultBuilder.AppendLine($"{result.TestCaseId}: {result.Outcome}");
-            if (result.Outcome != TestCaseResultType.Passed)
-            {
-                logWriter.WriteLine($"{result.TestCaseId}: {result.Outcome} Message: {result.ErrorMessage} StackTrace: {result.StackTrace}");
-            }
-
-            int i = 0;
-            foreach (var childResult in result.ChildrenResults)
-            {
-				resultBuilder.Append($"Data Row {i} - ");
-                ReportTestResult(childResult, logWriter, resultBuilder);
-                i++;
-            }
-        }
     }
 }

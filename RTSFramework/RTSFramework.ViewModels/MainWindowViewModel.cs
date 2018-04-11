@@ -13,7 +13,9 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
+using RTSFramework.Concrete.Reporting;
 using RTSFramework.Concrete.TFS2010.Models;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -24,10 +26,6 @@ namespace RTSFramework.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-		private readonly Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController;
-		private readonly Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController;
-		private readonly Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController;
-		private readonly Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController;
 		private readonly IDialogService dialogService;
 
 		private string result;
@@ -44,21 +42,13 @@ namespace RTSFramework.ViewModels
 		private bool isRunning;
 		private ICommand cancelRunCommand;
 
-		public MainWindowViewModel(
-			Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpFileElement>, MSTestTestcase>> gitFileController, 
-			Lazy<StateBasedController<GitProgramModel, StructuralDelta<GitProgramModel, CSharpClassElement>, MSTestTestcase>> gitClassController, 
-			Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpFileElement>, MSTestTestcase>> tfs2010FileController, 
-			Lazy<StateBasedController<TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, CSharpClassElement>, MSTestTestcase>> tfs2010ClassController,
-			IDialogService dialogService)
+		public MainWindowViewModel(IDialogService dialogService)
 		{
-			this.gitFileController = gitFileController;
-			this.gitClassController = gitClassController;
-			this.tfs2010FileController = tfs2010FileController;
-			this.tfs2010ClassController = tfs2010ClassController;
 			this.dialogService = dialogService;
 
 			StartRunCommand = new DelegateCommand(StartRun);
 			CancelRunCommand = new DelegateCommand(CancelRun);
+			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
 			IsRunning = false;
 
 			//Defaults
@@ -253,19 +243,24 @@ namespace RTSFramework.ViewModels
 			{
 				if (ProgramModelType == ProgramModelType.GitProgramModel)
 				{
-					await ExecuteGitRun();
+					var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
+					var newProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
+
+					await ExecuteRunForModel(oldProgramModel, newProgramModel);
 				}
-				else
+				else if(ProgramModelType == ProgramModelType.TFS2010ProgramModel)
 				{
 					if (DiscoveryType == DiscoveryType.LocalDiscovery)
 					{
 						dialogService.ShowError("Local Discovery combined with TFS 2010 is not supported yet!");
 						return;
 					}
-					await ExecuteTFS2010Run();
-				}
 
-				dialogService.ShowInformation(Result, "Run Result");
+					var oldProgramModel = new TFS2010ProgramModel { VersionId = "Test" };
+					var newProgramModel = new TFS2010ProgramModel { VersionId = "Test2" };
+
+					await ExecuteRunForModel(oldProgramModel, newProgramModel);
+				}
 			}
 			catch (Exception e)
 			{
@@ -277,49 +272,19 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private async Task ExecuteTFS2010Run()
+		private async Task ExecuteRunForModel<TModel>(TModel oldProgramModel, TModel newProgramModel)
+			where TModel : CSharpProgramModel
 		{
-			var oldProgramModel = new TFS2010ProgramModel {VersionId = "Test"};
-			var newProgramModel = new TFS2010ProgramModel {VersionId = "Test2"};
-
-			var configuration = new RunConfiguration<TFS2010ProgramModel>();
+			var configuration = new RunConfiguration<TModel>();
 			SetConfig(configuration, oldProgramModel, newProgramModel);
 
 			if (configuration.GranularityLevel == GranularityLevel.File)
 			{
-				Result = await Task.Run(() => tfs2010FileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				SetImpactedTests(tfs2010FileController.Value.ImpactedTests);
-
+				await ExecuteRunOnGranularityLevel<TModel, StructuralDelta<TModel, CSharpFileElement>>(configuration);
 			}
 			else if (configuration.GranularityLevel == GranularityLevel.Class)
 			{
-				Result = await Task.Run(() => tfs2010ClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				SetImpactedTests(tfs2010ClassController.Value.ImpactedTests);
-			}
-		}
-
-		private void SetImpactedTests(List<MSTestTestcase> impactedTests)
-		{
-			TestResults = new ObservableCollection<TestResultListViewItemViewModel>(impactedTests.Select(x => new TestResultListViewItemViewModel {FullyQualifiedName = x.Id}));
-		}
-
-		private async Task ExecuteGitRun()
-		{
-			var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
-			var newProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
-
-			var configuration = new RunConfiguration<GitProgramModel>();
-			SetConfig(configuration, oldProgramModel, newProgramModel);
-
-			if (configuration.GranularityLevel == GranularityLevel.File)
-			{
-				Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),cancellationTokenSource.Token);
-				SetImpactedTests(gitFileController.Value.ImpactedTests);
-			}
-			else if (configuration.GranularityLevel == GranularityLevel.Class)
-			{
-				Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token),cancellationTokenSource.Token);
-				SetImpactedTests(gitClassController.Value.ImpactedTests);
+				await ExecuteRunOnGranularityLevel<TModel, StructuralDelta<TModel, CSharpClassElement>>(configuration);
 			}
 		}
 
@@ -339,6 +304,48 @@ namespace RTSFramework.ViewModels
 
 			configuration.OldProgramModel = oldProgramModel;
 			configuration.NewProgramModel = newProgramModel;
+		}
+
+		private async Task ExecuteRunOnGranularityLevel<TModel, TDelta>(RunConfiguration<TModel> configuration)
+			where TModel : IProgramModel
+			where TDelta : IDelta
+		{
+			switch (configuration.ProcessingType)
+			{
+				case ProcessingType.MSTestExecution:
+				case ProcessingType.MSTestExecutionWithCoverage:
+					var executionResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, MSTestExectionResult>(configuration);
+
+					TestResults.Clear();
+					TestResults.AddRange(executionResult.TestcasesResults.Select(x => new TestResultListViewItemViewModel
+					{
+						FullyQualifiedName = x.TestCaseId,
+						TestOutcome = x.Outcome.ToString()
+					}));
+					break;
+				case ProcessingType.CsvReporting:
+					var csvCreationResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, FileProcessingResult>(configuration);
+
+					break;
+				case ProcessingType.ListReporting:
+					var listReportingResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(configuration);
+					TestResults.Clear();
+					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel
+					{
+						FullyQualifiedName = x.Id
+					}));
+					break;
+			}
+		}
+
+		private async Task<TResult> ExecuteRun<TModel, TDelta, TTestCase, TResult>(RunConfiguration<TModel> configuration) where TTestCase : ITestCase
+			where TModel : IProgramModel
+			where TDelta : IDelta
+			where TResult : ITestProcessingResult
+		{
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TModel, TDelta, TTestCase, TResult>();
+
+			return await Task.Run(() => stateBasedController.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
 		}
 	}
 }

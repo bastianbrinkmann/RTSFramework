@@ -46,7 +46,19 @@ namespace RTSFramework.ViewModels
 			InitDeltaDiscoverer(unityContainer);
 			InitTestsDiscoverer(unityContainer);
 			InitRTSApproaches(unityContainer);
-			InitTestsProcessors(unityContainer);
+			InitTestProcessors(unityContainer);
+
+			container = unityContainer;
+		}
+
+		private static IUnityContainer container;
+		internal static StateBasedController<TModel, TDelta, TTestCase, TResult> GetStateBasedController<TModel, TDelta, TTestCase, TResult>()
+			where TTestCase : ITestCase
+			where TModel : IProgramModel
+			where TDelta : IDelta
+			where TResult : ITestProcessingResult
+		{
+			return container.Resolve<StateBasedController<TModel, TDelta, TTestCase, TResult>>();
 		}
 
 		private static void InitHelper(IUnityContainer unityContainer)
@@ -154,17 +166,28 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		private static void InitTestsProcessors(IUnityContainer unityContainer)
-		{
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase>, TestCaseListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
+		#region TestProcessors
 
-			unityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase>>>(
-				new InjectionFactory(c =>
-				new Func<ProcessingType, ITestProcessor<MSTestTestcase>>(name => c.Resolve<ITestProcessor<MSTestTestcase>>(name.ToString()))));
+		private static void InitTestProcessors(IUnityContainer unityContainer)
+		{
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, FileProcessingResult>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>>, IdentifiedTestsListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
+
+			InitTestProcessorsFactoryForResultType<FileProcessingResult>(unityContainer);
+			InitTestProcessorsFactoryForResultType<MSTestExectionResult>(unityContainer);
+			InitTestProcessorsFactoryForResultType<TestListResult<MSTestTestcase>>(unityContainer);
 		}
+
+		private static void InitTestProcessorsFactoryForResultType<TResult>(IUnityContainer unityContainer) where TResult : ITestProcessingResult
+		{
+			unityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase, TResult>>>(
+				new InjectionFactory(c =>
+				new Func<ProcessingType, ITestProcessor<MSTestTestcase, TResult>>(name => c.Resolve<ITestProcessor<MSTestTestcase, TResult>>(name.ToString()))));
+		}
+
+		#endregion
 
 		private static void InitAdapters(IUnityContainer unityContainer)
 		{

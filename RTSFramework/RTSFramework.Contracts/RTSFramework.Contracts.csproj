@@ -95,6 +95,7 @@
     <Compile Include="DeltaDiscoverer\DiscoveryType.cs" />
     <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
+    <Compile Include="ITestProcessingResult.cs" />
     <Compile Include="Models\CoverageData.cs" />
     <Compile Include="Models\CoverageDataEntry.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />
@@ -103,8 +104,6 @@
     <Compile Include="Models\ITestCaseResult.cs" />
     <Compile Include="Models\Delta\StructuralDelta.cs" />
     <Compile Include="Models\TestCaseResultType.cs" />
-    <Compile Include="IAutomatedTestsExecutorWithCoverageCollection.cs" />
-    <Compile Include="IAutomatedTestsExecutor.cs" />
     <Compile Include="DeltaDiscoverer\IDeltaDiscoverer.cs" />
     <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
     <Compile Include="Models\IProgramModel.cs" />

@@ -1,9 +1,13 @@
-﻿using RTSFramework.ViewModels;
+﻿using RTSFramework.Contracts;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.ViewModels;
+using RTSFramework.ViewModels.RunConfigurations;
 using Unity;
 
 namespace RTSFramework.GUI.DependencyInjection
 {
-    internal static class UnityProvider
+    public static class UnityProvider
     {
         private static IUnityContainer UnityContainer { get; } = new UnityContainer();
 
@@ -13,10 +17,9 @@ namespace RTSFramework.GUI.DependencyInjection
 			UnityGUIInitializer.InitializeGUIClasses(UnityContainer);
         }
 
-		internal static MainWindow GetMainWindow()
+		public static MainWindow GetMainWindow()
 	    {
 		    return UnityContainer.Resolve<MainWindow>();
 	    }
-
     }
 }

@@ -93,15 +93,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                     executionResult.TestcasesResults.Add(currentResult);
                 }
 
-                var collectorElement =
-                (from collectors in doc.Descendants(ns + "Collector")
-                 let uri = collectors.Attribute("uri")?.Value
-                 where uri == "datacollector://microsoft/CodeCoverage/2.0"
-                 select collectors).SingleOrDefault();
-
-                string fileName = collectorElement?.Descendants(ns + "A").SingleOrDefault()?.Attribute("href")?.Value;
-                executionResult.CodeCoverageFile = fileName;
-
                 return executionResult;
             }
             catch (Exception ex)
