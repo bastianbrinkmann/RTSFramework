@@ -9,9 +9,9 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-    public class LocalFilesProvider<TP> : IFilesProvider<TP> where TP : IProgramModel
+    public class LocalFilesProvider : IFilesProvider
     {
-        public string GetFileContent(TP programModel, string path)
+        public string GetFileContent(IProgramModel programModel, string path)
         {
 	        Uri fullUri;
             if (!Uri.TryCreate(path, UriKind.Absolute, out fullUri))
@@ -29,7 +29,7 @@ namespace RTSFramework.Concrete.User
 			}
         }
 
-        public List<string> GetAllFiles(TP programModel)
+        public List<string> GetAllFiles(IProgramModel programModel)
         {
 			return GetAllFiles(programModel.RootPath);
         }

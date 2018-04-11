@@ -1,9 +1,9 @@
 ﻿namespace RTSFramework.Contracts.Models.Delta
 {
-    public interface IDelta<TP> where TP: IProgramModel
+    public interface IDelta
 	{
-        TP SourceModel { get; }
+		IProgramModel SourceModel { get; }
 
-        TP TargetModel { get; }
+		IProgramModel TargetModel { get; }
     }
 }

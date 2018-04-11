@@ -4,11 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Commands;
-using Prism.Interactivity.InteractionRequest;
 using Prism.Mvvm;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
-using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.TFS2010.Models;
@@ -21,10 +19,7 @@ namespace RTSFramework.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController;
-		private readonly Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController;
+		private readonly Lazy<CSharpProgramModelFileRTSController<MSTestTestcase>> executionController;
 		private readonly IDialogService dialogService;
 
 		private string result;
@@ -41,17 +36,9 @@ namespace RTSFramework.ViewModels
 		private bool isRunning;
 		private ICommand cancelRunCommand;
 
-		public MainWindowViewModel(
-			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, GitProgramModel, MSTestTestcase>> gitFileController,
-			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, GitProgramModel, MSTestTestcase>> gitClassController,
-			Lazy<CSharpProgramModelFileRTSController<CSharpFileElement, TFS2010ProgramModel, MSTestTestcase>> tfsFileController,
-			Lazy<CSharpProgramModelFileRTSController<CSharpClassElement, TFS2010ProgramModel, MSTestTestcase>> tfsClassController,
-			IDialogService dialogService)
+		public MainWindowViewModel(Lazy<CSharpProgramModelFileRTSController<MSTestTestcase>> executionController, IDialogService dialogService)
 		{
-			this.gitFileController = gitFileController;
-			this.gitClassController = gitClassController;
-			this.tfsFileController = tfsFileController;
-			this.tfsClassController = tfsClassController;
+			this.executionController = executionController;
 			this.dialogService = dialogService;
 
 			StartRunCommand = new DelegateCommand(StartRun);
@@ -235,24 +222,50 @@ namespace RTSFramework.ViewModels
 			IsRunning = true;
 			cancellationTokenSource = new CancellationTokenSource();
 
-			if (ProgramModelType == ProgramModelType.GitProgramModel)
+			try
 			{
-				await GitExampleRun();
-			}
-			else
-			{
-				if (DiscoveryType == DiscoveryType.LocalDiscovery)
+				CSharpProgramModel oldProgramModel, newProgramModel;
+
+				if (ProgramModelType == ProgramModelType.GitProgramModel)
 				{
-					dialogService.ShowErrorMessage("Local Discovery combined with TFS 2010 is not supported yet!");
-					return;
+					oldProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
+					newProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
+				}
+				else
+				{
+					if (DiscoveryType == DiscoveryType.LocalDiscovery)
+					{
+						dialogService.ShowError("Local Discovery combined with TFS 2010 is not supported yet!");
+						return;
+					}
+
+					oldProgramModel = new TFS2010ProgramModel {VersionId = "Test"};
+					newProgramModel = new TFS2010ProgramModel {VersionId = "Test2"};
 				}
 
-				await TFS2010ExampleRun();
+				await ExampleRun(oldProgramModel, newProgramModel);
+
+				dialogService.ShowInformation(Result, "Run Result");
 			}
-			IsRunning = false;
+			catch (Exception e)
+			{
+				dialogService.ShowError(e.Message);
+			}
+			finally
+			{
+				IsRunning = false;
+			}
 		}
 
-		private void SetConfig<T>(RunConfiguration<T> configuration) where T : CSharpProgramModel
+		private async Task ExampleRun(CSharpProgramModel oldProgramModel, CSharpProgramModel newProgramModel)
+		{
+			var configuration = new RunConfiguration();
+			SetConfig(configuration, oldProgramModel, newProgramModel);
+
+			Result = await Task.Run(() => executionController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
+		}
+
+		private void SetConfig(RunConfiguration configuration, CSharpProgramModel oldProgramModel, CSharpProgramModel newProgramModel)
 		{
 			configuration.ProcessingType = ProcessingType;
 			configuration.DiscoveryType = DiscoveryType;
@@ -260,72 +273,14 @@ namespace RTSFramework.ViewModels
 			configuration.AbsoluteSolutionPath = SolutionFilePath;
 			configuration.RTSApproachType = RTSApproachType;
 			configuration.GranularityLevel = GranularityLevel;
-		}
 
-		private async Task TFS2010ExampleRun()
-		{
-			var configuration = new RunConfiguration<TFS2010ProgramModel>();
-			SetConfig(configuration);
+			oldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
+			newProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
+			oldProgramModel.GranularityLevel = GranularityLevel;
+			newProgramModel.GranularityLevel = GranularityLevel;
 
-			var oldProgramModel = new TFS2010ProgramModel
-			{
-				VersionId = "Test"
-			};
-			var newProgramModel = new TFS2010ProgramModel
-			{
-				VersionId = "Test2"
-			};
 			configuration.OldProgramModel = oldProgramModel;
 			configuration.NewProgramModel = newProgramModel;
-			configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
-			configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
-
-			try
-			{
-				if (configuration.GranularityLevel == GranularityLevel.File)
-				{
-					Result = await Task.Run(() => tfsFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				}
-				else
-				{
-					Result = await Task.Run(() => tfsClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				}
-			}
-			catch (Exception e)
-			{
-				dialogService.ShowErrorMessage(e.Message);
-			}
-		}
-
-		private async Task GitExampleRun()
-		{
-			var configuration = new RunConfiguration<GitProgramModel>();
-			SetConfig(configuration);
-
-			var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-				GitVersionReferenceType.LatestCommit);
-			var newProgramModel = GitProgramModelProvider.GetGitProgramModel(configuration.GitRepositoryPath,
-				GitVersionReferenceType.CurrentChanges);
-			configuration.OldProgramModel = oldProgramModel;
-			configuration.NewProgramModel = newProgramModel;
-			configuration.OldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
-			configuration.NewProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
-
-			try
-			{
-				if (configuration.GranularityLevel == GranularityLevel.File)
-				{
-					Result = await Task.Run(() => gitFileController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				}
-				else
-				{
-					Result = await Task.Run(() => gitClassController.Value.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
-				}
-			}
-			catch (Exception e)
-			{
-				dialogService.ShowErrorMessage(e.Message);
-			}
 		}
 	}
 }

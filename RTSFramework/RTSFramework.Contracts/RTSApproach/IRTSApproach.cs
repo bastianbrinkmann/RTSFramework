@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts.RTSApproach
 {
-    public interface IRTSApproach<TP, TPe, TTc>where TTc : ITestCase where TPe : IProgramModelElement where TP : IProgramModel
+    public interface IRTSApproach<TTc>where TTc : ITestCase
     {
-        void RegisterImpactedTestObserver(IRTSListener<TTc> listener);
-
-        void UnregisterImpactedTestObserver(IRTSListener<TTc> listener);
-
-        void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta, CancellationToken token = default(CancellationToken));
+	    event EventHandler<ImpactedTestEventArgs<TTc>> ImpactedTest;
+        void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta delta, CancellationToken token = default(CancellationToken));
 
     }
 }

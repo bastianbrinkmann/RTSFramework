@@ -1,14 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Core.RTSApproach;
+using RTSFramework.Contracts.RTSApproach;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class RetestAllApproach<TP, TPe, TTc> : RTSApproachBase<TP, TPe, TTc> where TPe : IProgramModelElement where TTc : ITestCase where TP : IProgramModel
+    public class RetestAllApproach<TTc> : IRTSApproach<TTc> where TTc : ITestCase
     {
-        public override void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta<TP, TPe> delta, CancellationToken cancellationToken = default(CancellationToken))
+		public event EventHandler<ImpactedTestEventArgs<TTc>> ImpactedTest;
+
+		public void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta delta, CancellationToken cancellationToken = default(CancellationToken))
         {
             foreach (TTc testcase in testCases)
             {
@@ -16,7 +19,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 	            {
 		            return;
 	            }
-                ReportToAllListeners(testcase);
+                ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTc>(testcase));
             }
         }
     }

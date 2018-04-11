@@ -6,22 +6,28 @@ using System.Text;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitFilesProvider : IFilesProvider<GitProgramModel>
+    public class GitFilesProvider : IFilesProvider
     {
-        public string GetFileContent(GitProgramModel programModel, string path)
+        public string GetFileContent(IProgramModel programModel, string path)
         {
-            using (var repo = new Repository(programModel.RepositoryPath))
+	        var gitProgramModel = programModel as GitProgramModel;
+
+	        if (gitProgramModel == null)
+	        {
+		        throw new ArgumentException("Must be git program Model");
+	        }
+
+            using (var repo = new Repository(gitProgramModel.RepositoryPath))
             {
-                var commit = repo.Lookup<Commit>(programModel.CommitId);
-
-
+                var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);
 
                 string relPath;
-                Uri fullUri, relRoot = new Uri(programModel.RepositoryPath, UriKind.Absolute);
+                Uri fullUri, relRoot = new Uri(gitProgramModel.RootPath, UriKind.Absolute);
                 if (Uri.TryCreate(path, UriKind.Absolute, out fullUri))
                 {
                     relPath = relRoot.MakeRelativeUri(fullUri).ToString();
@@ -44,13 +50,20 @@ namespace RTSFramework.Concrete.Git
             }
         }
 
-        public List<string> GetAllFiles(GitProgramModel programModel)
+        public List<string> GetAllFiles(IProgramModel programModel)
         {
-            using (var repo = new Repository(programModel.RepositoryPath))
-            {
-                var commit = repo.Lookup<Commit>(programModel.CommitId);
+			var gitProgramModel = programModel as GitProgramModel;
 
-                return commit.Tree.Select(x => Path.Combine(programModel.RepositoryPath, x.Path)).ToList();
+			if (gitProgramModel == null)
+			{
+				throw new ArgumentException("Must be git program Model");
+			}
+
+			using (var repo = new Repository(gitProgramModel.RepositoryPath))
+            {
+                var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);
+
+                return commit.Tree.Select(x => Path.Combine(gitProgramModel.RepositoryPath, x.Path)).ToList();
             }
         }
     }

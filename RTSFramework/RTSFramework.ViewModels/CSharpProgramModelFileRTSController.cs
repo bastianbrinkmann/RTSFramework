@@ -19,45 +19,34 @@ using RTSFramework.ViewModels.RunConfigurations;
 
 namespace RTSFramework.ViewModels
 {
-    public class CSharpProgramModelFileRTSController<TPe, TP, TTc> : IRTSListener<TTc> where TPe : IProgramModelElement
+    public class CSharpProgramModelFileRTSController<TTc> 
         where TTc : ITestCase
-        where TP : CSharpProgramModel
     {
-        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory;
+        private readonly Func<DiscoveryType, GranularityLevel, IOfflineDeltaDiscoverer> discovererFactory;
         private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
         private readonly ITestsDiscoverer<TTc> testsDiscoverer;
-        private readonly Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory;
+        private readonly Func<RTSApproachType, IRTSApproach<TTc>> rtsApproachFactory;
         private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
         public CSharpProgramModelFileRTSController(
-            Func<DiscoveryType, IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, TPe>>> filedeltaDiscovererFactory,
+			Func<DiscoveryType, GranularityLevel, IOfflineDeltaDiscoverer> discovererFactory,
             Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
             ITestsDiscoverer<TTc> testsDiscoverer,
-            Func<RTSApproachType, IRTSApproach<TP, TPe, TTc>> rtsApproachFactory,
+            Func<RTSApproachType, IRTSApproach<TTc>> rtsApproachFactory,
 			CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
         {
-            this.filedeltaDiscovererFactory = filedeltaDiscovererFactory;
+            this.discovererFactory = discovererFactory;
             this.testProcessorFactory = testProcessorFactory;
             this.testsDiscoverer = testsDiscoverer;
             this.rtsApproachFactory = rtsApproachFactory;
             this.assembliesAdapter = assembliesAdapter;
         }
 
-        private ITestProcessor<TTc> InitializeTestProcessor(RunConfiguration<TP> configuration)
+        private StructuralDelta PerformDeltaDiscovery(RunConfiguration configuration)
         {
-            return testProcessorFactory(configuration.ProcessingType);
-        }
+            var deltaDiscoverer = discovererFactory(configuration.DiscoveryType, configuration.GranularityLevel);
 
-        private IRTSApproach<TP, TPe, TTc> InitializeRTSApproach(RunConfiguration<TP> configuration)
-        {
-            return rtsApproachFactory(configuration.RTSApproachType);
-        }
-
-        private StructuralDelta<TP, TPe> PerformDeltaDiscovery(RunConfiguration<TP> configuration)
-        {
-            var deltaDiscoverer = filedeltaDiscovererFactory(configuration.DiscoveryType);
-
-            StructuralDelta<TP, TPe> delta = default(StructuralDelta<TP, TPe>);
+            StructuralDelta delta = default(StructuralDelta);
             DebugStopWatchTracker.ReportNeededTimeOnDebug(
                 () => delta = deltaDiscoverer.Discover(configuration.OldProgramModel, configuration.NewProgramModel), "DeltaDiscovery");
 
@@ -65,12 +54,12 @@ namespace RTSFramework.ViewModels
         }
 
 	    private const string Cancelled = "Cancelled";
-		public async Task<string> ExecuteImpactedTests(RunConfiguration<TP> configuration, CancellationToken token)
+		public async Task<string> ExecuteImpactedTests(RunConfiguration configuration, CancellationToken token)
 		{
 			StringBuilder resultBuilder = new StringBuilder();
 
-			var testProcessor = InitializeTestProcessor(configuration);
-			var rtsApproach = InitializeRTSApproach(configuration);
+			var testProcessor = testProcessorFactory(configuration.ProcessingType);
+			var rtsApproach = rtsApproachFactory(configuration.RTSApproachType);
 
 			var parsingResult = await assembliesAdapter.Parse(configuration.AbsoluteSolutionPath, token);
 			if (token.IsCancellationRequested)
@@ -101,10 +90,11 @@ namespace RTSFramework.ViewModels
 			//var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
 			impactedTests = new List<TTc>();
-			rtsApproach.RegisterImpactedTestObserver(this);
+			rtsApproach.ImpactedTest += NotifyImpactedTest;
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta, token),
 				"RTSApproach");
-			rtsApproach.UnregisterImpactedTestObserver(this);
+			rtsApproach.ImpactedTest -= NotifyImpactedTest;
+
 			resultBuilder.AppendLine($"{impactedTests.Count} Tests impacted");
 			if (token.IsCancellationRequested)
 			{
@@ -123,7 +113,7 @@ namespace RTSFramework.ViewModels
 			var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
 			if (coverageResults != null)
 			{
-				var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TP, TPe, TTc>;
+				var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TTc>;
 				dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
 			}
 
@@ -138,9 +128,11 @@ namespace RTSFramework.ViewModels
 
 	    private List<TTc> impactedTests;
 
-        public void NotifyImpactedTest(TTc impactedTest)
+        public void NotifyImpactedTest(object sender, ImpactedTestEventArgs<TTc> args)
         {
-            Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
+	        var impactedTest = args.TestCase;
+
+			Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
             impactedTests.Add(impactedTest);
         }
 

@@ -38,9 +38,8 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             return model;
         }
 
-        public void UpdateCorrespondenceModel<TTc, TP>(CoverageData coverageData, IDelta<TP> delta, GranularityLevel granularityLevel, IEnumerable<TTc> allTests) 
+        public void UpdateCorrespondenceModel<TTc>(CoverageData coverageData, IDelta delta, GranularityLevel granularityLevel, IEnumerable<TTc> allTests) 
             where TTc : ITestCase 
-            where TP : IProgramModel
         {
             var oldModel = GetCorrespondenceModel(delta.SourceModel.VersionId, granularityLevel);
             var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);

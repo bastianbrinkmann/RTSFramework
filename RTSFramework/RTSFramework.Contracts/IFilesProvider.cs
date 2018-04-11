@@ -3,10 +3,10 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-    public interface IFilesProvider<TP> where TP : IProgramModel
+    public interface IFilesProvider
     {
-        string GetFileContent(TP programVersion, string path);
+        string GetFileContent(IProgramModel programVersion, string path);
 
-        List<string> GetAllFiles(TP programModel);
+        List<string> GetAllFiles(IProgramModel programModel);
     }
 }

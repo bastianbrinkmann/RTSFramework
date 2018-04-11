@@ -101,7 +101,7 @@
     <Compile Include="Models\GitProgramModel.cs" />
     <Compile Include="Models\GitVersionReferenceType.cs" />
     <Compile Include="GitProgramModelProvider.cs" />
-    <Compile Include="LocalGitFilesDeltaDiscoverer.cs" />
+    <Compile Include="LocalGitFileDeltaDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

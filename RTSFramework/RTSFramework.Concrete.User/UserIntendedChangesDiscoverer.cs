@@ -1,5 +1,4 @@
-﻿using System;
-using RTSFramework.Contracts.DeltaDiscoverer;
+﻿using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
@@ -7,13 +6,11 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-    public class UserIntendedChangesDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> where TP : IProgramModel
-    {
-		public DiscoveryType DiscoveryType => DiscoveryType.UserIntendedChangesDiscovery;
-
-		public StructuralDelta<TP, FileElement> Discover(TP oldVersion, TP newVersion)
+    public class UserIntendedChangesDiscoverer : IOfflineFileDeltaDiscoverer
+	{
+		public StructuralDelta Discover(IProgramModel oldVersion, IProgramModel newVersion)
         {
-            var delta = new StructuralDelta<TP, FileElement>
+            var delta = new StructuralDelta
             {
                 SourceModel = oldVersion,
                 TargetModel = newVersion

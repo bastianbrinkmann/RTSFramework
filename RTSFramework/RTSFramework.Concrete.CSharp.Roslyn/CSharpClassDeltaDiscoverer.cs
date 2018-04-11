@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.DeltaDiscoverer;
@@ -13,36 +12,32 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-    public class CSharpClassDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpClassElement>>
-        where TP : IProgramModel
+    public class CSharpClassDeltaDiscoverer : IOfflineDeltaDiscoverer
     {
-        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer;
-        private readonly Func<DiscoveryType, IFilesProvider<TP>> filesProviderFactory;
+        private readonly IOfflineDeltaDiscoverer internalDiscoverer;
+        private readonly Func<IProgramModel, IFilesProvider> filesProviderFactory;
 
-		public DiscoveryType DiscoveryType => internalDiscoverer.DiscoveryType;
-
-        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>> internalDiscoverer,
-            Func<DiscoveryType, IFilesProvider<TP>> filesProviderFactory)
+        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer internalDiscoverer, Func<IProgramModel, IFilesProvider> filesProviderFactory)
         {
             this.internalDiscoverer = internalDiscoverer;
             this.filesProviderFactory = filesProviderFactory;
         }
 
-        public StructuralDelta<TP, CSharpClassElement> Discover(TP oldModel, TP newModel)
+        public StructuralDelta Discover(IProgramModel oldModel, IProgramModel newModel)
         {
             var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
             return Convert(fileDelta, oldModel);
         }
 
-        private StructuralDelta<TP, CSharpClassElement> Convert(StructuralDelta<TP, CSharpFileElement> delta, TP oldModel)
+        private StructuralDelta Convert(StructuralDelta delta, IProgramModel oldModel)
         {
-            StructuralDelta<TP, CSharpClassElement> result = new StructuralDelta<TP, CSharpClassElement>
+            StructuralDelta result = new StructuralDelta
             {
                 SourceModel = delta.SourceModel,
                 TargetModel = delta.TargetModel,
             };
 
-	        var filesProvider = filesProviderFactory(DiscoveryType);
+	        var filesProvider = filesProviderFactory(oldModel);
 
             foreach (var cSharpFile in delta.ChangedElements)
             {

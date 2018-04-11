@@ -8,5 +8,7 @@ namespace RTSFramework.Concrete.CSharp.Core.Models
         public string AbsoluteSolutionPath { get; set;  }
         public string VersionId { get; set; }
         public string RootPath => Path.GetDirectoryName(AbsoluteSolutionPath) + "\\";
+
+		public GranularityLevel GranularityLevel { get; set; }
     }
 }

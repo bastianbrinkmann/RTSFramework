@@ -7,27 +7,24 @@ using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core
 {
-    public class CSharpFilesDeltaDiscoverer<TP> : IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, CSharpFileElement>>
-        where TP : IProgramModel
-    {
-        private readonly IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer;
+    public class CSharpFilesDeltaDiscoverer: IOfflineDeltaDiscoverer
+	{
+        private readonly IOfflineFileDeltaDiscoverer internalDiscoverer;
 
-		public DiscoveryType DiscoveryType => internalDiscoverer.DiscoveryType;
-
-		public CSharpFilesDeltaDiscoverer(IOfflineDeltaDiscoverer<TP, StructuralDelta<TP, FileElement>> internalDiscoverer)
+		public CSharpFilesDeltaDiscoverer(IOfflineFileDeltaDiscoverer internalDiscoverer)
         {
             this.internalDiscoverer = internalDiscoverer;
         }
 
-        public StructuralDelta<TP, CSharpFileElement> Discover(TP oldModel, TP newModel)
+        public StructuralDelta Discover(IProgramModel oldModel, IProgramModel newModel)
         {
             var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
             return Convert(fileDelta);
         }
 
-        public StructuralDelta<TP, CSharpFileElement> Convert(StructuralDelta<TP, FileElement> delta)
+        public StructuralDelta Convert(StructuralDelta delta)
         {
-            StructuralDelta<TP, CSharpFileElement> result = new StructuralDelta<TP, CSharpFileElement>
+            StructuralDelta result = new StructuralDelta
             {
                 SourceModel = delta.SourceModel,
                 TargetModel = delta.TargetModel,

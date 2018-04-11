@@ -25,7 +25,7 @@
 		</Grid.RowDefinitions>
 		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding StartRunCommand}" Height="20" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
 		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding CancelRunCommand}" Height="20" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
-		<Grid Grid.Row="1" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" Margin="0,5,5,5" Grid.ColumnSpan="2">
+		<Grid Grid.Row="1" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" Margin="0,5,5,5" Grid.Column="0" Grid.ColumnSpan="2">
 			<Grid.RowDefinitions >
 				<RowDefinition Height="28"/>
 				<RowDefinition Height="28"/>
@@ -63,8 +63,16 @@
 
 
 		</Grid>
-		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.RowSpan="2"/>
-		<TextBox x:Name="TbResult" Margin="5,5,5,5" TextWrapping="Wrap" Text="{Binding Result}" IsReadOnly="True" AcceptsReturn="True" VerticalAlignment="Stretch" Grid.Row="3" Grid.ColumnSpan="2" />
+		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
+		<DataGrid x:Name="TestsDataGrid" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+			
+		</DataGrid>
 	</Grid>
 </Window>
+
+
+
+
+
+
 

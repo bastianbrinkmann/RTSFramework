@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RTSFramework.Concrete.CSharp.Core.Models;
@@ -6,7 +7,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Core.RTSApproach;
+using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.RTSApproaches.ClassSRTS
@@ -15,9 +16,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     /// An extensive study of static regression test selection in modern software evolution
     /// https://dl.acm.org/citation.cfm?id=2950361
     /// </summary>
-    public class ClassSRTSApproach<TP> : RTSApproachBase<TP, CSharpClassElement, MSTestTestcase> where TP : CSharpProgramModel
+    public class ClassSRTSApproach : IRTSApproach<MSTestTestcase>
     {
-        private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
+		public event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;
+
+		private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
         private readonly IntertypeRelationGraphBuilder intertypeRelationGraphBuilder;
 
         public ClassSRTSApproach(IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter,
@@ -27,9 +30,15 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             this.intertypeRelationGraphBuilder = intertypeRelationGraphBuilder;
         }
 
-        public override void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta<TP, CSharpClassElement> delta, CancellationToken cancellationToken = default(CancellationToken))
+        public void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta delta, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var assemblies = assembliesArtefactAdapter.Parse(delta.SourceModel.AbsoluteSolutionPath);
+	        var sourceCSharpModel = delta.SourceModel as CSharpProgramModel;
+	        if (sourceCSharpModel == null)
+	        {
+		        throw new ArgumentException("Class SRTS can only be used for CSharp programs!");
+	        }
+
+            var assemblies = assembliesArtefactAdapter.Parse(sourceCSharpModel.AbsoluteSolutionPath);
 
             IntertypeRelationGraph graph = null;
             DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies, cancellationToken),
@@ -65,7 +74,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             var impactedTests = testcases.Where(x => x.FullClassName == type);
             foreach (var impactedTest in impactedTests)
             {
-                ReportToAllListeners(impactedTest);
+                ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<MSTestTestcase>(impactedTest));
             }
         }
 

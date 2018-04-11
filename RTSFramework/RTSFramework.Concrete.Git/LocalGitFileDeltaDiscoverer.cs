@@ -4,19 +4,25 @@ using System.Linq;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts.DeltaDiscoverer;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class LocalGitFilesDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel,FileElement>>
+    public class LocalGitFileDeltaDiscoverer : IOfflineFileDeltaDiscoverer
     {
-		public DiscoveryType DiscoveryType => DiscoveryType.LocalDiscovery;
-
-		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
+		public StructuralDelta Discover(IProgramModel oldM, IProgramModel newM)
         {
-            //TODO: Console Read for RepositoryPath
+			var oldModel = oldM as GitProgramModel;
+			var newModel = newM as GitProgramModel;
+
+	        if (oldModel == null || newModel == null)
+	        {
+		        throw new ArgumentException("Models must be git models!");
+	        }
+
             if (oldModel.RepositoryPath != newModel.RepositoryPath)
             {
                 throw new ArgumentException($"Git Models must be for the same repository! OldRepoPath: {oldModel.RepositoryPath} NewRepoPath: {newModel.RepositoryPath}");
@@ -24,7 +30,7 @@ namespace RTSFramework.Concrete.Git
 
             var repositoryPath = oldModel.RepositoryPath;
 
-            var delta = new StructuralDelta<GitProgramModel, FileElement>
+            var delta = new StructuralDelta
             {
                 SourceModel = oldModel,
                 TargetModel = newModel
