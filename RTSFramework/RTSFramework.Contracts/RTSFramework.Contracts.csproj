@@ -93,7 +93,6 @@
   <ItemGroup>
     <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
     <Compile Include="DeltaDiscoverer\DiscoveryType.cs" />
-    <Compile Include="DeltaDiscoverer\IOfflineFileDeltaDiscoverer.cs" />
     <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="Models\CoverageData.cs" />
@@ -108,7 +107,6 @@
     <Compile Include="IAutomatedTestsExecutor.cs" />
     <Compile Include="DeltaDiscoverer\IDeltaDiscoverer.cs" />
     <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
-    <Compile Include="DeltaDiscoverer\IOnlineDeltaDiscoverer.cs" />
     <Compile Include="Models\IProgramModel.cs" />
     <Compile Include="Models\ITestCase.cs" />
     <Compile Include="RTSApproach\ImpactedTestEventArgs.cs" />

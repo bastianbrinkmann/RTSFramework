@@ -7,19 +7,19 @@ using RTSFramework.Contracts.RTSApproach;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class RetestAllApproach<TTc> : IRTSApproach<TTc> where TTc : ITestCase
+    public class RetestAllApproach<TDelta, TTestCase> : IRTSApproach<TDelta, TTestCase> where TTestCase : ITestCase where TDelta : IDelta
     {
-		public event EventHandler<ImpactedTestEventArgs<TTc>> ImpactedTest;
+		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
-		public void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta delta, CancellationToken cancellationToken = default(CancellationToken))
+		public void ExecuteRTS(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken = default(CancellationToken))
         {
-            foreach (TTc testcase in testCases)
+            foreach (TTestCase testcase in testCases)
             {
 	            if (cancellationToken.IsCancellationRequested)
 	            {
 		            return;
 	            }
-                ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTc>(testcase));
+                ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
             }
         }
     }

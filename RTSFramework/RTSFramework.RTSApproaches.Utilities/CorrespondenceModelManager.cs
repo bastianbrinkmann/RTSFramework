@@ -38,8 +38,10 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             return model;
         }
 
-        public void UpdateCorrespondenceModel<TTc>(CoverageData coverageData, IDelta delta, GranularityLevel granularityLevel, IEnumerable<TTc> allTests) 
-            where TTc : ITestCase 
+        public void UpdateCorrespondenceModel<TModel, TModelElement, TTestCase>(CoverageData coverageData, StructuralDelta<TModel, TModelElement> delta, GranularityLevel granularityLevel, IEnumerable<TTestCase> allTests) 
+            where TTestCase : ITestCase 
+			where TModel : IProgramModel 
+			where TModelElement : IProgramModelElement
         {
             var oldModel = GetCorrespondenceModel(delta.SourceModel.VersionId, granularityLevel);
             var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);
@@ -49,8 +51,8 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             PersistCorrespondenceModel(newModel);
         }
 
-        private Dictionary<string, HashSet<string>> GetLinksByCoverageData<TP>(CoverageData coverageData, GranularityLevel granularityLevel, TP targetModel)
-            where TP : IProgramModel
+        private Dictionary<string, HashSet<string>> GetLinksByCoverageData<TModel>(CoverageData coverageData, GranularityLevel granularityLevel, TModel targetModel)
+            where TModel : IProgramModel
         {
             var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
@@ -79,8 +81,6 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 
             return links;
         }
-
-        
 
         private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
         {

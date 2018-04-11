@@ -6,22 +6,14 @@ using System.Text;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Models;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitFilesProvider : IFilesProvider
+    public class GitFilesProvider : IFilesProvider<GitProgramModel>
     {
-        public string GetFileContent(IProgramModel programModel, string path)
+        public string GetFileContent(GitProgramModel gitProgramModel, string path)
         {
-	        var gitProgramModel = programModel as GitProgramModel;
-
-	        if (gitProgramModel == null)
-	        {
-		        throw new ArgumentException("Must be git program Model");
-	        }
-
             using (var repo = new Repository(gitProgramModel.RepositoryPath))
             {
                 var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);
@@ -34,7 +26,7 @@ namespace RTSFramework.Concrete.Git
                 }
                 else
                 {
-                    var absolutePath = RelativePathHelper.GetAbsolutePath(programModel, path);
+                    var absolutePath = RelativePathHelper.GetAbsolutePath(gitProgramModel, path);
                     relPath = relRoot.MakeRelativeUri(new Uri(absolutePath, UriKind.Absolute)).ToString();
                 }
 
@@ -50,15 +42,8 @@ namespace RTSFramework.Concrete.Git
             }
         }
 
-        public List<string> GetAllFiles(IProgramModel programModel)
+        public List<string> GetAllFiles(GitProgramModel gitProgramModel)
         {
-			var gitProgramModel = programModel as GitProgramModel;
-
-			if (gitProgramModel == null)
-			{
-				throw new ArgumentException("Must be git program Model");
-			}
-
 			using (var repo = new Repository(gitProgramModel.RepositoryPath))
             {
                 var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);

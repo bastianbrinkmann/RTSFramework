@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RTSFramework.Contracts.Models
 {
-	public interface ITestCaseResult<TTC> where TTC : ITestCase
+	public interface ITestCaseResult<TTestCase> where TTestCase : ITestCase
 	{
         string TestCaseId { get; }
 
@@ -15,6 +15,6 @@ namespace RTSFramework.Contracts.Models
 
 		TestCaseResultType Outcome { get; }
 
-        List<ITestCaseResult<TTC>> ChildrenResults { get; }
+        List<ITestCaseResult<TTestCase>> ChildrenResults { get; }
     }
 }

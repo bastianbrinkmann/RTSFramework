@@ -19,20 +19,22 @@ using RTSFramework.ViewModels.RunConfigurations;
 
 namespace RTSFramework.ViewModels
 {
-    public class CSharpProgramModelFileRTSController<TTc> 
-        where TTc : ITestCase
+    public class CSharpProgramModelFileRTSController<TModel, TDelta, TTestCase> 
+        where TTestCase : ITestCase 
+		where TModel : IProgramModel 
+		where TDelta : IDelta
     {
-        private readonly Func<DiscoveryType, GranularityLevel, IOfflineDeltaDiscoverer> discovererFactory;
-        private readonly Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory;
-        private readonly ITestsDiscoverer<TTc> testsDiscoverer;
-        private readonly Func<RTSApproachType, IRTSApproach<TTc>> rtsApproachFactory;
+        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> discovererFactory;
+        private readonly Func<ProcessingType, ITestProcessor<TTestCase>> testProcessorFactory;
+        private readonly ITestsDiscoverer<TTestCase> testsDiscoverer;
+        private readonly Func<RTSApproachType, IRTSApproach<TDelta,TTestCase>> rtsApproachFactory;
         private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
         public CSharpProgramModelFileRTSController(
-			Func<DiscoveryType, GranularityLevel, IOfflineDeltaDiscoverer> discovererFactory,
-            Func<ProcessingType, ITestProcessor<TTc>> testProcessorFactory,
-            ITestsDiscoverer<TTc> testsDiscoverer,
-            Func<RTSApproachType, IRTSApproach<TTc>> rtsApproachFactory,
+			Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> discovererFactory,
+            Func<ProcessingType, ITestProcessor<TTestCase>> testProcessorFactory,
+            ITestsDiscoverer<TTestCase> testsDiscoverer,
+            Func<RTSApproachType, IRTSApproach<TDelta, TTestCase>> rtsApproachFactory,
 			CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
         {
             this.discovererFactory = discovererFactory;
@@ -42,11 +44,11 @@ namespace RTSFramework.ViewModels
             this.assembliesAdapter = assembliesAdapter;
         }
 
-        private StructuralDelta PerformDeltaDiscovery(RunConfiguration configuration)
+        private TDelta PerformDeltaDiscovery(RunConfiguration<TModel> configuration)
         {
-            var deltaDiscoverer = discovererFactory(configuration.DiscoveryType, configuration.GranularityLevel);
+            var deltaDiscoverer = discovererFactory(configuration.DiscoveryType);
 
-            StructuralDelta delta = default(StructuralDelta);
+			TDelta delta = default(TDelta);
             DebugStopWatchTracker.ReportNeededTimeOnDebug(
                 () => delta = deltaDiscoverer.Discover(configuration.OldProgramModel, configuration.NewProgramModel), "DeltaDiscovery");
 
@@ -54,7 +56,7 @@ namespace RTSFramework.ViewModels
         }
 
 	    private const string Cancelled = "Cancelled";
-		public async Task<string> ExecuteImpactedTests(RunConfiguration configuration, CancellationToken token)
+		public async Task<string> ExecuteImpactedTests(RunConfiguration<TModel> configuration, CancellationToken token)
 		{
 			StringBuilder resultBuilder = new StringBuilder();
 
@@ -78,7 +80,7 @@ namespace RTSFramework.ViewModels
 				return resultBuilder.ToString();
 			}
 
-			IEnumerable<TTc> allTests = null;
+			IEnumerable<TTestCase> allTests = null;
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => allTests = testsDiscoverer.GetTestCases(),
 				"TestsDiscovery");
 			if (token.IsCancellationRequested)
@@ -89,7 +91,7 @@ namespace RTSFramework.ViewModels
 			//TODO Filtering of tests
 			//var defaultCategory = allTests.Where(x => x.Categories.Any(y => y == "Default"));
 
-			impactedTests = new List<TTc>();
+			impactedTests = new List<TTestCase>();
 			rtsApproach.ImpactedTest += NotifyImpactedTest;
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta, token),
 				"RTSApproach");
@@ -109,15 +111,15 @@ namespace RTSFramework.ViewModels
 				return resultBuilder.ToString();
 			}
 
-			var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTc>;
+			var processorWithCoverageCollection = testProcessor as IAutomatedTestsExecutorWithCoverageCollection<TTestCase>;
 			var coverageResults = processorWithCoverageCollection?.GetCollectedCoverageData();
 			if (coverageResults != null)
 			{
-				var dynamicRtsApproach = rtsApproach as DynamicRTSApproach<TTc>;
+				var dynamicRtsApproach = rtsApproach as IDynamicRTSApproach;
 				dynamicRtsApproach?.UpdateCorrespondenceModel(coverageResults);
 			}
 
-			var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTc>;
+			var automatedTestsProcessor = testProcessor as IAutomatedTestsExecutor<TTestCase>;
 			if (automatedTestsProcessor != null)
 			{
 				var testResults = automatedTestsProcessor.GetResults();
@@ -126,9 +128,9 @@ namespace RTSFramework.ViewModels
 			return resultBuilder.ToString();
 		}
 
-	    private List<TTc> impactedTests;
+	    private List<TTestCase> impactedTests;
 
-        public void NotifyImpactedTest(object sender, ImpactedTestEventArgs<TTc> args)
+        public void NotifyImpactedTest(object sender, ImpactedTestEventArgs<TTestCase> args)
         {
 	        var impactedTest = args.TestCase;
 
@@ -136,12 +138,12 @@ namespace RTSFramework.ViewModels
             impactedTests.Add(impactedTest);
         }
 
-        private void ReportFinalResults(IEnumerable<ITestCaseResult<TTc>> results, StringBuilder resultBuilder)
+        private void ReportFinalResults(IEnumerable<ITestCaseResult<TTestCase>> results, StringBuilder resultBuilder)
         {
 			resultBuilder.AppendLine();
 			resultBuilder.AppendLine("Final more detailed Test Results:");
 
-            var testCaseResults = results as IList<ITestCaseResult<TTc>> ?? results.ToList();
+            var testCaseResults = results as IList<ITestCaseResult<TTestCase>> ?? results.ToList();
 
             if (File.Exists("Error.log"))
             {
@@ -170,7 +172,7 @@ namespace RTSFramework.ViewModels
                 : $"{numberOfTestsNotPassed} of {testCaseResults.Count} did not pass!");
         }
 
-        private void ReportTestResult(ITestCaseResult<TTc> result, StreamWriter logWriter, StringBuilder resultBuilder)
+        private void ReportTestResult(ITestCaseResult<TTestCase> result, StreamWriter logWriter, StringBuilder resultBuilder)
         {
 			resultBuilder.AppendLine($"{result.TestCaseId}: {result.Outcome}");
             if (result.Outcome != TestCaseResultType.Passed)

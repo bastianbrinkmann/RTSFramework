@@ -58,11 +58,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LocalFilesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserIntendedChangesDiscoverer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.TFS2010\RTSFramework.Concrete.TFS2010.csproj">
+      <Project>{BFA8DBD3-1761-4660-A372-334482F08950}</Project>
+      <Name>RTSFramework.Concrete.TFS2010</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
       <Name>RTSFramework.Contracts</Name>
@@ -70,6 +73,10 @@
     <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
       <Project>{34343ade-c3e0-423d-94b6-9d0400f498cb}</Project>
       <Name>RTSFramework.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
+      <Project>{ECDB3480-0CF5-4DED-8118-046F41CD4743}</Project>
+      <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

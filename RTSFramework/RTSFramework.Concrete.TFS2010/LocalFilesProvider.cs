@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.Models;
 using RTSFramework.Core.Utilities;
 
-namespace RTSFramework.Concrete.User
+namespace RTSFramework.Concrete.TFS2010
 {
-    public class LocalFilesProvider : IFilesProvider
+	//TODO Replace by TFS Files Provider
+    public class LocalFilesProvider : IFilesProvider<TFS2010ProgramModel>
     {
-        public string GetFileContent(IProgramModel programModel, string path)
+        public string GetFileContent(TFS2010ProgramModel programModel, string path)
         {
 	        Uri fullUri;
             if (!Uri.TryCreate(path, UriKind.Absolute, out fullUri))
@@ -29,7 +30,7 @@ namespace RTSFramework.Concrete.User
 			}
         }
 
-        public List<string> GetAllFiles(IProgramModel programModel)
+        public List<string> GetAllFiles(TFS2010ProgramModel programModel)
         {
 			return GetAllFiles(programModel.RootPath);
         }

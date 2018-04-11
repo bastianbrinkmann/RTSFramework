@@ -6,10 +6,10 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts.RTSApproach
 {
-    public interface IRTSApproach<TTc>where TTc : ITestCase
+    public interface IRTSApproach<TDelta, TTestCase>where TTestCase : ITestCase where TDelta :IDelta
     {
-	    event EventHandler<ImpactedTestEventArgs<TTc>> ImpactedTest;
-        void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta delta, CancellationToken token = default(CancellationToken));
+	    event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
+        void ExecuteRTS(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken token = default(CancellationToken));
 
     }
 }

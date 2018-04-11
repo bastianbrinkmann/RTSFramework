@@ -6,6 +6,7 @@ using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Utilities;
@@ -16,7 +17,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     /// An extensive study of static regression test selection in modern software evolution
     /// https://dl.acm.org/citation.cfm?id=2950361
     /// </summary>
-    public class ClassSRTSApproach : IRTSApproach<MSTestTestcase>
+    public class ClassSRTSApproach<TModel> : IRTSApproach<StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase> where TModel : IProgramModel
     {
 		public event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;
 
@@ -30,7 +31,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
             this.intertypeRelationGraphBuilder = intertypeRelationGraphBuilder;
         }
 
-        public void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta delta, CancellationToken cancellationToken = default(CancellationToken))
+        public void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken = default(CancellationToken))
         {
 	        var sourceCSharpModel = delta.SourceModel as CSharpProgramModel;
 	        if (sourceCSharpModel == null)

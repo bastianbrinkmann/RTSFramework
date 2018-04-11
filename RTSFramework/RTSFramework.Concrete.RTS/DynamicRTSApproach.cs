@@ -9,9 +9,12 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class DynamicRTSApproach<TTc> : IRTSApproach<TTc> where TTc : ITestCase
+    public class DynamicRTSApproach<TModel, TModelElement, TTestCase> : IRTSApproach<StructuralDelta<TModel, TModelElement>, TTestCase>, IDynamicRTSApproach
+		where TTestCase : ITestCase 
+		where TModel : IProgramModel 
+		where TModelElement : IProgramModelElement
     {
-		public event EventHandler<ImpactedTestEventArgs<TTc>> ImpactedTest;
+		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
 		private readonly CorrespondenceModelManager correspondenceModelManager;
         public DynamicRTSApproach(CorrespondenceModelManager correspondenceModelManager)
@@ -19,12 +22,12 @@ namespace RTSFramework.RTSApproaches.Dynamic
             this.correspondenceModelManager = correspondenceModelManager;
         }
 
-        private IList<TTc> allTests;
-        private StructuralDelta currentDelta;
+        private IList<TTestCase> allTests;
+        private StructuralDelta<TModel, TModelElement> currentDelta;
 
-        public void ExecuteRTS(IEnumerable<TTc> testCases, StructuralDelta delta, CancellationToken cancellationToken = default(CancellationToken))
+        public void ExecuteRTS(IEnumerable<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken = default(CancellationToken))
         {
-            allTests = testCases as IList<TTc> ?? testCases.ToList();
+            allTests = testCases as IList<TTestCase> ?? testCases.ToList();
             currentDelta = delta;
 
             var correspondenceModel = correspondenceModelManager.GetCorrespondenceModel(delta.SourceModel.VersionId, delta.SourceModel.GranularityLevel);
@@ -43,13 +46,13 @@ namespace RTSFramework.RTSApproaches.Dynamic
                     if (delta.ChangedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))) || 
                         delta.DeletedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))))
                     {
-	                    ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTc>(testcase));
+	                    ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
                     }
                 }
                 else
                 {
 					//Unknown testcase - considered as new testcase so impacted
-					ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTc>(testcase));
+					ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
 				}
             }
         }

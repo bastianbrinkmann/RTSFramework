@@ -6,12 +6,13 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-    public class UserIntendedChangesDiscoverer : IOfflineFileDeltaDiscoverer
+	//TODO: This is no delta discoverer but a Delta Adapter from string list to Delta
+    public class UserIntendedChangesDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, FileElement>> where TModel : IProgramModel
 	{
-		public StructuralDelta Discover(IProgramModel oldVersion, IProgramModel newVersion)
+		public StructuralDelta<TModel, FileElement> Discover(TModel oldVersion, TModel newVersion)
         {
-            var delta = new StructuralDelta
-            {
+            var delta = new StructuralDelta<TModel, FileElement>
+			{
                 SourceModel = oldVersion,
                 TargetModel = newVersion
             };

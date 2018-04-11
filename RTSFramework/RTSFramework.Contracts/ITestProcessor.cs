@@ -5,8 +5,8 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-    public interface ITestProcessor<TTc> where TTc : ITestCase
+    public interface ITestProcessor<TTestCase> where TTestCase : ITestCase
     {
-        Task ProcessTests(IEnumerable<TTc> tests, CancellationToken cancellationToken = default(CancellationToken));
+        Task ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

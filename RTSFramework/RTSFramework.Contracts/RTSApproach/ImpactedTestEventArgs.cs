@@ -3,13 +3,13 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts.RTSApproach
 {
-	public class ImpactedTestEventArgs<TTc> : EventArgs where TTc : ITestCase
+	public class ImpactedTestEventArgs<TTestCase> : EventArgs where TTestCase : ITestCase
 	{
-		public ImpactedTestEventArgs(TTc testCase)
+		public ImpactedTestEventArgs(TTestCase testCase)
 		{
 			TestCase = testCase;
 		}
 
-		public TTc TestCase { get; private set; }
+		public TTestCase TestCase { get; private set; }
 	}
 }

@@ -4,7 +4,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.ViewModels.RunConfigurations
 {
-    public class RunConfiguration
+    public class RunConfiguration<TModel> where TModel : IProgramModel
     {
 
         public GranularityLevel GranularityLevel { get; set; }
@@ -14,9 +14,9 @@ namespace RTSFramework.ViewModels.RunConfigurations
 
         public RTSApproachType RTSApproachType { get; set; }
 
-        public IProgramModel OldProgramModel { get; set; }
+        public TModel OldProgramModel { get; set; }
 
-        public IProgramModel NewProgramModel { get; set; }
+        public TModel NewProgramModel { get; set; }
 
         public string GitRepositoryPath { get; set; }
 

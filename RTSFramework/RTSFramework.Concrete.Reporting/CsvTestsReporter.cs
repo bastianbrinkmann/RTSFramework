@@ -7,9 +7,9 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.Reporting
 {
-    public class CsvTestsReporter<TTc> : ITestProcessor<TTc> where TTc : ITestCase
+    public class CsvTestsReporter<TTestCase> : ITestProcessor<TTestCase> where TTestCase : ITestCase
     {
-        public Task ProcessTests(IEnumerable<TTc> tests, CancellationToken cancellationToken = default(CancellationToken))
+        public Task ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken))
         {
             FileInfo csvFile = new FileInfo("Results.csv");
 
