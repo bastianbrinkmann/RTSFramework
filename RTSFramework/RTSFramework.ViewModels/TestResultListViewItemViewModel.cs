@@ -1,11 +1,13 @@
 ﻿using Prism.Mvvm;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.ViewModels
 {
 	public class TestResultListViewItemViewModel : BindableBase
 	{
 		private string fullyQualifiedName;
-		private string testOutcome;
+		private TestExecutionOutcome testOutcome;
+		private string categories;
 
 		public string FullyQualifiedName
 		{
@@ -17,8 +19,17 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		//TODO: TestOutcome as Type and ValueConverter
-		public string TestOutcome
+		public string Categories
+		{
+			get { return categories; }
+			set
+			{
+				categories = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public TestExecutionOutcome TestOutcome
 		{
 			get { return testOutcome; }
 			set

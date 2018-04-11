@@ -103,7 +103,7 @@
     <Compile Include="Models\IProgramModelElement.cs" />
     <Compile Include="Models\ITestCaseResult.cs" />
     <Compile Include="Models\Delta\StructuralDelta.cs" />
-    <Compile Include="Models\TestCaseResultType.cs" />
+    <Compile Include="Models\TestExecutionOutcome.cs" />
     <Compile Include="DeltaDiscoverer\IDeltaDiscoverer.cs" />
     <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
     <Compile Include="Models\IProgramModel.cs" />

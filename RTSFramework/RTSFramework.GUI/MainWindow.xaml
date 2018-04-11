@@ -11,7 +11,7 @@
         xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="#FFDBE5F1" BorderBrush="#FFDBE5F1">
+        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="95"/>
@@ -66,23 +66,33 @@
 
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
-		<ListView x:Name="TestsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
+		<ListView x:Name="TestsListView" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
 			<ListView.View>
 				<GridView>
-					<GridViewColumn Width="350" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
-					<GridViewColumn Width="140" Header="Outcome" DisplayMemberBinding="{Binding TestOutcome}" />
+					<GridViewColumn Width="250" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
+					<GridViewColumn Width="32">
+						<GridViewColumn.CellTemplate> 
+							<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
+								<Grid>
+									<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" />
+								</Grid>
+							</DataTemplate>
+						</GridViewColumn.CellTemplate>
+					</GridViewColumn>
+					<GridViewColumn Width="75" Header="Outcome" DisplayMemberBinding="{Binding TestOutcome}" />
+					<GridViewColumn Width="150" Header="Categories" DisplayMemberBinding="{Binding Categories}"/>
 				</GridView>
 			</ListView.View>
 		</ListView>
-		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Background="{StaticResource BackgroundColor}">
 			<StatusBar.ItemsPanel>
 				<ItemsPanelTemplate>
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="Auto" />
-							<ColumnDefinition Width="*" />
 							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
 						</Grid.ColumnDefinitions>
 					</Grid>
 				</ItemsPanelTemplate>
@@ -92,7 +102,7 @@
 			</StatusBarItem>
 			<Separator Grid.Column="1" />
 			<StatusBarItem Grid.Column="4">
-				<ProgressBar x:Name="PbStatus" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsIndeterminate="{Binding IsRunning}" Height="20" Width="100" />
+				<ProgressBar x:Name="PbStatus" Margin="0,0,5,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsIndeterminate="{Binding IsRunning}" Height="20" Width="100" BorderBrush="{StaticResource BorderColor}" Background="White" />
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>

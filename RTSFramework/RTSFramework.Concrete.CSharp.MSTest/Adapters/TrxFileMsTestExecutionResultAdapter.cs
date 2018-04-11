@@ -107,12 +107,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
         }
 
         //TODO Move closer to testcaseresulttype
-        private TestCaseResultType ParseOutcome(string outcome)
+        private TestExecutionOutcome ParseOutcome(string outcome)
         {
-            TestCaseResultType enumValue;
+            TestExecutionOutcome enumValue;
             if (!Enum.TryParse(outcome, true, out enumValue))
             {
-                enumValue = TestCaseResultType.Failed;
+                enumValue = TestExecutionOutcome.Failed;
             }
 
             return enumValue;

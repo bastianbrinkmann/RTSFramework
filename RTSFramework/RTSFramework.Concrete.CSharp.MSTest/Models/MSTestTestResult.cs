@@ -6,7 +6,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
     public class MSTestTestResult : ITestCaseResult<MSTestTestcase>
     {
-        public TestCaseResultType Outcome { get; set; }
+        public TestExecutionOutcome Outcome { get; set; }
         public string ErrorMessage { get; set; }
         public string StackTrace { get; set; }
         public double DurationInSeconds { get; set; }

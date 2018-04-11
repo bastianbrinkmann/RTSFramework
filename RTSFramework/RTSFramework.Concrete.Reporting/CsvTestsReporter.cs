@@ -26,7 +26,7 @@ namespace RTSFramework.Concrete.Reporting
 	                    {
 		                    return Task.FromResult(result);
 	                    }
-                        writer.WriteLine($"{test.Id};" + string.Join(",", test.Categories));
+                        writer.WriteLine($"{test.Id};" + string.Join(" ", test.Categories));
                     }
                 }
             }

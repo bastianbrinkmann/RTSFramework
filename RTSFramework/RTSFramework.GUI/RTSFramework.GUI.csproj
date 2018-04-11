@@ -257,6 +257,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\InverseBooleanConverter.cs" />
+    <Compile Include="Converters\TestExecutionOutcomeImageConverter.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="DependencyInjection\UnityGUIInitializer.cs" />
     <Compile Include="DependencyInjection\UnityProvider.cs" />
@@ -363,6 +364,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\testselection.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\failed.png" />
+    <Resource Include="Resources\other.png" />
+    <Resource Include="Resources\passed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\current.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

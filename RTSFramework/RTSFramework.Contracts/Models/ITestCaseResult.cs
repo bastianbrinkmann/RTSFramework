@@ -13,7 +13,7 @@ namespace RTSFramework.Contracts.Models
 		DateTime StartTime { get; }
 		DateTime EndTime { get; }
 
-		TestCaseResultType Outcome { get; }
+		TestExecutionOutcome Outcome { get; }
 
         List<ITestCaseResult<TTestCase>> ChildrenResults { get; }
     }

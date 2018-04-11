@@ -337,7 +337,7 @@ namespace RTSFramework.ViewModels
 					TestResults.AddRange(executionResult.TestcasesResults.Select(x => new TestResultListViewItemViewModel
 					{
 						FullyQualifiedName = x.TestCaseId,
-						TestOutcome = x.Outcome.ToString()
+						TestOutcome = x.Outcome
 					}));
 					break;
 				case ProcessingType.CsvReporting:
@@ -354,7 +354,8 @@ namespace RTSFramework.ViewModels
 					TestResults.Clear();
 					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel
 					{
-						FullyQualifiedName = x.Id
+						FullyQualifiedName = x.Id,
+						Categories = string.Join(",", x.Categories)
 					}));
 					break;
 			}

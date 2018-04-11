@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<Application.Resources>
-		
+		<Brush x:Key="BackgroundColor">#FFDBE5F1</Brush>
+		<Brush x:Key="BorderColor">#FF8095B0</Brush>
 	</Application.Resources>
 </Application>
