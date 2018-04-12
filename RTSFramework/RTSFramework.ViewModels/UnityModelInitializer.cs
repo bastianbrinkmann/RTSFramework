@@ -48,32 +48,79 @@ namespace RTSFramework.ViewModels
 			InitRTSApproaches(unityContainer);
 			InitTestProcessors(unityContainer);
 
+			InitStateBasedController(unityContainer);
+
 			container = unityContainer;
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TModel, TDelta, TTestCase, TResult> GetStateBasedController<TModel, TDelta, TTestCase, TResult>()
+		internal static StateBasedController<TModel, TDelta, TTestCase, TResult> GetStateBasedController<TModel, TDelta, TTestCase, TResult>
+			(DiscoveryType discoveryType, RTSApproachType rtsApproachType, ProcessingType processingType)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TDelta : IDelta
 			where TResult : ITestProcessingResult
 		{
-			return container.Resolve<StateBasedController<TModel, TDelta, TTestCase, TResult>>();
+			var factory = container.Resolve<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>>();
+
+			return factory(discoveryType, rtsApproachType, processingType);
 		}
 
-		private static void InitHelper(IUnityContainer unityContainer)
+		#region StateBasedController
+
+		private static void InitStateBasedController(IUnityContainer unityContainer)
 		{
-			//FilesProvider
-			unityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
-			unityContainer.RegisterType<IFilesProvider<TFS2010ProgramModel>, LocalFilesProvider>();
-
-			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
+			InitStateBasedControllerFactoryDelta<GitProgramModel>(unityContainer);
+			InitStateBasedControllerFactoryDelta<TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitCorrespondenceModelManager(IUnityContainer unityContainer)
+		private static void InitStateBasedControllerFactoryDelta<TModel>(IUnityContainer unityContainer)
+			where TModel : IProgramModel
 		{
-			unityContainer.RegisterInstance(typeof(CorrespondenceModelManager));
+			InitStateBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
+			InitStateBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
 		}
+
+		private static void InitStateBasedControllerFactoryResult<TModel, TDelta>(IUnityContainer unityContainer) 
+			where TModel : IProgramModel 
+			where TDelta : IDelta
+		{
+			InitStateBasedControllerFactoryTestcase<TModel, TDelta, MSTestExectionResult>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TModel, TDelta, FileProcessingResult>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TModel, TDelta, TestListResult<MSTestTestcase>>(unityContainer);
+		}
+
+		private static void InitStateBasedControllerFactoryTestcase<TModel, TDelta, TResult>(IUnityContainer unityContainer)
+			where TModel : IProgramModel
+			where TDelta : IDelta
+			where TResult : ITestProcessingResult
+		{
+			InitStateBasedControllerFactory<TModel, TDelta, MSTestTestcase, TResult>(unityContainer);
+		}
+
+		private static void InitStateBasedControllerFactory<TModel, TDelta, TTestCase, TResult>(IUnityContainer unityContainer) 
+			where TModel : IProgramModel 
+			where TDelta : IDelta 
+			where TTestCase : ITestCase 
+			where TResult : ITestProcessingResult
+		{
+			unityContainer.RegisterType<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>>(
+				new InjectionFactory(c =>
+					new Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>(
+						(discoveryType, rtsApproachType, processingType) =>
+						{
+							var deltaDiscovererFactory = unityContainer.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TDelta, TTestCase>>>();
+							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult>>>();
+
+							return unityContainer.Resolve<StateBasedController<TModel, TDelta, TTestCase, TResult>>(
+								new ParameterOverride("deltaDiscoverer", deltaDiscovererFactory(discoveryType)),
+								new ParameterOverride("rtsApproach", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
+						})));
+		}
+
+		#endregion
 
 		#region TestDiscoverer
 
@@ -188,6 +235,20 @@ namespace RTSFramework.ViewModels
 		}
 
 		#endregion
+
+		private static void InitHelper(IUnityContainer unityContainer)
+		{
+			//FilesProvider
+			unityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
+			unityContainer.RegisterType<IFilesProvider<TFS2010ProgramModel>, LocalFilesProvider>();
+
+			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
+		}
+
+		private static void InitCorrespondenceModelManager(IUnityContainer unityContainer)
+		{
+			unityContainer.RegisterInstance(typeof(CorrespondenceModelManager));
+		}
 
 		private static void InitAdapters(IUnityContainer unityContainer)
 		{

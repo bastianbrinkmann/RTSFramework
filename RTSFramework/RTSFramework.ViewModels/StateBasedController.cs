@@ -21,43 +21,32 @@ namespace RTSFramework.ViewModels
 		where TDelta : IDelta
 		where TResult : ITestProcessingResult
     {
-        private readonly Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> deltaDiscovererFactory;
-        private readonly Func<ProcessingType, ITestProcessor<TTestCase, TResult>> testProcessorFactory;
+        private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
+        private readonly ITestProcessor<TTestCase, TResult> testProcessor;
         private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
-        private readonly Func<RTSApproachType, IRTSApproach<TDelta,TTestCase>> rtsApproachFactory;
+        private readonly IRTSApproach<TDelta,TTestCase> rtsApproach;
 
         public StateBasedController(
-			Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>> deltaDiscovererFactory,
+			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
             ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
-            Func<RTSApproachType, IRTSApproach<TDelta, TTestCase>> rtsApproachFactory,
-			Func<ProcessingType, ITestProcessor<TTestCase, TResult>> testProcessorFactory)
+			IRTSApproach<TDelta, TTestCase> rtsApproach,
+			ITestProcessor<TTestCase, TResult> testProcessor)
         {
-            this.deltaDiscovererFactory = deltaDiscovererFactory;
-            this.testProcessorFactory = testProcessorFactory;
+            this.deltaDiscoverer = deltaDiscoverer;
+            this.testProcessor = testProcessor;
             this.testsDiscoverer = testsDiscoverer;
-            this.rtsApproachFactory = rtsApproachFactory;
+            this.rtsApproach = rtsApproach;
         }
 
-        private TDelta PerformDeltaDiscovery(RunConfiguration<TModel> configuration)
-        {
-            var deltaDiscoverer = deltaDiscovererFactory(configuration.DiscoveryType);
-
-	        var delta = DebugStopWatchTracker.ReportNeededTimeOnDebug(() => deltaDiscoverer.Discover(configuration.OldProgramModel, configuration.NewProgramModel), "DeltaDiscovery");
-
-            return delta;
-        }
-		public async Task<TResult> ExecuteImpactedTests(RunConfiguration<TModel> configuration, CancellationToken token)
+		public async Task<TResult> ExecuteImpactedTests(TModel oldModel, TModel newModel, CancellationToken token)
 		{
-			var testProcessor = testProcessorFactory(configuration.ProcessingType);
-			var rtsApproach = rtsApproachFactory(configuration.RTSApproachType);
-
-			var delta = PerformDeltaDiscovery(configuration);
+			var delta = DebugStopWatchTracker.ReportNeededTimeOnDebug(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
 			if (token.IsCancellationRequested)
 			{
 				return default(TResult);
 			}
 
-			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(configuration.NewProgramModel, token), "TestsDiscovery");
+			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
 			if (token.IsCancellationRequested)
 			{
 				return default(TResult);

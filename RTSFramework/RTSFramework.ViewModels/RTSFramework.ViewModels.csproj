@@ -95,7 +95,6 @@
     <Compile Include="RunConfigurations\ProcessingType.cs" />
     <Compile Include="RunConfigurations\ProgramModelType.cs" />
     <Compile Include="RunConfigurations\RTSApproachType.cs" />
-    <Compile Include="RunConfigurations\RunConfiguration.cs" />
     <Compile Include="TestResultListViewItemViewModel.cs" />
     <Compile Include="UnityModelInitializer.cs" />
     <Compile Include="RequireUIServices\IDialogService.cs" />

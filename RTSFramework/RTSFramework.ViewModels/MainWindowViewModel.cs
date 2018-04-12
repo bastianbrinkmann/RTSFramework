@@ -48,7 +48,7 @@ namespace RTSFramework.ViewModels
 		{
 			this.dialogService = dialogService;
 
-			StartRunCommand = new DelegateCommand(StartRun);
+			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
 			CancelRunCommand = new DelegateCommand(CancelRun);
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
 			RunStatus = RunStatus.Ready;
@@ -253,32 +253,33 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		private async void StartRun()
+		private async void ExecuteRunFixModel()
 		{
 			RunStatus = RunStatus.Running;
 			cancellationTokenSource = new CancellationTokenSource();
 
 			try
 			{
-				if (ProgramModelType == ProgramModelType.GitProgramModel)
+				switch (ProgramModelType)
 				{
-					var oldProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
-					var newProgramModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
+					case ProgramModelType.GitProgramModel:
+						var oldGitModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
+						var newGitModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
 
-					await ExecuteRunForModel(oldProgramModel, newProgramModel);
-				}
-				else if(ProgramModelType == ProgramModelType.TFS2010ProgramModel)
-				{
-					if (DiscoveryType == DiscoveryType.LocalDiscovery)
-					{
-						dialogService.ShowError("Local Discovery combined with TFS 2010 is not supported yet!");
-						return;
-					}
+						await ExecuteRunFixGranularityLevel(oldGitModel, newGitModel);
+						break;
+					case ProgramModelType.TFS2010ProgramModel:
+						if (DiscoveryType == DiscoveryType.LocalDiscovery)
+						{
+							dialogService.ShowError("Local Discovery combined with TFS 2010 is not supported yet!");
+							return;
+						}
 
-					var oldProgramModel = new TFS2010ProgramModel { VersionId = "Test" };
-					var newProgramModel = new TFS2010ProgramModel { VersionId = "Test2" };
+						var oldTfsModel = new TFS2010ProgramModel { VersionId = "Test" };
+						var newTfsModel = new TFS2010ProgramModel { VersionId = "Test2" };
 
-					await ExecuteRunForModel(oldProgramModel, newProgramModel);
+						await ExecuteRunFixGranularityLevel(oldTfsModel, newTfsModel);
+						break;
 				}
 
 				RunStatus = RunStatus.Completed;
@@ -289,49 +290,34 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private async Task ExecuteRunForModel<TModel>(TModel oldProgramModel, TModel newProgramModel)
+		private async Task ExecuteRunFixGranularityLevel<TModel>(TModel oldProgramModel, TModel newProgramModel)
 			where TModel : CSharpProgramModel
 		{
-			var configuration = new RunConfiguration<TModel>();
-			SetConfig(configuration, oldProgramModel, newProgramModel);
-
-			if (configuration.GranularityLevel == GranularityLevel.File)
-			{
-				await ExecuteRunOnGranularityLevel<TModel, StructuralDelta<TModel, CSharpFileElement>>(configuration);
-			}
-			else if (configuration.GranularityLevel == GranularityLevel.Class)
-			{
-				await ExecuteRunOnGranularityLevel<TModel, StructuralDelta<TModel, CSharpClassElement>>(configuration);
-			}
-		}
-
-		private void SetConfig<TModel>(RunConfiguration<TModel> configuration, TModel oldProgramModel, TModel newProgramModel) where TModel : CSharpProgramModel
-		{
-			configuration.ProcessingType = ProcessingType;
-			configuration.DiscoveryType = DiscoveryType;
-			configuration.GitRepositoryPath = GitRepositoryPath;
-			configuration.AbsoluteSolutionPath = SolutionFilePath;
-			configuration.RTSApproachType = RTSApproachType;
-			configuration.GranularityLevel = GranularityLevel;
-
-			oldProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
-			newProgramModel.AbsoluteSolutionPath = configuration.AbsoluteSolutionPath;
+			oldProgramModel.AbsoluteSolutionPath = SolutionFilePath;
+			newProgramModel.AbsoluteSolutionPath = SolutionFilePath;
 			oldProgramModel.GranularityLevel = GranularityLevel;
 			newProgramModel.GranularityLevel = GranularityLevel;
 
-			configuration.OldProgramModel = oldProgramModel;
-			configuration.NewProgramModel = newProgramModel;
+			switch (GranularityLevel)
+			{
+				case GranularityLevel.File:
+					await ExecuteRunFixProcessingType<TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramModel, newProgramModel);
+					break;
+				case GranularityLevel.Class:
+					await ExecuteRunFixProcessingType<TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramModel, newProgramModel);
+					break;
+			}
 		}
 
-		private async Task ExecuteRunOnGranularityLevel<TModel, TDelta>(RunConfiguration<TModel> configuration)
+		private async Task ExecuteRunFixProcessingType<TModel, TDelta>(TModel oldProgramModel, TModel newProgramModel)
 			where TModel : IProgramModel
 			where TDelta : IDelta
 		{
-			switch (configuration.ProcessingType)
+			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionWithCoverage:
-					var executionResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, MSTestExectionResult>(configuration);
+					var executionResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldProgramModel, newProgramModel);
 
 					TestResults.Clear();
 					TestResults.AddRange(executionResult.TestcasesResults.Select(x => new TestResultListViewItemViewModel
@@ -341,7 +327,7 @@ namespace RTSFramework.ViewModels
 					}));
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, FileProcessingResult>(configuration);
+					var csvCreationResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldProgramModel, newProgramModel);
 					bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?","CSV File Created");
 					if (openFile)
 					{
@@ -350,7 +336,7 @@ namespace RTSFramework.ViewModels
 
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(configuration);
+					var listReportingResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldProgramModel, newProgramModel);
 					TestResults.Clear();
 					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel
 					{
@@ -361,14 +347,17 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private async Task<TResult> ExecuteRun<TModel, TDelta, TTestCase, TResult>(RunConfiguration<TModel> configuration) where TTestCase : ITestCase
+		private async Task<TResult> ExecuteRun<TModel, TDelta, TTestCase, TResult>(TModel oldProgramModel, TModel newProgramModel) where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TDelta : IDelta
 			where TResult : ITestProcessingResult
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TModel, TDelta, TTestCase, TResult>();
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);
 
-			return await Task.Run(() => stateBasedController.ExecuteImpactedTests(configuration, cancellationTokenSource.Token), cancellationTokenSource.Token);
+			return
+				await Task.Run(
+					() => stateBasedController.ExecuteImpactedTests(oldProgramModel, newProgramModel, cancellationTokenSource.Token),
+					cancellationTokenSource.Token);
 		}
 	}
 }
