@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IIntededChangesProvider.cs" />
+    <Compile Include="IIntendedChangesProvider.cs" />
     <Compile Include="IntendedFileChangesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserIntendedChangesDiscoverer.cs" />
