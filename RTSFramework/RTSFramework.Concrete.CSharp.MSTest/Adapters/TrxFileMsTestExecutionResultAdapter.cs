@@ -52,7 +52,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 
                     var currentResult = new MSTestTestResult
                     {
-                        TestCaseId = currentTestCase.Id,
+                        TestCase = currentTestCase,
                         Outcome = result.Outcome,
                         DurationInSeconds = result.DurationInSeconds,
                         EndTime = result.EndTime,
@@ -69,7 +69,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                         {
                             var childrenResult = new MSTestTestResult
                             {
-                                TestCaseId = currentTestCase.Id,
+                                TestCase = currentTestCase,
                                 Outcome = nextResult.Outcome,
                                 DurationInSeconds = nextResult.DurationInSeconds,
                                 EndTime = nextResult.EndTime,

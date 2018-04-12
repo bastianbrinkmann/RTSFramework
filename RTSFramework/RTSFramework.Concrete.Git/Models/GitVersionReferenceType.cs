@@ -3,6 +3,7 @@
     public enum GitVersionReferenceType
     {
         LatestCommit,
-        CurrentChanges
+        CurrentChanges,
+		SpecificCommit
     }
 }

@@ -14,47 +14,96 @@ namespace RTSFramework.Concrete.Git
     {
 		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {
-            if (oldModel.RepositoryPath != newModel.RepositoryPath)
+            if (oldModel.GitVersionIdentification.RepositoryPath != newModel.GitVersionIdentification.RepositoryPath)
             {
-                throw new ArgumentException($"Git Models must be for the same repository! OldRepoPath: {oldModel.RepositoryPath} NewRepoPath: {newModel.RepositoryPath}");
+                throw new ArgumentException($"Git Models must be for the same repository! OldRepoPath: {oldModel.GitVersionIdentification.RepositoryPath} NewRepoPath: {newModel.GitVersionIdentification.RepositoryPath}");
             }
 
-            var repositoryPath = oldModel.RepositoryPath;
+            var repositoryPath = oldModel.GitVersionIdentification.RepositoryPath;
 
 	        var delta = new StructuralDelta<GitProgramModel, FileElement>(oldModel, newModel);
 
             using (Repository repo = new Repository(repositoryPath))
             {
-                if (oldModel.GitVersionReferenceType == GitVersionReferenceType.LatestCommit &&
-                    newModel.GitVersionReferenceType == GitVersionReferenceType.CurrentChanges)
+				AddDeltaBetweenCommits(delta, repo, oldModel.GitVersionIdentification, newModel.GitVersionIdentification);
+
+                if (newModel.GitVersionIdentification.ReferenceType == GitVersionReferenceType.CurrentChanges)
                 {
                     TreeChanges changes = repo.Diff.Compare<TreeChanges>();
-                    foreach (TreeEntryChanges change in changes)
-                    {
-                        var filePath = change.Path;
-                        var fullPath = Path.Combine(repositoryPath, filePath);
-                        var relativePathToSolution = RelativePathHelper.GetRelativePath(newModel, fullPath);
-
-                        switch (change.Status)
-                        {
-                            case ChangeKind.Added:
-                                if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-                                    delta.AddedElements.Add(new FileElement(relativePathToSolution));
-                                break;
-                            case ChangeKind.Deleted:
-                                if (delta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-                                    delta.DeletedElements.Add(new FileElement(relativePathToSolution));
-                                break;
-                            case ChangeKind.Modified:
-                                if (delta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-                                    delta.ChangedElements.Add(new FileElement(relativePathToSolution));
-                                break;
-                        }
-                    }
+                    AddDeltaInTreeChanges(delta, changes);
                 }
             }
 
             return delta;
         }
+
+	    private void AddDeltaBetweenCommits(StructuralDelta<GitProgramModel, FileElement> delta, Repository repo, GitVersionIdentification oldVersion, GitVersionIdentification newVersion)
+	    {
+		    bool collectDelta = newVersion.ReferenceType == GitVersionReferenceType.CurrentChanges;
+
+		    for(int i = 0; i < repo.Commits.Count(); i++)
+		    {
+			    var commit = repo.Commits.ElementAt(i);
+
+				if (commit.Id.Sha == newVersion.Commit.ShaId)
+				{
+					collectDelta = true;
+				}
+
+				if (commit.Id.Sha == oldVersion.Commit.ShaId)
+				{
+					break;
+				}
+
+				if (collectDelta)
+				{
+					if (i + 1 < repo.Commits.Count())
+					{
+						var previousCommit = repo.Commits.ElementAt(i + 1);
+						TreeChanges diff = repo.Diff.Compare<TreeChanges>(commit.Tree, previousCommit.Tree);
+
+						AddDeltaInTreeChanges(delta, diff);
+					}
+					else
+					{
+						foreach (TreeEntry entry in commit.Tree)
+						{
+							var filePath = entry.Path;
+							var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, filePath);
+							var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+
+							if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+								delta.AddedElements.Add(new FileElement(relativePathToSolution));
+						}
+					}
+				}
+		    }
+	    }
+
+	    private void AddDeltaInTreeChanges(StructuralDelta<GitProgramModel, FileElement> delta, TreeChanges treeChanges)
+	    {
+			foreach (TreeEntryChanges change in treeChanges)
+			{
+				var filePath = change.Path;
+				var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, filePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+
+				switch (change.Status)
+				{
+					case ChangeKind.Added:
+						if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+							delta.AddedElements.Add(new FileElement(relativePathToSolution));
+						break;
+					case ChangeKind.Deleted:
+						if (delta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+							delta.DeletedElements.Add(new FileElement(relativePathToSolution));
+						break;
+					case ChangeKind.Modified:
+						if (delta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+							delta.ChangedElements.Add(new FileElement(relativePathToSolution));
+						break;
+				}
+			}
+		}
     }
 }

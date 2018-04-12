@@ -6,7 +6,9 @@ namespace RTSFramework.ViewModels.RunConfigurations
 	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
 	public enum DiscoveryType
     {
-		[Description("Local Discovery")]
+		[Description("Between Commits")]
+		VersionCompare,
+		[Description("Uncommitted Changes")]
         LocalDiscovery,
 		[Description("Intended Changes")]
 		UserIntendedChangesDiscovery,

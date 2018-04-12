@@ -58,10 +58,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TFS2010VersionIdentification.cs" />
     <Compile Include="LocalFilesProvider.cs" />
     <Compile Include="Models\TFS2010ProgramModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TFS2010ProgramModelProvider.cs" />
+    <Compile Include="TFS2010ProgramModelAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">

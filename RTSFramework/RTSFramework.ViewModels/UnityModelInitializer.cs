@@ -68,14 +68,14 @@ namespace RTSFramework.ViewModels
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TModel, TDelta, TTestCase, TResult> GetStateBasedController<TModel, TDelta, TTestCase, TResult>
+		internal static StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult> GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>
 			(DiscoveryType discoveryType, RTSApproachType rtsApproachType, ProcessingType processingType)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>>();
+			var factory = container.Resolve<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>>>();
 
 			return factory(discoveryType, rtsApproachType, processingType);
 		}
@@ -138,50 +138,50 @@ namespace RTSFramework.ViewModels
 
 		private static void InitStateBasedController(IUnityContainer unityContainer)
 		{
-			InitStateBasedControllerFactoryDelta<GitProgramModel>(unityContainer);
-			InitStateBasedControllerFactoryDelta<TFS2010ProgramModel>(unityContainer);
+			InitStateBasedControllerFactoryDelta<GitVersionIdentification, GitProgramModel>(unityContainer);
+			InitStateBasedControllerFactoryDelta<TFS2010VersionIdentification, TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryDelta<TModel>(IUnityContainer unityContainer)
+		private static void InitStateBasedControllerFactoryDelta<TArtefact, TModel>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 		{
-			InitStateBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitStateBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitStateBasedControllerFactoryResult<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
+			InitStateBasedControllerFactoryResult<TArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryResult<TModel, TDelta>(IUnityContainer unityContainer) 
+		private static void InitStateBasedControllerFactoryResult<TArtefact, TModel, TDelta>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
 			where TDelta : IDelta<TModel>
 		{
-			InitStateBasedControllerFactoryTestcase<TModel, TDelta, MSTestExectionResult>(unityContainer);
-			InitStateBasedControllerFactoryTestcase<TModel, TDelta, FileProcessingResult>(unityContainer);
-			InitStateBasedControllerFactoryTestcase<TModel, TDelta, TestListResult<MSTestTestcase>>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TDelta, MSTestExectionResult>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TDelta, FileProcessingResult>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryTestcase<TModel, TDelta, TResult>(IUnityContainer unityContainer)
+		private static void InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TDelta, TResult>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			InitStateBasedControllerFactory<TModel, TDelta, MSTestTestcase, TResult>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TDelta, MSTestTestcase, TResult>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactory<TModel, TDelta, TTestCase, TResult>(IUnityContainer unityContainer) 
+		private static void InitStateBasedControllerFactory<TArtefact, TModel, TDelta, TTestCase, TResult>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
 			where TDelta : IDelta<TModel>
 			where TTestCase : ITestCase 
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>>(
+			unityContainer.RegisterType<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>>>(
 				new InjectionFactory(c =>
-					new Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>(
+					new Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>>(
 						(discoveryType, rtsApproachType, processingType) =>
 						{
 							var deltaDiscovererFactory = unityContainer.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>>>();
 							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TModel, TDelta, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult>>>();
 
-							return unityContainer.Resolve<StateBasedController<TModel, TDelta, TTestCase, TResult>>(
+							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>>(
 								new ParameterOverride("deltaDiscoverer", deltaDiscovererFactory(discoveryType)),
 								new ParameterOverride("rtsApproach", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
@@ -209,6 +209,7 @@ namespace RTSFramework.ViewModels
 		private static void InitDeltaDiscoverer(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, LocalGitFileDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
+			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, LocalGitFileDeltaDiscoverer>(DiscoveryType.VersionCompare.ToString());
 			InitDiscovererForModels<GitProgramModel>(unityContainer);
 			InitDiscovererForModels<TFS2010ProgramModel>(unityContainer);
 		}
@@ -327,6 +328,8 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>, OpenCoverXmlCoverageAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, GitProgramModel>, GitProgramModelAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<TFS2010VersionIdentification, TFS2010ProgramModel>, TFS2010ProgramModelAdapter>();
 
 			//Cancelable Adapter
 			unityContainer.RegisterType<CancelableArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();

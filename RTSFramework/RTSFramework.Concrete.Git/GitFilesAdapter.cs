@@ -14,9 +14,9 @@ namespace RTSFramework.Concrete.Git
     {
         public string GetFileContent(GitProgramModel gitProgramModel, string path)
         {
-            using (var repo = new Repository(gitProgramModel.RepositoryPath))
+            using (var repo = new Repository(gitProgramModel.GitVersionIdentification.RepositoryPath))
             {
-                var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);
+                var commit = repo.Lookup<Commit>(gitProgramModel.GitVersionIdentification.Commit.ShaId);
 
                 string relPath;
                 Uri fullUri, relRoot = new Uri(gitProgramModel.RootPath, UriKind.Absolute);
@@ -44,11 +44,11 @@ namespace RTSFramework.Concrete.Git
 
         public List<string> GetAllFiles(GitProgramModel gitProgramModel)
         {
-			using (var repo = new Repository(gitProgramModel.RepositoryPath))
+			using (var repo = new Repository(gitProgramModel.GitVersionIdentification.RepositoryPath))
             {
-                var commit = repo.Lookup<Commit>(gitProgramModel.CommitId);
+                var commit = repo.Lookup<Commit>(gitProgramModel.GitVersionIdentification.Commit.ShaId);
 
-                return commit.Tree.Select(x => Path.Combine(gitProgramModel.RepositoryPath, x.Path)).ToList();
+                return commit.Tree.Select(x => Path.Combine(gitProgramModel.GitVersionIdentification.RepositoryPath, x.Path)).ToList();
             }
         }
     }

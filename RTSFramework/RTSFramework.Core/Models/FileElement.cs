@@ -2,6 +2,7 @@
 
 namespace RTSFramework.Core.Models
 {
+	//TODO: Not only Id but also store file content?
     public class FileElement : IProgramModelElement
     {
         public string Id { get; }

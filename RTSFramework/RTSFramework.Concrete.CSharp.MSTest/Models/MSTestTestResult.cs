@@ -12,7 +12,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
         public double DurationInSeconds { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string TestCaseId { get; set; }
+        public MSTestTestcase TestCase { get; set; }
 
         public List<ITestCaseResult<MSTestTestcase>> ChildrenResults { get; } = new List<ITestCaseResult<MSTestTestcase>>();
     }

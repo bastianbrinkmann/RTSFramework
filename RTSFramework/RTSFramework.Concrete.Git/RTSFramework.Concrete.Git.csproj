@@ -97,10 +97,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GitFilesProvider.cs" />
+    <Compile Include="GitCommitsProvider.cs" />
+    <Compile Include="GitFilesAdapter.cs" />
+    <Compile Include="Models\GitCommit.cs" />
     <Compile Include="Models\GitProgramModel.cs" />
+    <Compile Include="Models\GitVersionIdentification.cs" />
     <Compile Include="Models\GitVersionReferenceType.cs" />
-    <Compile Include="GitProgramModelProvider.cs" />
+    <Compile Include="GitProgramModelAdapter.cs" />
     <Compile Include="LocalGitFileDeltaDiscoverer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

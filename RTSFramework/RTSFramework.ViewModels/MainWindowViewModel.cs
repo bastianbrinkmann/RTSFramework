@@ -15,6 +15,7 @@ using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.Reporting;
+using RTSFramework.Concrete.TFS2010;
 using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
@@ -334,22 +335,10 @@ namespace RTSFramework.ViewModels
 				switch (ProgramModelType)
 				{
 					case ProgramModelType.GitProgramModel:
-						var oldGitModel = GitProgramModelProvider.GetGitProgramModel(RepositoryPath, GitVersionReferenceType.LatestCommit);
-						var newGitModel = GitProgramModelProvider.GetGitProgramModel(RepositoryPath, GitVersionReferenceType.CurrentChanges);
-
-						await ExecuteRunFixGranularityLevel(oldGitModel, newGitModel);
+						await ExecuteGitRun();
 						break;
 					case ProgramModelType.TFS2010ProgramModel:
-						if (DiscoveryType == DiscoveryType.LocalDiscovery)
-						{
-							dialogService.ShowError("Local Discovery combined with TFS 2010 is not supported yet!");
-							return;
-						}
-
-						var oldTfsModel = new TFS2010ProgramModel { VersionId = "Test" };
-						var newTfsModel = new TFS2010ProgramModel { VersionId = "Test2" };
-
-						await ExecuteRunFixGranularityLevel(oldTfsModel, newTfsModel);
+						await ExecuteTFS2010Run();
 						break;
 				}
 
@@ -362,26 +351,90 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private async Task ExecuteRunFixGranularityLevel<TModel>(TModel oldProgramModel, TModel newProgramModel)
+		private async Task ExecuteGitRun()
+		{
+			GitVersionIdentification oldGitIdentification, newGitIdentification;
+
+			if (DiscoveryType == DiscoveryType.VersionCompare)
+			{
+				oldGitIdentification = new GitVersionIdentification
+				{
+					ReferenceType = GitVersionReferenceType.SpecificCommit,
+					Commit = new GitCommit { ShaId = "19178661b16e27e8eaee1a0cf8efe61c5e9a48ec" },
+					RepositoryPath = RepositoryPath,
+					AbsoluteSolutionPath = SolutionFilePath,
+					GranularityLevel = GranularityLevel
+				};
+				newGitIdentification = new GitVersionIdentification
+				{
+					ReferenceType = GitVersionReferenceType.SpecificCommit,
+					Commit = new GitCommit { ShaId = "4cb33f5f4f4edade9d4c8dd500681605d3a22700" },
+					RepositoryPath = RepositoryPath,
+					AbsoluteSolutionPath = SolutionFilePath,
+					GranularityLevel = GranularityLevel
+				};
+			}
+			else
+			{
+				oldGitIdentification = new GitVersionIdentification
+				{
+					ReferenceType = GitVersionReferenceType.LatestCommit,
+					RepositoryPath = RepositoryPath,
+					AbsoluteSolutionPath = SolutionFilePath,
+					GranularityLevel = GranularityLevel
+				};
+				newGitIdentification = new GitVersionIdentification
+				{
+					ReferenceType = GitVersionReferenceType.CurrentChanges,
+					RepositoryPath = RepositoryPath,
+					AbsoluteSolutionPath = SolutionFilePath,
+					GranularityLevel = GranularityLevel
+				};
+			}
+			
+
+
+			await ExecuteRunFixGranularityLevel<GitVersionIdentification, GitProgramModel>(oldGitIdentification, newGitIdentification);
+		}
+
+		private async Task ExecuteTFS2010Run()
+		{
+			if (DiscoveryType == DiscoveryType.LocalDiscovery || DiscoveryType == DiscoveryType.VersionCompare)
+			{
+				throw new ArgumentException("Commit based changes combined with TFS 2010 are not supported yet!");
+			}
+
+			var oldTfsProgramArtefact = new TFS2010VersionIdentification
+			{
+				AbsoluteSolutionPath = SolutionFilePath,
+				GranularityLevel = GranularityLevel,
+				CommitId = "Test"
+			};
+			var newTfsProgramArtefact = new TFS2010VersionIdentification
+			{
+				AbsoluteSolutionPath = SolutionFilePath,
+				GranularityLevel = GranularityLevel,
+				CommitId = "Test2"
+			};
+
+			await ExecuteRunFixGranularityLevel<TFS2010VersionIdentification, TFS2010ProgramModel>(oldTfsProgramArtefact, newTfsProgramArtefact);
+		}
+
+		private async Task ExecuteRunFixGranularityLevel<TArtefact, TModel>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)
 			where TModel : CSharpProgramModel
 		{
-			oldProgramModel.AbsoluteSolutionPath = SolutionFilePath;
-			newProgramModel.AbsoluteSolutionPath = SolutionFilePath;
-			oldProgramModel.GranularityLevel = GranularityLevel;
-			newProgramModel.GranularityLevel = GranularityLevel;
-
 			switch (GranularityLevel)
 			{
 				case GranularityLevel.File:
-					await ExecuteRunFixProcessingType<TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramModel, newProgramModel);
+					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramArtefact, newProgramArtefact);
 					break;
 				case GranularityLevel.Class:
-					await ExecuteRunFixProcessingType<TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramModel, newProgramModel);
+					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramArtefact, newProgramArtefact);
 					break;
 			}
 		}
 
-		private async Task ExecuteRunFixProcessingType<TModel, TDelta>(TModel oldProgramModel, TModel newProgramModel)
+		private async Task ExecuteRunFixProcessingType<TArtefact, TModel, TDelta>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 		{
@@ -389,17 +442,18 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionWithCoverage:
-					var executionResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldProgramModel, newProgramModel);
+					var executionResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
 
 					TestResults.Clear();
 					TestResults.AddRange(executionResult.TestcasesResults.Select(x => new TestResultListViewItemViewModel
 					{
-						FullyQualifiedName = x.TestCaseId,
+						FullyQualifiedName = x.TestCase.Id,
+						Categories = string.Join(",", x.TestCase.Categories),
 						TestOutcome = x.Outcome
 					}));
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldProgramModel, newProgramModel);
+					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
 					bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?","CSV File Created");
 					if (openFile)
 					{
@@ -408,7 +462,7 @@ namespace RTSFramework.ViewModels
 
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldProgramModel, newProgramModel);
+					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					TestResults.Clear();
 					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel
 					{
@@ -419,16 +473,16 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private async Task<TResult> ExecuteRun<TModel, TDelta, TTestCase, TResult>(TModel oldProgramModel, TModel newProgramModel) where TTestCase : ITestCase
+		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);
 
 			return
 				await Task.Run(
-					() => stateBasedController.ExecuteImpactedTests(oldProgramModel, newProgramModel, cancellationTokenSource.Token),
+					() => stateBasedController.ExecuteImpactedTests(oldArtefact, newArtefact, cancellationTokenSource.Token),
 					cancellationTokenSource.Token);
 		}
 	}
