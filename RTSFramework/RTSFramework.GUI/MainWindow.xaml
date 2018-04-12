@@ -11,7 +11,7 @@
         xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}">
+        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="95"/>
@@ -43,43 +43,47 @@
 				<ColumnDefinition Width="200*"/>
 			</Grid.ColumnDefinitions>
 
-			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="86" Grid.Column="0" Grid.Row="0"/>
-			<Label x:Name="LblProgramModelType" Content="Program Model:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="95" Grid.Column="0" Grid.Row="1" />
-			<Label x:Name="LblDiscoveryType" Content="Delta Discovery:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="95" Grid.Column="0" Grid.Row="2"/>
-			<Label x:Name="LblRTSApproachType" Content="RTS Approach:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="86" Grid.Column="0" Grid.Row="3"/>
-			<Label x:Name="LblProcessingType" Content="Processing:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="69" Grid.Column="0" Grid.Row="4" />
+			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="86" Grid.Column="0" Grid.Row="0"/>
+			<Label x:Name="LblProgramModelType" Content="Program Model:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="95" Grid.Column="0" Grid.Row="1" />
+			<Label x:Name="LblDiscoveryType" Content="Delta Discovery:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="95" Grid.Column="0" Grid.Row="2"/>
+			<Label x:Name="LblRTSApproachType" Content="RTS Approach:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="86" Grid.Column="0" Grid.Row="3"/>
+			<Label x:Name="LblProcessingType" Content="Processing:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="69" Grid.Column="0" Grid.Row="4" />
 
-			<TextBox x:Name="TbSolutionFilePath" Height="23" Margin="0,0,30,0" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Top" Text="{Binding SolutionFilePath}" Grid.Column="1" Grid.Row="0"/>
-			<Button x:Name="BtnSelectSolutionFile" Content="..." HorizontalAlignment="Right" VerticalAlignment="Top" Width="25" Height="23" Click="SelectSolutionFile" Grid.Column="1" Grid.Row="0"/>
-			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Top" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Grid.Column="1" Height="22" Grid.Row="1" />
-			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Top" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type deltaDiscoverer:DiscoveryType}}}" SelectedItem="{Binding DiscoveryType}" Grid.Column="1" Height="22" Grid.Row="2" />
-			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Top" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Grid.Column="1" Height="22" Grid.Row="3" />
-			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Top" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProcessingType}}}" SelectedItem="{Binding ProcessingType}" Grid.Column="1" Height="22" Grid.Row="4" />
+			<TextBox x:Name="TbSolutionFilePath" Height="23" VerticalContentAlignment="Center" Margin="0,0,30,0" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding SolutionFilePath}" Grid.Column="1" Grid.Row="0"/>
+			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="23" Grid.Column="1" Grid.Row="0"/>
+			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Grid.Column="1" Height="22" Grid.Row="1" />
+			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:DiscoveryType}}}" SelectedItem="{Binding DiscoveryType}" Grid.Column="1" Height="22" Grid.Row="2" />
+			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Grid.Column="1" Height="22" Grid.Row="3" />
+			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProcessingType}}}" SelectedItem="{Binding ProcessingType}" Grid.Column="1" Height="22" Grid.Row="4" />
 
-			<Label x:Name="LblGitRepositoryPath" Content="Git Repository:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="86" Grid.Column="2" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="1" />
-			<Label x:Name="LblGranularityLevel" Content="Granularity Level:" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Height="26" Width="105" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.RowSpan="2"/>
+			<Label x:Name="LblGitRepositoryPath" Content="Git Repository:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="86" Grid.Column="2" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="1" />
+			<Label x:Name="LblGranularityLevel" Content="Granularity Level:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="2" Height="26" Width="105" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.RowSpan="2"/>
 
-			<ComboBox x:Name="CbGranularityLevel" VerticalAlignment="Top" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type models:GranularityLevel}}}" SelectedItem="{Binding GranularityLevel}" Grid.Column="3" Height="22" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.RowSpan="2" />
-			<TextBox x:Name="TbGitRepositoryPath" Margin="0,0,30,0" Height="23" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Top" Text="{Binding GitRepositoryPath}" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3"  Grid.Row="1"/>
-			<Button x:Name="BtnSelectRepositoryPath" Content="..." HorizontalAlignment="Right" VerticalAlignment="Top" Width="25" Height="23" Click="SelectSolutionFile" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3"  Grid.Row="1"/>
-
+			<ComboBox x:Name="CbGranularityLevel" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type models:GranularityLevel}}}" SelectedItem="{Binding GranularityLevel}" Grid.Column="3" Height="22" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.RowSpan="2" />
+			<TextBox x:Name="TbGitRepositoryPath" Height="23" VerticalContentAlignment="Center" Margin="0,0,30,0" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding RepositoryPath}" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3"  Grid.Row="1"/>
+			<Button x:Name="BtnSelectRepositoryPath" Command="{Binding SelectRepositoryCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="23" Visibility="{Binding IsGitRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3"  Grid.Row="1"/>
+			<Button x:Name="BtnIntendedChanges" Command="{Binding SpecitfyIntendedChangesCommand}" Content="IntendedChanges" HorizontalAlignment="Center" VerticalAlignment="Center" Width="105" Height="23" Visibility="{Binding IsIntededChangesEditingEnabled, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="2"  Grid.Row="2"/>
 
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
-		<ListView x:Name="TestsListView" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
+		<ListView x:Name="LvTests" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
 			<ListView.View>
 				<GridView>
 					<GridViewColumn Width="250" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
-					<GridViewColumn Width="32">
-						<GridViewColumn.CellTemplate> 
+					<GridViewColumn Width="100" Header ="Outcome">
+						<GridViewColumn.CellTemplate>
 							<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
 								<Grid>
-									<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" />
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="16" />
+										<ColumnDefinition Width="*" />
+									</Grid.ColumnDefinitions>
+									<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" Grid.Column="0" />
+									<TextBlock Text="{Binding TestOutcome}" Grid.Column="1" Margin="5,0,0,0"/>
 								</Grid>
 							</DataTemplate>
 						</GridViewColumn.CellTemplate>
 					</GridViewColumn>
-					<GridViewColumn Width="75" Header="Outcome" DisplayMemberBinding="{Binding TestOutcome}" />
 					<GridViewColumn Width="150" Header="Categories" DisplayMemberBinding="{Binding Categories}"/>
 				</GridView>
 			</ListView.View>

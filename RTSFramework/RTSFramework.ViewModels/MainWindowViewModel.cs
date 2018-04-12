@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -18,7 +17,6 @@ using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.Reporting;
 using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.ViewModels.RequireUIServices;
@@ -29,8 +27,10 @@ namespace RTSFramework.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		private readonly IDialogService dialogService;
+		private CancellationTokenSource cancellationTokenSource;
 
-		private string result;
+		#region BackingFields
+
 		private ICommand startRunCommand;
 		private ProcessingType processingType;
 		private DiscoveryType discoveryType;
@@ -38,11 +38,19 @@ namespace RTSFramework.ViewModels
 		private GranularityLevel granularityLevel;
 		private bool isGranularityLevelChangable;
 		private string solutionFilePath;
-		private string gitRepositoryPath;
+		private string repositoryPath;
 		private bool isGitRepositoryPathChangable;
 		private ProgramModelType programModelType;
 		private bool isRunning;
 		private ICommand cancelRunCommand;
+		private ObservableCollection<TestResultListViewItemViewModel> testResults;
+		private RunStatus runStatus;
+		private ICommand selectSolutionFileCommand;
+		private ICommand selectRepositoryCommand;
+		private ICommand specitfyIntendedChangesCommand;
+		private bool isIntededChangesEditingEnabled;
+
+		#endregion
 
 		public MainWindowViewModel(IDialogService dialogService)
 		{
@@ -50,7 +58,12 @@ namespace RTSFramework.ViewModels
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
 			CancelRunCommand = new DelegateCommand(CancelRun);
+			SelectSolutionFileCommand = new DelegateCommand(SelectSolutionFile);
+			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
+			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
+
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
+
 			RunStatus = RunStatus.Ready;
 
 			//Defaults
@@ -61,15 +74,36 @@ namespace RTSFramework.ViewModels
 			IsGranularityLevelChangable = false;
 			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
 			ProgramModelType = ProgramModelType.GitProgramModel;
-			GitRepositoryPath = @"C:\Git\TIATestProject\";
+			RepositoryPath = @"C:\Git\TIATestProject\";
 			IsGitRepositoryPathChangable = true;
 
 			PropertyChanged += OnPropertyChanged;
 		}
 
-		private CancellationTokenSource cancellationTokenSource;
-		private ObservableCollection<TestResultListViewItemViewModel> testResults;
-		private RunStatus runStatus;
+		private void SpecifyIntendedChanges()
+		{
+			var intendedChangesViewModel = dialogService.OpenDialogByViewModel<IntendedChangesDialogViewModel>();
+
+			intendedChangesViewModel.RootDirectory = Path.GetDirectoryName(SolutionFilePath);
+		}
+
+		private void SelectRepository()
+		{
+			string selectedDirectory;
+			if (dialogService.SelectDirectory(RepositoryPath, out selectedDirectory))
+			{
+				RepositoryPath = selectedDirectory;
+			}
+		}
+
+		private void SelectSolutionFile()
+		{
+			string selectedFile;
+			if (dialogService.SelectFile(RepositoryPath, "Solution Files (*.sln)|*.sln", out selectedFile))
+			{
+				SolutionFilePath = selectedFile;
+			}
+		}
 
 		private void CancelRun()
 		{
@@ -93,6 +127,11 @@ namespace RTSFramework.ViewModels
 				IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
 			}
 
+			if (propertyChangedEventArgs.PropertyName == nameof(DiscoveryType))
+			{
+				IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
+			}
+
 			if (propertyChangedEventArgs.PropertyName == nameof(RunStatus))
 			{
 				IsRunning = RunStatus == RunStatus.Running;
@@ -100,6 +139,46 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public bool IsIntededChangesEditingEnabled
+		{
+			get { return isIntededChangesEditingEnabled; }
+			set
+			{
+				isIntededChangesEditingEnabled = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ICommand SpecitfyIntendedChangesCommand
+		{
+			get { return specitfyIntendedChangesCommand; }
+			set
+			{
+				specitfyIntendedChangesCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ICommand SelectRepositoryCommand
+		{
+			get { return selectRepositoryCommand; }
+			set
+			{
+				selectRepositoryCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ICommand SelectSolutionFileCommand
+		{
+			get { return selectSolutionFileCommand; }
+			set
+			{
+				selectSolutionFileCommand = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public ObservableCollection<TestResultListViewItemViewModel> TestResults
 		{
@@ -161,12 +240,12 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public string GitRepositoryPath
+		public string RepositoryPath
 		{
-			get { return gitRepositoryPath; }
+			get { return repositoryPath; }
 			set
 			{
-				gitRepositoryPath = value;
+				repositoryPath = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -231,16 +310,6 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public string Result
-		{
-			get { return result; }
-			set
-			{
-				result = value;
-				RaisePropertyChanged();
-			}
-		}
-
 		public ICommand StartRunCommand
 		{
 			get { return startRunCommand; }
@@ -256,6 +325,8 @@ namespace RTSFramework.ViewModels
 		private async void ExecuteRunFixModel()
 		{
 			RunStatus = RunStatus.Running;
+			TestResults.Clear();
+
 			cancellationTokenSource = new CancellationTokenSource();
 
 			try
@@ -263,8 +334,8 @@ namespace RTSFramework.ViewModels
 				switch (ProgramModelType)
 				{
 					case ProgramModelType.GitProgramModel:
-						var oldGitModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.LatestCommit);
-						var newGitModel = GitProgramModelProvider.GetGitProgramModel(GitRepositoryPath, GitVersionReferenceType.CurrentChanges);
+						var oldGitModel = GitProgramModelProvider.GetGitProgramModel(RepositoryPath, GitVersionReferenceType.LatestCommit);
+						var newGitModel = GitProgramModelProvider.GetGitProgramModel(RepositoryPath, GitVersionReferenceType.CurrentChanges);
 
 						await ExecuteRunFixGranularityLevel(oldGitModel, newGitModel);
 						break;
@@ -286,6 +357,7 @@ namespace RTSFramework.ViewModels
 			}
 			catch (Exception e)
 			{
+				RunStatus = RunStatus.Failed;
 				dialogService.ShowError(e.Message);
 			}
 		}

@@ -15,7 +15,7 @@ namespace RTSFramework.GUI.DependencyInjection
         {
             UnityModelInitializer.InitializeModelClasses(UnityContainer);
 			UnityGUIInitializer.InitializeGUIClasses(UnityContainer);
-        }
+		}
 
 		public static MainWindow GetMainWindow()
 	    {

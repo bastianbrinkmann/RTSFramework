@@ -13,9 +13,5 @@ namespace RTSFramework.GUI
 			InitializeComponent();
 			DataContext = viewModel;
 		}
-
-		private void SelectSolutionFile(object sender, RoutedEventArgs e)
-		{
-		}
 	}
 }

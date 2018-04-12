@@ -21,11 +21,7 @@ namespace RTSFramework.Concrete.Git
 
             var repositoryPath = oldModel.RepositoryPath;
 
-            var delta = new StructuralDelta<GitProgramModel, FileElement>
-			{
-                SourceModel = oldModel,
-                TargetModel = newModel
-            };
+	        var delta = new StructuralDelta<GitProgramModel, FileElement>(oldModel, newModel);
 
             using (Repository repo = new Repository(repositoryPath))
             {

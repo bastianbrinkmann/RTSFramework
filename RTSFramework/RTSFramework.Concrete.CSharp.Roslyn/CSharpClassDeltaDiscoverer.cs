@@ -33,11 +33,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 
         private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta, TModel oldModel)
         {
-            var result = new StructuralDelta<TModel, CSharpClassElement>
-			{
-                SourceModel = delta.SourceModel,
-                TargetModel = delta.TargetModel,
-            };
+	        var result = new StructuralDelta<TModel, CSharpClassElement>(delta.SourceModel, delta.TargetModel);
 
             foreach (var cSharpFile in delta.ChangedElements)
             {

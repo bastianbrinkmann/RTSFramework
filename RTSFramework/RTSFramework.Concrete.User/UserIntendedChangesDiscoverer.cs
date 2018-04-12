@@ -6,33 +6,26 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-	//TODO: This is no delta discoverer but a Delta Adapter from string list to Delta
-    public class UserIntendedChangesDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, FileElement>> where TModel : IProgramModel
+	public class UserIntendedChangesDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, FileElement>> where TModel : IProgramModel
 	{
+		private readonly IIntededChangesProvider intededChangesProvider;
+
+		public UserIntendedChangesDiscoverer(IIntededChangesProvider intededChangesProvider)
+		{
+			this.intededChangesProvider = intededChangesProvider;
+		}
+
 		public StructuralDelta<TModel, FileElement> Discover(TModel oldVersion, TModel newVersion)
-        {
-            var delta = new StructuralDelta<TModel, FileElement>
+		{
+			var delta = new StructuralDelta<TModel, FileElement>(oldVersion, newVersion);
+
+			foreach (string intendedChange in intededChangesProvider.IntendedChanges)
 			{
-                SourceModel = oldVersion,
-                TargetModel = newVersion
-            };
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(newVersion, intendedChange);
+				delta.ChangedElements.Add(new FileElement(relativePathToSolution));
+			}
 
-            //TODO Should be Independent of console, so add additional interface
-            //Console.WriteLine("Intended Changes (absolute files - \"Done\" once list is complete):");
-            //string line = Console.ReadLine();
-
-            //while (line != null && !line.Equals("Done"))
-            //{
-            //    delta.ChangedElements.Add(new FileElement(line));
-            //    line = Console.ReadLine();
-            //} 
-            var relativePathToSolution = RelativePathHelper.GetRelativePath(newVersion, @"C:\Git\TIATestProject\MainProject\Calculator.cs");
-
-            delta.ChangedElements.Add(new FileElement(relativePathToSolution));
-
-            
-
-            return delta;
-        }
-    }
+			return delta;
+		}
+	}
 }

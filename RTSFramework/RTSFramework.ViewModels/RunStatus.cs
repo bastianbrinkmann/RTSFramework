@@ -13,6 +13,8 @@ namespace RTSFramework.ViewModels
 		[Description("Completed!")]
 		Completed,
 		[Description("Cancelled!")]
-		Cancelled
+		Cancelled,
+		[Description("Failed!")]
+		Failed
 	}
 }

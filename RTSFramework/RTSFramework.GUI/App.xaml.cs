@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using RTSFramework.GUI.DependencyInjection;
 
 namespace RTSFramework.GUI
@@ -10,10 +11,15 @@ namespace RTSFramework.GUI
 	{
 		protected override void OnStartup(StartupEventArgs e)
 		{
+			var splashScreen = new SplashScreen(@"Resources\loading.png");
+			splashScreen.Show(false, true);
+
 			base.OnStartup(e);
 
 			UnityProvider.Initialize();
 			var mainWindow = UnityProvider.GetMainWindow();
+
+			splashScreen.Close(TimeSpan.FromMilliseconds(750));
 			mainWindow.Show();
 		}
 	}

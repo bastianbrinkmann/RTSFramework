@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using RTSFramework.Contracts.Utilities;
 
-namespace RTSFramework.Contracts.DeltaDiscoverer
+namespace RTSFramework.ViewModels.RunConfigurations
 {
 	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
 	public enum DiscoveryType

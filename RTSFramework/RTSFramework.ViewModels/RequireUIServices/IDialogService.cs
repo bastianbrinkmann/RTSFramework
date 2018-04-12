@@ -1,4 +1,6 @@
-﻿namespace RTSFramework.ViewModels.RequireUIServices
+﻿using Prism.Mvvm;
+
+namespace RTSFramework.ViewModels.RequireUIServices
 {
 	public interface IDialogService
 	{
@@ -9,5 +11,11 @@
 		void ShowInformation(string message, string title = "Information");
 
 		bool ShowQuestion(string message, string title = "Question");
+
+		bool SelectFile(string initialDirectory, string fileExtensionPattern, out string selectedPath);
+
+		bool SelectDirectory(string initialDirectory, out string selectedDirectory);
+
+		T OpenDialogByViewModel<T>() where T : BindableBase;
 	}
 }

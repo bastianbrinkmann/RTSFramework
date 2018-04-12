@@ -1,0 +1,31 @@
+﻿<Window x:Class="RTSFramework.GUI.IntendedChangesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RTSFramework.GUI"
+        xmlns:viewModels="clr-namespace:RTSFramework.ViewModels;assembly=RTSFramework.ViewModels"
+        mc:Ignorable="d"
+		d:DataContext="{d:DesignInstance viewModels:IntendedChangesDialogViewModel}"
+        Title="Intended Changes" Height="300" Width="500" Icon="Resources/testselection.ico" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="85"/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="29"/>
+			<RowDefinition Height="242*"/>
+		</Grid.RowDefinitions>
+		<Button x:Name="BtnAddFile" Command="{Binding AddFileCommand}" Content="Add File" Margin="5,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Row="0" Grid.Column="0" Height="19"/>
+		<Button x:Name="BtnRemoveFile" Command="{Binding RemoveFileCommand}" Content="Remove File" Margin="4.2,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Row="0" Grid.Column="1" Height="19"/>
+
+		<ListView x:Name="LvIntendedChanges" Margin="5,5.2,4.6,5.4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" SelectedItem="{Binding SelectedFile}" ItemsSource="{Binding IntendedChanges}" Grid.Column="0" Grid.ColumnSpan="2">
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Header="Intended Changes" Width="450"/>
+				</GridView>
+			</ListView.View>
+		</ListView>
+	</Grid>
+</Window>

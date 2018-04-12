@@ -7,7 +7,6 @@ using OpenCover.Framework.Model;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
-using RTSFramework.Core;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
