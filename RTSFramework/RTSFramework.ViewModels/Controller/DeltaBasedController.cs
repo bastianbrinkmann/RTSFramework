@@ -1,52 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
-using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Dynamic;
-using RTSFramework.ViewModels.RunConfigurations;
 
-namespace RTSFramework.ViewModels
+namespace RTSFramework.ViewModels.Controller
 {
-    public class StateBasedController<TModel, TDelta, TTestCase, TResult> 
-        where TTestCase : ITestCase 
-		where TModel : IProgramModel 
-		where TDelta : IDelta
+	public class DeltaBasedController<TModel, TDelta, TTestCase, TResult>
+		where TTestCase : ITestCase
+		where TModel : IProgramModel
+		where TDelta : IDelta<TModel>
 		where TResult : ITestProcessingResult
-    {
-        private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
-        private readonly ITestProcessor<TTestCase, TResult> testProcessor;
-        private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
-        private readonly IRTSApproach<TDelta,TTestCase> rtsApproach;
+	{
+		private readonly ITestProcessor<TTestCase, TResult> testProcessor;
+		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
+		private readonly IRTSApproach<TModel, TDelta, TTestCase> rtsApproach;
 
-        public StateBasedController(
-			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
-            ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
-			IRTSApproach<TDelta, TTestCase> rtsApproach,
+		public DeltaBasedController(
+			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
+			IRTSApproach<TModel, TDelta, TTestCase> rtsApproach,
 			ITestProcessor<TTestCase, TResult> testProcessor)
-        {
-            this.deltaDiscoverer = deltaDiscoverer;
-            this.testProcessor = testProcessor;
-            this.testsDiscoverer = testsDiscoverer;
-            this.rtsApproach = rtsApproach;
-        }
-
-		public async Task<TResult> ExecuteImpactedTests(TModel oldModel, TModel newModel, CancellationToken token)
 		{
-			var delta = DebugStopWatchTracker.ReportNeededTimeOnDebug(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
-			if (token.IsCancellationRequested)
-			{
-				return default(TResult);
-			}
+			this.testProcessor = testProcessor;
+			this.testsDiscoverer = testsDiscoverer;
+			this.rtsApproach = rtsApproach;
+		}
 
-			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
+		public async Task<TResult> ExecuteImpactedTests(TDelta delta, CancellationToken token)
+		{
+			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(delta.TargetModel, token), "TestsDiscovery");
 			if (token.IsCancellationRequested)
 			{
 				return default(TResult);
@@ -85,5 +73,5 @@ namespace RTSFramework.ViewModels
 
 			return processingResult;
 		}
-    }
+	}
 }

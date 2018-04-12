@@ -7,7 +7,7 @@ using RTSFramework.Contracts.RTSApproach;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class RetestAllApproach<TDelta, TTestCase> : IRTSApproach<TDelta, TTestCase> where TTestCase : ITestCase where TDelta : IDelta
+    public class RetestAllApproach<TModel, TDelta, TTestCase> : IRTSApproach<TModel, TDelta, TTestCase> where TTestCase : ITestCase where TDelta : IDelta<TModel> where TModel : IProgramModel
     {
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 

@@ -26,6 +26,7 @@ using RTSFramework.RTSApproaches.ClassSRTS;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 using RTSFramework.RTSApproaches.CorrespondenceModel.Models;
 using RTSFramework.RTSApproaches.Dynamic;
+using RTSFramework.ViewModels.Controller;
 using RTSFramework.ViewModels.RunConfigurations;
 using Unity;
 using Unity.Injection;
@@ -58,7 +59,7 @@ namespace RTSFramework.ViewModels
 			(DiscoveryType discoveryType, RTSApproachType rtsApproachType, ProcessingType processingType)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TDelta : IDelta
+			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
 			var factory = container.Resolve<Func<DiscoveryType, RTSApproachType, ProcessingType, StateBasedController<TModel, TDelta, TTestCase, TResult>>>();
@@ -83,7 +84,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitStateBasedControllerFactoryResult<TModel, TDelta>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
-			where TDelta : IDelta
+			where TDelta : IDelta<TModel>
 		{
 			InitStateBasedControllerFactoryTestcase<TModel, TDelta, MSTestExectionResult>(unityContainer);
 			InitStateBasedControllerFactoryTestcase<TModel, TDelta, FileProcessingResult>(unityContainer);
@@ -92,7 +93,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitStateBasedControllerFactoryTestcase<TModel, TDelta, TResult>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TDelta : IDelta
+			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
 			InitStateBasedControllerFactory<TModel, TDelta, MSTestTestcase, TResult>(unityContainer);
@@ -100,7 +101,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitStateBasedControllerFactory<TModel, TDelta, TTestCase, TResult>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
-			where TDelta : IDelta 
+			where TDelta : IDelta<TModel>
 			where TTestCase : ITestCase 
 			where TResult : ITestProcessingResult
 		{
@@ -110,7 +111,7 @@ namespace RTSFramework.ViewModels
 						(discoveryType, rtsApproachType, processingType) =>
 						{
 							var deltaDiscovererFactory = unityContainer.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>>>();
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TDelta, TTestCase>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TModel, TDelta, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult>>>();
 
 							return unityContainer.Resolve<StateBasedController<TModel, TDelta, TTestCase, TResult>>(
@@ -196,19 +197,19 @@ namespace RTSFramework.ViewModels
 
 		private static void InitRTSApproachesForModel<TModel>(IUnityContainer unityContainer) where TModel : IProgramModel
 		{
-			unityContainer.RegisterType<IRTSApproach<StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSApproach<TModel>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSApproach<TModel>>(RTSApproachType.ClassSRTS.ToString());
 			InitRTSAproachesForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
 			InitRTSAproachesForModelAndElementType<TModel, CSharpClassElement>(unityContainer);
 		}
 
 		private static void InitRTSAproachesForModelAndElementType<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel where TModelElement : IProgramModelElement
 		{
-			unityContainer.RegisterType<IRTSApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTSApproach<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<IRTSApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTSApproach<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
 
-			unityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
 				new InjectionFactory(c =>
-				new Func<RTSApproachType, IRTSApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name => c.Resolve<IRTSApproach<StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name.ToString()))));
+				new Func<RTSApproachType, IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name => c.Resolve<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name.ToString()))));
 		}
 
 		#endregion

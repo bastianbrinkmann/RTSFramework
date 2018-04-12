@@ -2,7 +2,7 @@
 
 namespace RTSFramework.Contracts.Models.Delta
 {
-    public class StructuralDelta<TModel, TModelElement> : IDelta where TModel : IProgramModel where TModelElement : IProgramModelElement
+    public class StructuralDelta<TModel, TModelElement> : IDelta<TModel> where TModel : IProgramModel where TModelElement : IProgramModelElement
     {
         public List<TModelElement> AddedElements { get; } = new List<TModelElement>();
 

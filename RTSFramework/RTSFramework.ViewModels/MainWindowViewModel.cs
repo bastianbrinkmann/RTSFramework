@@ -311,7 +311,7 @@ namespace RTSFramework.ViewModels
 
 		private async Task ExecuteRunFixProcessingType<TModel, TDelta>(TModel oldProgramModel, TModel newProgramModel)
 			where TModel : IProgramModel
-			where TDelta : IDelta
+			where TDelta : IDelta<TModel>
 		{
 			switch (ProcessingType)
 			{
@@ -349,7 +349,7 @@ namespace RTSFramework.ViewModels
 
 		private async Task<TResult> ExecuteRun<TModel, TDelta, TTestCase, TResult>(TModel oldProgramModel, TModel newProgramModel) where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TDelta : IDelta
+			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
 			var stateBasedController = UnityModelInitializer.GetStateBasedController<TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);

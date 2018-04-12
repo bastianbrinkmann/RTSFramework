@@ -17,7 +17,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     /// An extensive study of static regression test selection in modern software evolution
     /// https://dl.acm.org/citation.cfm?id=2950361
     /// </summary>
-    public class ClassSRTSApproach<TModel> : IRTSApproach<StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase> where TModel : IProgramModel
+    public class ClassSRTSApproach<TModel> : IRTSApproach<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase> where TModel : IProgramModel
     {
 		public event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;
 

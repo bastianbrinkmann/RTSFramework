@@ -9,7 +9,7 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class DynamicRTSApproach<TModel, TModelElement, TTestCase> : IRTSApproach<StructuralDelta<TModel, TModelElement>, TTestCase>, IDynamicRTSApproach
+    public class DynamicRTSApproach<TModel, TModelElement, TTestCase> : IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, IDynamicRTSApproach
 		where TTestCase : ITestCase 
 		where TModel : IProgramModel 
 		where TModelElement : IProgramModelElement
