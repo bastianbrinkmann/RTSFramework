@@ -8,18 +8,18 @@ namespace RTSFramework.Concrete.User
 {
 	public class UserIntendedChangesDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, FileElement>> where TModel : IProgramModel
 	{
-		private readonly IIntededChangesProvider intededChangesProvider;
+		private readonly IIntendedChangesProvider intendedChangesProvider;
 
-		public UserIntendedChangesDiscoverer(IIntededChangesProvider intededChangesProvider)
+		public UserIntendedChangesDiscoverer(IIntendedChangesProvider intendedChangesProvider)
 		{
-			this.intededChangesProvider = intededChangesProvider;
+			this.intendedChangesProvider = intendedChangesProvider;
 		}
 
 		public StructuralDelta<TModel, FileElement> Discover(TModel oldVersion, TModel newVersion)
 		{
 			var delta = new StructuralDelta<TModel, FileElement>(oldVersion, newVersion);
 
-			foreach (string intendedChange in intededChangesProvider.IntendedChanges)
+			foreach (string intendedChange in intendedChangesProvider.IntendedChanges)
 			{
 				var relativePathToSolution = RelativePathHelper.GetRelativePath(newVersion, intendedChange);
 				delta.ChangedElements.Add(new FileElement(relativePathToSolution));

@@ -313,7 +313,7 @@ namespace RTSFramework.ViewModels
 
 			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
 
-			unityContainer.RegisterType<IIntededChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
 		}
 
 		private static void InitCorrespondenceModelManager(IUnityContainer unityContainer)
