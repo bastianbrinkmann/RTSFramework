@@ -191,11 +191,11 @@ namespace RTSFramework.ViewModels
 
 		private static void InitRTSApproaches(IUnityContainer unityContainer)
 		{
-			InitRTSApproachesForModel<GitProgramModel>(unityContainer);
-			InitRTSApproachesForModel<TFS2010ProgramModel>(unityContainer);
+			InitRTSApproachesForCSharpModel<GitProgramModel>(unityContainer);
+			InitRTSApproachesForCSharpModel<TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitRTSApproachesForModel<TModel>(IUnityContainer unityContainer) where TModel : IProgramModel
+		private static void InitRTSApproachesForCSharpModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
 			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSApproach<TModel>>(RTSApproachType.ClassSRTS.ToString());
 			InitRTSAproachesForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
