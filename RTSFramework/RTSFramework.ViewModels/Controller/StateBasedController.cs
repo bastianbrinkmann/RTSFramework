@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +27,9 @@ namespace RTSFramework.ViewModels.Controller
         private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
         private readonly IRTSApproach<TModel, TDelta,TTestCase> rtsApproach;
 
-        public StateBasedController(
+		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
+
+		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
             ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
@@ -61,8 +64,8 @@ namespace RTSFramework.ViewModels.Controller
 			rtsApproach.ImpactedTest += (sender, args) =>
 			{
 				var impactedTest = args.TestCase;
+				ImpactedTest?.Invoke(sender, args);
 
-				Debug.WriteLine($"Impacted Test: {impactedTest.Id}");
 				impactedTests.Add(impactedTest);
 			};
 

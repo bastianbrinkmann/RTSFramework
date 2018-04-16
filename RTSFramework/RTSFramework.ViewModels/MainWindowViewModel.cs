@@ -28,6 +28,7 @@ namespace RTSFramework.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		private readonly IDialogService dialogService;
+		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
@@ -60,9 +61,10 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		public MainWindowViewModel(IDialogService dialogService, GitCommitsProvider gitCommitsProvider)
+		public MainWindowViewModel(IDialogService dialogService, GitCommitsProvider gitCommitsProvider, IApplicationUiExecutor applicationUiExecutor)
 		{
 			this.dialogService = dialogService;
+			this.applicationUiExecutor = applicationUiExecutor;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -575,6 +577,16 @@ namespace RTSFramework.ViewModels
 			where TResult : ITestProcessingResult
 		{
 			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);
+
+			stateBasedController.ImpactedTest += (sender, args) =>
+			{
+				applicationUiExecutor.ExecuteOnUI(() =>
+					TestResults.Add(new TestResultListViewItemViewModel
+					{
+						FullyQualifiedName = args.TestCase.Id,
+						Categories = string.Join(",", args.TestCase.Categories)
+					}));
+			};
 
 			return
 				await Task.Run(

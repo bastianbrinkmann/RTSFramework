@@ -109,6 +109,7 @@
     <Compile Include="CommitViewModel.cs" />
     <Compile Include="Controller\DeltaBasedController.cs" />
     <Compile Include="IntendedChangesDialogViewModel.cs" />
+    <Compile Include="RequireUIServices\IApplicationUiExecutor.cs" />
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
     <Compile Include="RunStatus.cs" />
     <Compile Include="Controller\StateBasedController.cs" />

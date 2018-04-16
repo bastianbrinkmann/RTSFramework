@@ -30,6 +30,7 @@ namespace RTSFramework.GUI.DependencyInjection
 		private static void InitializeUtilities(IUnityContainer container)
 		{
 			container.RegisterType<IDialogService, DialogService>(new ContainerControlledLifetimeManager());
+			container.RegisterType<IApplicationUiExecutor, ApplicationUiExecutor>(new ContainerControlledLifetimeManager());
 		}
 
 		private static void InitializeViewModelsViewsFactory(IUnityContainer container)

@@ -36,8 +36,10 @@ namespace RTSFramework.GUI.Converters
 					return resourcesFolder + "passed.png";
 				case TestExecutionOutcome.Failed:
 					return resourcesFolder + "failed.png";
-				default:
+				case TestExecutionOutcome.NotExecuted:
 					return resourcesFolder + "other.png";
+				default:
+					return "";
 			}
 		}
 

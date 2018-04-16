@@ -286,6 +286,7 @@
     <Compile Include="IntendedChangesDialog.xaml.cs">
       <DependentUpon>IntendedChangesDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RequireUIServices\ApplicationUiExecutor.cs" />
     <Compile Include="RequireUIServices\DialogService.cs" />
     <Compile Include="Utilities\EnumBindingSourceExtension.cs" />
     <Page Include="IntendedChangesDialog.xaml">
