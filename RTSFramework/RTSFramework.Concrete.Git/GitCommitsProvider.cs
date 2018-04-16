@@ -9,6 +9,11 @@ namespace RTSFramework.Concrete.Git
 	{
 		public IList<GitCommit> GetAllCommits(string repositoryPath)
 		{
+			if (!Repository.IsValid(repositoryPath))
+			{
+				return new List<GitCommit>();
+			}
+
 			using (var repo = new Repository(repositoryPath))
 			{
 				return repo.Commits.Select(x => new GitCommit

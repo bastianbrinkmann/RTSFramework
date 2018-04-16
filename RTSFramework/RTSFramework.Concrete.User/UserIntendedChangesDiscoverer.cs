@@ -1,4 +1,5 @@
-﻿using RTSFramework.Contracts.DeltaDiscoverer;
+﻿using System.IO;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
@@ -22,7 +23,7 @@ namespace RTSFramework.Concrete.User
 			foreach (string intendedChange in intendedChangesProvider.IntendedChanges)
 			{
 				var relativePathToSolution = RelativePathHelper.GetRelativePath(newVersion, intendedChange);
-				delta.ChangedElements.Add(new FileElement(relativePathToSolution));
+				delta.ChangedElements.Add(new FileElement(relativePathToSolution, () => File.ReadAllText(intendedChange)));
 			}
 
 			return delta;

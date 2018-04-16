@@ -1,4 +1,6 @@
-﻿namespace RTSFramework.Concrete.Git.Models
+﻿using RTSFramework.Contracts.Utilities;
+
+namespace RTSFramework.Concrete.Git.Models
 {
 	public class GitCommit
 	{

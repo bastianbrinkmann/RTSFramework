@@ -307,10 +307,6 @@ namespace RTSFramework.ViewModels
 
 		private static void InitHelper(IUnityContainer unityContainer)
 		{
-			//FilesProvider
-			unityContainer.RegisterType<IFilesProvider<GitProgramModel>, GitFilesProvider>();
-			unityContainer.RegisterType<IFilesProvider<TFS2010ProgramModel>, LocalFilesProvider>();
-
 			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
 
 			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());

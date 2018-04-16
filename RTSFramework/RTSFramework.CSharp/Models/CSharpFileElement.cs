@@ -1,4 +1,5 @@
-﻿using RTSFramework.Contracts.Models;
+﻿using System;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core.Models
 {
@@ -6,9 +7,12 @@ namespace RTSFramework.Concrete.CSharp.Core.Models
     {
         public string Id { get; }
 
-        public CSharpFileElement(string filePath)
+		public Func<string> GetContent { get; }
+
+		public CSharpFileElement(string filePath, Func<string> getContent)
         {
             Id = filePath;
+	        GetContent = getContent;
         }
     }
 }

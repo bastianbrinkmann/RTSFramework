@@ -93,7 +93,6 @@
   <ItemGroup>
     <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
-    <Compile Include="IFilesProvider.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="ITestProcessingResult.cs" />
     <Compile Include="Models\CoverageData.cs" />

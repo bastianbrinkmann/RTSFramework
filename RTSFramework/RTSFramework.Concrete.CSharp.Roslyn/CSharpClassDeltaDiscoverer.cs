@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -15,37 +14,33 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
     public class CSharpClassDeltaDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpClassElement>> where TModel : IProgramModel
     {
         private readonly IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer;
-        private readonly IFilesProvider<TModel> filesProvider;
 
-        public CSharpClassDeltaDiscoverer(
-			IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer, 
-			IFilesProvider<TModel> filesProvider)
+        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer)
         {
             this.internalDiscoverer = internalDiscoverer;
-            this.filesProvider = filesProvider;
         }
 
         public StructuralDelta<TModel, CSharpClassElement> Discover(TModel oldModel, TModel newModel)
         {
             var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
-            return Convert(fileDelta, oldModel);
+            return Convert(fileDelta);
         }
 
-        private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta, TModel oldModel)
+        private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
         {
 	        var result = new StructuralDelta<TModel, CSharpClassElement>(delta.SourceModel, delta.TargetModel);
 
             foreach (var cSharpFile in delta.ChangedElements)
             {
-                result.ChangedElements.AddRange(GetContainedClasses(filesProvider.GetFileContent(oldModel, cSharpFile.Id)));
+                result.ChangedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
             }
             foreach (var cSharpFile in delta.AddedElements)
             {
-                result.AddedElements.AddRange(GetContainedClasses(filesProvider.GetFileContent(oldModel, cSharpFile.Id)));
+                result.AddedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
             }
             foreach (var cSharpFile in delta.DeletedElements)
             {
-                result.DeletedElements.AddRange(GetContainedClasses(filesProvider.GetFileContent(oldModel, cSharpFile.Id)));
+                result.DeletedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
             }
 
             return result;

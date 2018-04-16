@@ -28,6 +28,7 @@ namespace RTSFramework.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		private readonly IDialogService dialogService;
+		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
 		#region BackingFields
@@ -50,12 +51,19 @@ namespace RTSFramework.ViewModels
 		private ICommand selectRepositoryCommand;
 		private ICommand specitfyIntendedChangesCommand;
 		private bool isIntededChangesEditingEnabled;
+		private CommitViewModel fromCommit;
+		private CommitViewModel toCommit;
+		private ObservableCollection<CommitViewModel> fromCommitModels;
+		private ObservableCollection<CommitViewModel> toCommitModels;
+		private bool isFromCommitChangeable;
+		private bool isToCommitChangeable;
 
 		#endregion
 
-		public MainWindowViewModel(IDialogService dialogService)
+		public MainWindowViewModel(IDialogService dialogService, GitCommitsProvider gitCommitsProvider)
 		{
 			this.dialogService = dialogService;
+			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
 			CancelRunCommand = new DelegateCommand(CancelRun);
@@ -64,10 +72,14 @@ namespace RTSFramework.ViewModels
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
 
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
+			FromCommitModels = new ObservableCollection<CommitViewModel>();
+			ToCommitModels = new ObservableCollection<CommitViewModel>();
 
 			RunStatus = RunStatus.Ready;
 
-			//Defaults
+			PropertyChanged += OnPropertyChanged;
+
+			//TODO: Defaults - Load from config
 			DiscoveryType = DiscoveryType.LocalDiscovery;
 			ProcessingType = ProcessingType.MSTestExecution;
 			RTSApproachType = RTSApproachType.ClassSRTS;
@@ -77,8 +89,6 @@ namespace RTSFramework.ViewModels
 			ProgramModelType = ProgramModelType.GitProgramModel;
 			RepositoryPath = @"C:\Git\TIATestProject\";
 			IsGitRepositoryPathChangable = true;
-
-			PropertyChanged += OnPropertyChanged;
 		}
 
 		private void SpecifyIntendedChanges()
@@ -112,34 +122,120 @@ namespace RTSFramework.ViewModels
 			RunStatus = RunStatus.Cancelled;
 		}
 
+		private void RefreshCommitsSelection()
+		{
+			FromCommitModels.Clear();
+			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).Select(ConvertCommit));
+			FromCommit =FromCommitModels.FirstOrDefault();
+			IsFromCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && FromCommitModels.Any();
+		}
+
+		private CommitViewModel ConvertCommit(GitCommit gitCommit)
+		{
+			return new CommitViewModel
+			{
+				Committer = gitCommit.Committer,
+				Identifier = gitCommit.ShaId,
+				Message = gitCommit.Message
+			};
+		}
+
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
 		{
-			if (propertyChangedEventArgs.PropertyName == nameof(RTSApproachType))
+			switch (propertyChangedEventArgs.PropertyName)
 			{
-				if (RTSApproachType == RTSApproachType.ClassSRTS)
-				{
-					GranularityLevel = GranularityLevel.Class;
-				}
-				IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;
-			}
-
-			if (propertyChangedEventArgs.PropertyName == nameof(ProgramModelType))
-			{
-				IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
-			}
-
-			if (propertyChangedEventArgs.PropertyName == nameof(DiscoveryType))
-			{
-				IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
-			}
-
-			if (propertyChangedEventArgs.PropertyName == nameof(RunStatus))
-			{
-				IsRunning = RunStatus == RunStatus.Running;
+				case nameof(RTSApproachType):
+					if (RTSApproachType == RTSApproachType.ClassSRTS)
+					{
+						GranularityLevel = GranularityLevel.Class;
+					}
+					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;
+					break;
+				case nameof(ProgramModelType):
+					IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
+					break;
+				case nameof(DiscoveryType):
+					IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
+					IsFromCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && FromCommitModels.Any();
+					IsToCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && ToCommitModels.Any();
+					break;
+				case nameof(RunStatus):
+					IsRunning = RunStatus == RunStatus.Running;
+					break;
+				case nameof(RepositoryPath):
+					RefreshCommitsSelection();
+					break;
+				case nameof(FromCommit):
+					var toCommitId = ToCommit?.Identifier;
+					ToCommitModels.Clear();
+					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
+					ToCommit = ToCommitModels.SingleOrDefault(x => x.Identifier == toCommitId) ?? ToCommitModels.FirstOrDefault();
+					IsToCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && ToCommitModels.Any();
+					break;
 			}
 		}
 
 		#region Properties
+
+		public bool IsToCommitChangeable
+		{
+			get { return isToCommitChangeable; }
+			set
+			{
+				isToCommitChangeable = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool IsFromCommitChangeable
+		{
+			get { return isFromCommitChangeable; }
+			set
+			{
+				isFromCommitChangeable = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ObservableCollection<CommitViewModel> ToCommitModels
+		{
+			get { return toCommitModels; }
+			set
+			{
+				toCommitModels = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ObservableCollection<CommitViewModel> FromCommitModels
+		{
+			get { return fromCommitModels; }
+			set
+			{
+				fromCommitModels = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public CommitViewModel ToCommit
+		{
+			get { return toCommit; }
+			set
+			{
+				toCommit = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public CommitViewModel FromCommit
+		{
+			get { return fromCommit; }
+			set
+			{
+				fromCommit = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public bool IsIntededChangesEditingEnabled
 		{
@@ -360,7 +456,7 @@ namespace RTSFramework.ViewModels
 				oldGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
-					Commit = new GitCommit { ShaId = "19178661b16e27e8eaee1a0cf8efe61c5e9a48ec" },
+					Commit = new GitCommit { ShaId = FromCommit.Identifier},
 					RepositoryPath = RepositoryPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
@@ -368,7 +464,7 @@ namespace RTSFramework.ViewModels
 				newGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
-					Commit = new GitCommit { ShaId = "4cb33f5f4f4edade9d4c8dd500681605d3a22700" },
+					Commit = new GitCommit { ShaId = ToCommit.Identifier },
 					RepositoryPath = RepositoryPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel

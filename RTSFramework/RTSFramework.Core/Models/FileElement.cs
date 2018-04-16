@@ -1,15 +1,18 @@
-﻿using RTSFramework.Contracts.Models;
+﻿using System;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Core.Models
 {
-	//TODO: Not only Id but also store file content?
     public class FileElement : IProgramModelElement
     {
         public string Id { get; }
 
-        public FileElement(string filePath)
+		public Func<string> GetContent { get; }
+
+        public FileElement(string filePath, Func<string> getContent)
         {
             Id = filePath;
+	        GetContent = getContent;
         }
     }
 }
