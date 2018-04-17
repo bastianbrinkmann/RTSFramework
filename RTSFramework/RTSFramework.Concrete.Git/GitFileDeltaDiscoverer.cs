@@ -11,7 +11,7 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class LocalGitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>
+    public class GitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>
     {
 		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {

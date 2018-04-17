@@ -208,8 +208,8 @@ namespace RTSFramework.ViewModels
 		#region DeltaDiscoverer
 		private static void InitDeltaDiscoverer(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, LocalGitFileDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
-			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, LocalGitFileDeltaDiscoverer>(DiscoveryType.VersionCompare.ToString());
+			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, GitFileDeltaDiscoverer>(DiscoveryType.LocalDiscovery.ToString());
+			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, GitFileDeltaDiscoverer>(DiscoveryType.VersionCompare.ToString());
 			InitDiscovererForModels<GitProgramModel>(unityContainer);
 			InitDiscovererForModels<TFS2010ProgramModel>(unityContainer);
 		}
@@ -272,8 +272,8 @@ namespace RTSFramework.ViewModels
 
 		private static void InitRTSAproachesForModelAndElementType<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel where TModelElement : IProgramModelElement
 		{
-			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTSApproach<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTS<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAll<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
 
 			unityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
 				new InjectionFactory(c =>
@@ -287,7 +287,7 @@ namespace RTSFramework.ViewModels
 		private static void InitTestProcessors(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, FileProcessingResult>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionWithCoverage.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>>, IdentifiedTestsListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 

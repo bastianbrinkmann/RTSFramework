@@ -8,8 +8,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
     {
 		[Description("MSTest")]
         MSTestExecution,
-		[Description("MSTest + Coverage")]
-		MSTestExecutionWithCoverage,
+		[Description("MSTest + Create Correspondence")]
+		MSTestExecutionCreateCorrespondenceModel,
 		[Description("CSV File")]
 		CsvReporting,
 		[Description("Only Identify")]

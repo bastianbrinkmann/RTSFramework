@@ -9,7 +9,7 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-    public class DynamicRTSApproach<TModel, TModelElement, TTestCase> : IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, IDynamicRTSApproach
+    public class DynamicRTS<TModel, TModelElement, TTestCase> : IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, IDynamicRTSApproach
 		where TTestCase : ITestCase 
 		where TModel : IProgramModel 
 		where TModelElement : IProgramModelElement
@@ -17,7 +17,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
 		private readonly CorrespondenceModelManager correspondenceModelManager;
-        public DynamicRTSApproach(CorrespondenceModelManager correspondenceModelManager)
+        public DynamicRTS(CorrespondenceModelManager correspondenceModelManager)
         {
             this.correspondenceModelManager = correspondenceModelManager;
         }

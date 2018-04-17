@@ -539,7 +539,7 @@ namespace RTSFramework.ViewModels
 			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
-				case ProcessingType.MSTestExecutionWithCoverage:
+				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 					var executionResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
 
 					TestResults.Clear();
