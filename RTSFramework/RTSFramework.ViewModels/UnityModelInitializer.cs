@@ -50,21 +50,8 @@ namespace RTSFramework.ViewModels
 			InitTestProcessors(unityContainer);
 
 			InitStateBasedController(unityContainer);
-			InitDeltaBasedController(unityContainer);
 
 			container = unityContainer;
-		}
-
-		internal static DeltaBasedController<TModel, TDelta, TTestCase, TResult> GetDeltaBasedController<TModel, TDelta, TTestCase, TResult>
-			(RTSApproachType rtsApproachType, ProcessingType processingType)
-			where TTestCase : ITestCase
-			where TModel : IProgramModel
-			where TDelta : IDelta<TModel>
-			where TResult : ITestProcessingResult
-		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, DeltaBasedController<TModel, TDelta, TTestCase, TResult>>>();
-
-			return factory(rtsApproachType, processingType);
 		}
 
 		private static IUnityContainer container;
@@ -79,60 +66,6 @@ namespace RTSFramework.ViewModels
 
 			return factory(discoveryType, rtsApproachType, processingType);
 		}
-
-		#region DeltaBasedController
-
-		private static void InitDeltaBasedController(IUnityContainer unityContainer)
-		{
-			InitDeltaBasedControllerFactoryDelta<GitProgramModel>(unityContainer);
-			InitDeltaBasedControllerFactoryDelta<TFS2010ProgramModel>(unityContainer);
-		}
-
-		private static void InitDeltaBasedControllerFactoryDelta<TModel>(IUnityContainer unityContainer)
-			where TModel : IProgramModel
-		{
-			InitDeltaBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitDeltaBasedControllerFactoryResult<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
-		}
-
-		private static void InitDeltaBasedControllerFactoryResult<TModel, TDelta>(IUnityContainer unityContainer)
-			where TModel : IProgramModel
-			where TDelta : IDelta<TModel>
-		{
-			InitDeltaBasedControllerFactoryTestcase<TModel, TDelta, MSTestExectionResult>(unityContainer);
-			InitDeltaBasedControllerFactoryTestcase<TModel, TDelta, FileProcessingResult>(unityContainer);
-			InitDeltaBasedControllerFactoryTestcase<TModel, TDelta, TestListResult<MSTestTestcase>>(unityContainer);
-		}
-
-		private static void InitDeltaBasedControllerFactoryTestcase<TModel, TDelta, TResult>(IUnityContainer unityContainer)
-			where TModel : IProgramModel
-			where TDelta : IDelta<TModel>
-			where TResult : ITestProcessingResult
-		{
-			InitDeltaBasedControllerFactory<TModel, TDelta, MSTestTestcase, TResult>(unityContainer);
-		}
-
-		private static void InitDeltaBasedControllerFactory<TModel, TDelta, TTestCase, TResult>(IUnityContainer unityContainer)
-			where TModel : IProgramModel
-			where TDelta : IDelta<TModel>
-			where TTestCase : ITestCase
-			where TResult : ITestProcessingResult
-		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, DeltaBasedController<TModel, TDelta, TTestCase, TResult>>>(
-				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, DeltaBasedController<TModel, TDelta, TTestCase, TResult>>(
-						(rtsApproachType, processingType) =>
-						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TModel, TDelta, TTestCase>>>();
-							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult>>>();
-
-							return unityContainer.Resolve<DeltaBasedController<TModel, TDelta, TTestCase, TResult>>(
-								new ParameterOverride("rtsApproach", rtsApproachFactory(rtsApproachType)),
-								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
-						})));
-		}
-
-		#endregion
 
 		#region StateBasedController
 
@@ -314,7 +247,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitCorrespondenceModelManager(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterInstance(typeof(CorrespondenceModelManager));
+			unityContainer.RegisterType<CorrespondenceModelManager>(new ContainerControlledLifetimeManager());
 		}
 
 		private static void InitAdapters(IUnityContainer unityContainer)

@@ -21,18 +21,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.assembliesAdapter = assembliesAdapter;
 		}
 
-		//TODO: Think about discovery of tests based on source code (using ASTs)
-		//Advantage: can identify impacted tests even if code does not compile
-		//Disadvantage: maybe requires lot more time?
-		public async Task<IEnumerable<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token = default(CancellationToken))
+		public async Task<IEnumerable<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
 		{
 			var testCases = new List<MSTestTestcase>();
 
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
-			if (token.IsCancellationRequested)
-			{
-				return testCases;
-			}
+			token.ThrowIfCancellationRequested();
 
 			//TODO Filtering of Test dlls?
 			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith("Test.dll"));
@@ -46,6 +40,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					{
 						foreach (MethodDefinition method in type.Methods)
 						{
+							token.ThrowIfCancellationRequested();
+
 							if (method.CustomAttributes.Any(x => x.AttributeType.Name == MSTestConstants.TestMethodAttributeName))
 							{
 								var testCase = new MSTestTestcase(modulePath, method.Name, type.FullName);

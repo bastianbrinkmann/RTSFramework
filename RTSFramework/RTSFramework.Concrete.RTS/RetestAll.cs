@@ -11,15 +11,12 @@ namespace RTSFramework.RTSApproaches.Dynamic
     {
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
-		public void ExecuteRTS(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken = default(CancellationToken))
+		public void ExecuteRTS(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
         {
             foreach (TTestCase testcase in testCases)
             {
-	            if (cancellationToken.IsCancellationRequested)
-	            {
-		            return;
-	            }
-                ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
+				cancellationToken.ThrowIfCancellationRequested();
+				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
             }
         }
     }

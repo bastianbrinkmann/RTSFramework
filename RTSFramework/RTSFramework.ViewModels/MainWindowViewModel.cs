@@ -121,7 +121,6 @@ namespace RTSFramework.ViewModels
 		private void CancelRun()
 		{
 			cancellationTokenSource?.Cancel();
-			RunStatus = RunStatus.Cancelled;
 		}
 
 		private void RefreshCommitsSelection()
@@ -442,6 +441,10 @@ namespace RTSFramework.ViewModels
 
 				RunStatus = RunStatus.Completed;
 			}
+			catch (OperationCanceledException)
+			{
+				RunStatus = RunStatus.Cancelled;
+			}
 			catch (Exception e)
 			{
 				RunStatus = RunStatus.Failed;
@@ -580,7 +583,7 @@ namespace RTSFramework.ViewModels
 
 			stateBasedController.ImpactedTest += (sender, args) =>
 			{
-				applicationUiExecutor.ExecuteOnUI(() =>
+				applicationUiExecutor.ExecuteOnUi(() =>
 					TestResults.Add(new TestResultListViewItemViewModel
 					{
 						FullyQualifiedName = args.TestCase.Id,

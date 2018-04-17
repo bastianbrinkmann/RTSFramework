@@ -26,7 +26,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
 
-        public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
         {
 	        var executionResult = new MSTestExectionResult();
 
@@ -37,10 +37,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 var arguments = BuildVsTestsArguments();
 
                 await ExecuteVsTestsByArguments(arguments, cancellationToken);
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return executionResult;
-				}
+				cancellationToken.ThrowIfCancellationRequested();
 
 				executionResult = ParseVsTestsTrxAnswer();
             }

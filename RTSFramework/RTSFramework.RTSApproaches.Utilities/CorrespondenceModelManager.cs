@@ -9,101 +9,106 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
-    public class CorrespondenceModelManager
-    {
-        private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
-        private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
-        private const string CorrespondenceModelsStoragePlace = "CorrespondenceModels";
+	public class CorrespondenceModelManager
+	{
+		private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
+		private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
+		private const string CorrespondenceModelsStoragePlace = "CorrespondenceModels";
 
-        public CorrespondenceModelManager(IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter)
-        {
-            this.correspondenceModelAdapter = correspondenceModelAdapter;
-        }
+		public CorrespondenceModelManager(IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter)
+		{
+			this.correspondenceModelAdapter = correspondenceModelAdapter;
+		}
 
-        public Models.CorrespondenceModel GetCorrespondenceModel(string versionId, GranularityLevel granularityLevel)
-        {
-            Models.CorrespondenceModel model = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == versionId && x.GranularityLevel == granularityLevel);
+		public Models.CorrespondenceModel GetCorrespondenceModelOrDefault(IProgramModel programModel)
+		{
+			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
 
-            if (model == null)
-            {
-                var artefact = GetFile(versionId, granularityLevel);
-                model = correspondenceModelAdapter.Parse(artefact);
-                if (model == null)
-                {
-                    model = new Models.CorrespondenceModel { ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName), GranularityLevel = granularityLevel};
-                }
-                correspondenceModels.Add(model);
-            }
+			var defaultModel = new Models.CorrespondenceModel
+			{
+				ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName),
+				GranularityLevel = programModel.GranularityLevel
+			};
 
-            return model;
-        }
+			Models.CorrespondenceModel model = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == programModel.VersionId && x.GranularityLevel == programModel.GranularityLevel);
 
-        public void UpdateCorrespondenceModel<TModel, TModelElement, TTestCase>(CoverageData coverageData, StructuralDelta<TModel, TModelElement> delta, GranularityLevel granularityLevel, IEnumerable<TTestCase> allTests) 
-            where TTestCase : ITestCase 
-			where TModel : IProgramModel 
-			where TModelElement : IProgramModelElement
-        {
-            var oldModel = GetCorrespondenceModel(delta.SourceModel.VersionId, granularityLevel);
-            var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);
-            newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, granularityLevel, delta.TargetModel));
-            newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
+			if (model == null)
+			{
+				model = correspondenceModelAdapter.Parse(artefact) ?? defaultModel;
 
-            PersistCorrespondenceModel(newModel);
-        }
+				correspondenceModels.Add(model);
+			}
 
-        private Dictionary<string, HashSet<string>> GetLinksByCoverageData<TModel>(CoverageData coverageData, GranularityLevel granularityLevel, TModel targetModel)
-            where TModel : IProgramModel
-        {
-            var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
+			return model;
+		}
 
-            if (granularityLevel == GranularityLevel.Class)
-            {
-                foreach (var coverageEntry in coverageData.CoverageDataEntries)
-                {
-                    if (!links[coverageEntry.TestCaseId].Contains(coverageEntry.ClassName))
-                    {
-                        links[coverageEntry.TestCaseId].Add(coverageEntry.ClassName);
-                    }
-                }
-            }
-            else
-            {
+		private IProgramModel source, target;
+		private List<string> allTestCaseIds;
 
-                foreach (var coverageEntry in coverageData.CoverageDataEntries)
-                {
-                    var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
-                    if (!links[coverageEntry.TestCaseId].Contains(relativePath))
-                    {
-                        links[coverageEntry.TestCaseId].Add(relativePath);
-                    }
-                }
-            }
+		public void PrepareCorrespondenceModelCreation<TModel, TTestCase>(IDelta<TModel> delta, IEnumerable<TTestCase> allTests) where TModel : IProgramModel where TTestCase : ITestCase
+		{
+			source = delta.SourceModel;
+			target = delta.TargetModel;
+			allTestCaseIds = allTests.Select(x => x.Id).ToList();
+		}
 
-            return links;
-        }
+		public void CreateCorrespondenceModel(CoverageData coverageData) 
+		{
+			var oldModel = GetCorrespondenceModelOrDefault(source);
+			var newModel = oldModel.CloneModel(target.VersionId);
+			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, target));
+			newModel.RemoveDeletedTests(allTestCaseIds);
 
-        private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
-        {
-            var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
+			PersistCorrespondenceModel(newModel);
+		}
 
-            if (currentModel != null)
-            {
-                correspondenceModels.Remove(currentModel);
-            }
+		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
+		{
+			var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
-            if (!Directory.Exists(CorrespondenceModelsStoragePlace))
-            {
-                Directory.CreateDirectory(CorrespondenceModelsStoragePlace);
-            }
+			foreach (var coverageEntry in coverageData.CoverageDataEntries)
+			{
+				if (targetModel.GranularityLevel == GranularityLevel.Class)
+				{
+					if (!links[coverageEntry.TestCaseId].Contains(coverageEntry.ClassName))
+					{
+						links[coverageEntry.TestCaseId].Add(coverageEntry.ClassName);
+					}
+					else
+					{
+						var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
+						if (!links[coverageEntry.TestCaseId].Contains(relativePath))
+						{
+							links[coverageEntry.TestCaseId].Add(relativePath);
+						}
+					}
+				}
+			}
+			return links;
+		}
 
-            var artefact = GetFile(model.ProgramVersionId, model.GranularityLevel);
-            correspondenceModelAdapter.Unparse(model, artefact);
-            correspondenceModels.Add(model);
-        }
+		private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
+		{
+			var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 
-        private static FileInfo GetFile(string programVersionId, GranularityLevel granularityLevel)
-        {
-            return new FileInfo(Path.Combine(CorrespondenceModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}"));
-        }
-    }
+			if (currentModel != null)
+			{
+				correspondenceModels.Remove(currentModel);
+			}
+
+			if (!Directory.Exists(CorrespondenceModelsStoragePlace))
+			{
+				Directory.CreateDirectory(CorrespondenceModelsStoragePlace);
+			}
+
+			var artefact = GetFile(model.ProgramVersionId, model.GranularityLevel);
+			correspondenceModelAdapter.Unparse(model, artefact);
+			correspondenceModels.Add(model);
+		}
+
+		private static FileInfo GetFile(string programVersionId, GranularityLevel granularityLevel)
+		{
+			return new FileInfo(Path.Combine(CorrespondenceModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}"));
+		}
+	}
 }

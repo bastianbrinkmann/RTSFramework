@@ -4,6 +4,6 @@ namespace RTSFramework.ViewModels.RequireUIServices
 {
 	public interface IApplicationUiExecutor
 	{
-		void ExecuteOnUI(Action action);
+		void ExecuteOnUi(Action action);
 	}
 }

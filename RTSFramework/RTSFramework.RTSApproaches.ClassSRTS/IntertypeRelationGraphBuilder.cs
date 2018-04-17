@@ -10,7 +10,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     {
         private const string MonoModuleTyp = "<Module>";
 
-        public IntertypeRelationGraph BuildIntertypeRelationGraph(IList<CSharpAssembly> assemblies, CancellationToken cancellationToken = default(CancellationToken))
+        public IntertypeRelationGraph BuildIntertypeRelationGraph(IList<CSharpAssembly> assemblies, CancellationToken cancellationToken)
         {
             var graph = new IntertypeRelationGraph();
             var typeDefinitions = new List<TypeDefinition>();

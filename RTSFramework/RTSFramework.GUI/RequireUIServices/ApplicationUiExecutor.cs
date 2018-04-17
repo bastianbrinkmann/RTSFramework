@@ -6,7 +6,7 @@ namespace RTSFramework.GUI.RequireUIServices
 {
 	public class ApplicationUiExecutor : IApplicationUiExecutor
 	{
-		public void ExecuteOnUI(Action action)
+		public void ExecuteOnUi(Action action)
 		{
 			Application.Current.Dispatcher.Invoke(action);
 		}

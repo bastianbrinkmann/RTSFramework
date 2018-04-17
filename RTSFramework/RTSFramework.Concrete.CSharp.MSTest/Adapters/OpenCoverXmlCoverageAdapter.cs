@@ -10,109 +10,113 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
-    public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>
-    {
-        public CoverageData Parse(MSTestExecutionResultParameters resultParameters)
-        {
-            var serializer = new XmlSerializer(typeof(CoverageSession),
-                                                    new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
-            using (var stream = new FileStream(resultParameters.File.FullName, FileMode.Open))
-            {
-                using (var reader = new StreamReader(stream, new UTF8Encoding()))
-                {
-                    var session = (CoverageSession)serializer.Deserialize(reader);
+	public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>
+	{
+		public CoverageData Parse(MSTestExecutionResultParameters resultParameters)
+		{
+			var serializer = new XmlSerializer(typeof(CoverageSession),
+													new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
+			using (var stream = new FileStream(resultParameters.File.FullName, FileMode.Open))
+			{
+				using (var reader = new StreamReader(stream, new UTF8Encoding()))
+				{
+					var session = (CoverageSession)serializer.Deserialize(reader);
 
-                    //Determine Ids of testcases
-                    var coverageIdsTestCases = new Dictionary<uint, MSTestTestcase>();
+					//Determine Ids of testcases
+					var coverageIdsTestCases = new Dictionary<uint, MSTestTestcase>();
 
-                    foreach (var module in session.Modules)
-                    {
-                        if (module.TrackedMethods != null)
-                        {
-                            foreach (var trackedMethod in module.TrackedMethods)
-                            {
-                                var fullName = trackedMethod.FullName.Replace("::", ".");
+					foreach (var module in session.Modules)
+					{
+						if (module.TrackedMethods != null)
+						{
+							foreach (var trackedMethod in module.TrackedMethods)
+							{
+								var fullName = trackedMethod.FullName.Replace("::", ".");
 
-                                var associatedTest = resultParameters.ExecutedTestcases.SingleOrDefault(x => fullName.Contains($" {x.Id}()"));
+								var associatedTest = resultParameters.ExecutedTestcases.SingleOrDefault(x => fullName.Contains($" {x.Id}()"));
 
-                                coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
-                            }
-                        }
-                    }
+								coverageIdsTestCases.Add(trackedMethod.UniqueId, associatedTest);
+							}
+						}
+					}
 
-                    var coverageEntries = new HashSet<CoverageDataEntry>();
+					var coverageEntries = GetCollectedCoverageEntries(session, coverageIdsTestCases);
 
-                    foreach (var module in session.Modules)
-                    {
-                        var files = new Dictionary<uint, string>();
+					return new CoverageData(coverageEntries);
+				}
+			}
+		}
 
-                        //Determine Ids of files
-                        if (module.Files == null || module.Classes == null)
-                        {
-                            continue;
-                        }
+		private HashSet<CoverageDataEntry> GetCollectedCoverageEntries(CoverageSession session, Dictionary<uint, MSTestTestcase> coverageIdsTestCases)
+		{
+			var coverageEntries = new HashSet<CoverageDataEntry>();
 
-                        foreach (var file in module.Files)
-                        {
-                            files.Add(file.UniqueId, file.FullPath);
-                        }
+			foreach (var module in session.Modules)
+			{
+				var files = new Dictionary<uint, string>();
 
-                        foreach (var @class in module.Classes)
-                        {
-                            if (@class.Methods == null)
-                            {
-                                continue;
-                            }
+				//Determine Ids of files
+				if (module.Files == null || module.Classes == null)
+				{
+					continue;
+				}
 
-                            foreach (var method in @class.Methods)
-                            {
-                                if (method.FileRef == null || method.SequencePoints == null)
-                                {
-                                    continue;
-                                }
+				foreach (var file in module.Files)
+				{
+					files.Add(file.UniqueId, file.FullPath);
+				}
 
-                                var fileId = method.FileRef.UniqueId;
-	                            var filePath = files[fileId];
+				foreach (var className in module.Classes)
+				{
+					if (className.Methods == null)
+					{
+						continue;
+					}
 
-                                foreach (var sequencePoint in method.SequencePoints)
-                                {
-                                    if (sequencePoint.TrackedMethodRefs == null)
-                                    {
-                                        continue;
-                                    }
+					foreach (var method in className.Methods)
+					{
+						if (method.FileRef == null || method.SequencePoints == null)
+						{
+							continue;
+						}
 
-                                    foreach (var methodRef in sequencePoint.TrackedMethodRefs)
-                                    {
-	                                    var associatedTestcase = coverageIdsTestCases[methodRef.UniqueId];
+						var fileId = method.FileRef.UniqueId;
+						var filePath = files[fileId];
 
-                                        if (!coverageEntries.Any(
-                                            x => x.ClassName == @class.FullName && 
-                                                 x.FileName == filePath &&
-                                                 x.MethodName == method.FullName &&
-                                                 x.TestCaseId == associatedTestcase.Id))//TODO Convert method name once required - format "ReturnType ClassFullName::MethodName(ParameterList)"
-                                        {
-                                            coverageEntries.Add(new CoverageDataEntry
-                                            {
-                                                ClassName = @class.FullName,
-                                                FileName = filePath,
-                                                MethodName = method.FullName,
-                                                TestCaseId = associatedTestcase.Id
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+						foreach (var sequencePoint in method.SequencePoints)
+						{
+							if (sequencePoint.TrackedMethodRefs == null)
+							{
+								continue;
+							}
 
-                    return new CoverageData(coverageEntries);
-                }
-            }
-        }
+							foreach (var methodRef in sequencePoint.TrackedMethodRefs)
+							{
+								var associatedTestcase = coverageIdsTestCases[methodRef.UniqueId];
 
-        public void Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+								if (!coverageEntries.Any(
+									x => x.ClassName == className.FullName &&
+										 x.FileName == filePath &&
+										 x.TestCaseId == associatedTestcase.Id))
+								{
+									coverageEntries.Add(new CoverageDataEntry
+									{
+										ClassName = className.FullName,
+										FileName = filePath,
+										TestCaseId = associatedTestcase.Id
+									});
+								}
+							}
+						}
+					}
+				}
+			}
+			return coverageEntries;
+		}
+
+		public void Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
+		{
+			throw new System.NotImplementedException();
+		}
+	}
 }

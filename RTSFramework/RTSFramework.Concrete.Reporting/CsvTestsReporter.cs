@@ -9,7 +9,7 @@ namespace RTSFramework.Concrete.Reporting
 {
     public class CsvTestsReporter<TTestCase> : ITestProcessor<TTestCase, FileProcessingResult> where TTestCase : ITestCase
     {
-        public Task<FileProcessingResult> ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<FileProcessingResult> ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken)
         {
             FileInfo csvFile = new FileInfo("Results.csv");
 			var result = new FileProcessingResult();
@@ -22,11 +22,8 @@ namespace RTSFramework.Concrete.Reporting
                     writer.WriteLine("Name;Categories");
                     foreach (var test in tests)
                     {
-	                    if (cancellationToken.IsCancellationRequested)
-	                    {
-		                    return Task.FromResult(result);
-	                    }
-                        writer.WriteLine($"{test.Id};" + string.Join(" ", test.Categories));
+						cancellationToken.ThrowIfCancellationRequested();
+						writer.WriteLine($"{test.Id};" + string.Join(" ", test.Categories));
                     }
                 }
             }

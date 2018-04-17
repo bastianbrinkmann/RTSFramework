@@ -8,6 +8,5 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
     {
 		public List<MSTestTestResult> TestcasesResults { get; } = new List<MSTestTestResult>();
 
-		public CoverageData CoverageData { get; set; }
     }
 }

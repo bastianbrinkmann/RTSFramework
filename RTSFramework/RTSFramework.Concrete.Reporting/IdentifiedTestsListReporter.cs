@@ -8,7 +8,7 @@ namespace RTSFramework.Concrete.Reporting
 {
     public class IdentifiedTestsListReporter<TTestCase> : ITestProcessor<TTestCase, TestListResult<TTestCase>> where TTestCase : ITestCase
     {
-	    public Task<TestListResult<TTestCase>> ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken = default(CancellationToken))
+	    public Task<TestListResult<TTestCase>> ProcessTests(IEnumerable<TTestCase> tests, CancellationToken cancellationToken)
 	    {
 		    return Task.FromResult(new TestListResult<TTestCase> {IdentifiedTests = tests});
 	    }

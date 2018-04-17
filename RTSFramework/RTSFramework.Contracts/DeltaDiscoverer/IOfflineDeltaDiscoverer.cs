@@ -3,7 +3,7 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts.DeltaDiscoverer
 {
-	public interface IOfflineDeltaDiscoverer<TModel, TDelta> : IDeltaDiscoverer<TModel, TDelta> where TModel : IProgramModel where TDelta : IDelta<TModel>
+	public interface IOfflineDeltaDiscoverer<TModel, TDelta> where TModel : IProgramModel where TDelta : IDelta<TModel>
 	{
 		TDelta Discover(TModel oldVersion, TModel newVersion);
 	}

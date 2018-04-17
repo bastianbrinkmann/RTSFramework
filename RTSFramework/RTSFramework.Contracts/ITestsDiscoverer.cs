@@ -7,6 +7,6 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestsDiscoverer<TModel, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel
 	{
-        Task<IEnumerable<TTestCase>> GetTestCasesForModel(TModel model, CancellationToken token = default(CancellationToken));
+        Task<IEnumerable<TTestCase>> GetTestCasesForModel(TModel model, CancellationToken token);
 	}
 }

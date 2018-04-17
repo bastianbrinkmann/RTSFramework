@@ -11,6 +11,7 @@ using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Utilities;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.ViewModels.Controller
@@ -24,7 +25,8 @@ namespace RTSFramework.ViewModels.Controller
 	    private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 	    private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
         private readonly ITestProcessor<TTestCase, TResult> testProcessor;
-        private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
+	    private readonly CorrespondenceModelManager correspondenceModelManager;
+	    private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
         private readonly IRTSApproach<TModel, TDelta,TTestCase> rtsApproach;
 
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
@@ -34,12 +36,14 @@ namespace RTSFramework.ViewModels.Controller
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
             ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
 			IRTSApproach<TModel, TDelta, TTestCase> rtsApproach,
-			ITestProcessor<TTestCase, TResult> testProcessor)
+			ITestProcessor<TTestCase, TResult> testProcessor,
+			CorrespondenceModelManager correspondenceModelManager)
         {
 	        this.artefactAdapter = artefactAdapter;
 	        this.deltaDiscoverer = deltaDiscoverer;
             this.testProcessor = testProcessor;
-            this.testsDiscoverer = testsDiscoverer;
+	        this.correspondenceModelManager = correspondenceModelManager;
+	        this.testsDiscoverer = testsDiscoverer;
             this.rtsApproach = rtsApproach;
         }
 
@@ -49,16 +53,10 @@ namespace RTSFramework.ViewModels.Controller
 			var newModel = artefactAdapter.Parse(newArtefact);
 
 			var delta = DebugStopWatchTracker.ReportNeededTimeOnDebug(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
-			if (token.IsCancellationRequested)
-			{
-				return default(TResult);
-			}
+			token.ThrowIfCancellationRequested();
 
 			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
-			if (token.IsCancellationRequested)
-			{
-				return default(TResult);
-			}
+			token.ThrowIfCancellationRequested();
 
 			var impactedTests = new List<TTestCase>();
 			rtsApproach.ImpactedTest += (sender, args) =>
@@ -73,23 +71,12 @@ namespace RTSFramework.ViewModels.Controller
 
 			Debug.WriteLine($"{impactedTests.Count} Tests impacted");
 
-			if (token.IsCancellationRequested)
-			{
-				return default(TResult);
-			}
+			token.ThrowIfCancellationRequested();
+
+			correspondenceModelManager.PrepareCorrespondenceModelCreation(delta, allTests);
 
 			var processingResult = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testProcessor.ProcessTests(impactedTests, token), "ProcessingOfImpactedTests");
-			if (token.IsCancellationRequested)
-			{
-				return default(TResult);
-			}
-
-			var testExecutionResult = processingResult as MSTestExectionResult;
-			if (testExecutionResult != null && testExecutionResult.CoverageData != null)
-			{
-				var dynamicRtsApproach = rtsApproach as IDynamicRTSApproach;
-				dynamicRtsApproach?.UpdateCorrespondenceModel(testExecutionResult.CoverageData);
-			}
+			token.ThrowIfCancellationRequested();
 
 			return processingResult;
 		}

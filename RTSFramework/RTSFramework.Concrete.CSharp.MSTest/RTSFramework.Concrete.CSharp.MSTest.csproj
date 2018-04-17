@@ -101,6 +101,10 @@
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
+      <Project>{8E0E2C16-376E-4465-AF69-E1B300726080}</Project>
+      <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

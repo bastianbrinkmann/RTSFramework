@@ -9,41 +9,29 @@ using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 {
-    public class SolutionAssembliesAdapter : CancelableArtefactAdapter<string, IList<CSharpAssembly>>
-    {
-        public override async Task<IList<CSharpAssembly>> Parse(string artefact, CancellationToken token)
-        {
+	public class SolutionAssembliesAdapter : CancelableArtefactAdapter<string, IList<CSharpAssembly>>
+	{
+		public override async Task<IList<CSharpAssembly>> Parse(string artefact, CancellationToken token)
+		{
 			var result = new List<CSharpAssembly>();
 
 			var workspace = MSBuildWorkspace.Create();
-	        Solution solution;
 
-			try
-	        {
-				solution = await workspace.OpenSolutionAsync(artefact, token);
+			var solution = await workspace.OpenSolutionAsync(artefact, token);
+
+			foreach (var project in solution.Projects)
+			{
+				//TODO Check somehow whether project needs to be rebuilt?
+				token.ThrowIfCancellationRequested();
+				result.Add(new CSharpAssembly { AbsolutePath = project.OutputFilePath });
 			}
-			catch (OperationCanceledException)
-	        {
-		        return result;
-	        }
 
-            foreach (var project in solution.Projects)
-            {
-                //TODO Check somehow whether project needs to be rebuilt?
-	            if (token.IsCancellationRequested)
-	            {
-		            return result;
-	            }
+			return result;
+		}
 
-                result.Add(new CSharpAssembly{AbsolutePath = project.OutputFilePath});
-            }
-
-            return result;
-        }
-
-        public override Task Unparse(IList<CSharpAssembly> model, string artefact, CancellationToken token)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+		public override Task Unparse(IList<CSharpAssembly> model, string artefact, CancellationToken token)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
