@@ -21,28 +21,17 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
     {
 		public event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;
 
-		private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
-        private readonly IntertypeRelationGraphBuilder intertypeRelationGraphBuilder;
+        private readonly IIntertypeRelationGraphBuilder intertypeRelationGraphBuilder;
 
-        public ClassSRTSApproach(IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter,
-            IntertypeRelationGraphBuilder intertypeRelationGraphBuilder)
+        public ClassSRTSApproach(IIntertypeRelationGraphBuilder intertypeRelationGraphBuilder)
         {
-            this.assembliesArtefactAdapter = assembliesArtefactAdapter;
             this.intertypeRelationGraphBuilder = intertypeRelationGraphBuilder;
         }
 
         public void ExecuteRTS(IEnumerable<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
         {
-	        var sourceCSharpModel = delta.SourceModel as CSharpProgramModel;
-	        if (sourceCSharpModel == null)
-	        {
-		        throw new ArgumentException("Class SRTS can only be used for CSharp programs!");
-	        }
-
-            var assemblies = assembliesArtefactAdapter.Parse(sourceCSharpModel.AbsoluteSolutionPath);
-
-            IntertypeRelationGraph graph = null;
-            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(assemblies, cancellationToken),
+			IntertypeRelationGraph graph = null;
+            DebugStopWatchTracker.ReportNeededTimeOnDebug(() => graph = intertypeRelationGraphBuilder.BuildIntertypeRelationGraph(delta.SourceModel, cancellationToken),
                 "Building IntertypeRelationGraph");
 			cancellationToken.ThrowIfCancellationRequested();
 

@@ -240,7 +240,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitHelper(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<IntertypeRelationGraphBuilder>();
+			unityContainer.RegisterType<IIntertypeRelationGraphBuilder, IntermediateLanguageIntertypeRelationGraphBuilder>();
 
 			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
 		}

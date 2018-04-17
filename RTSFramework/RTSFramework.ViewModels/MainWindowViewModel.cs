@@ -461,32 +461,11 @@ namespace RTSFramework.ViewModels
 				oldGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
-					Commit = new GitCommit { ShaId = FromCommit.Identifier},
+					Commit = new GitCommit { ShaId = FromCommit.Identifier },
 					RepositoryPath = RepositoryPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};
-				if (ToCommit != null)
-				{
-					newGitIdentification = new GitVersionIdentification
-					{
-						ReferenceType = GitVersionReferenceType.SpecificCommit,
-						Commit = new GitCommit {ShaId = ToCommit.Identifier},
-						RepositoryPath = RepositoryPath,
-						AbsoluteSolutionPath = SolutionFilePath,
-						GranularityLevel = GranularityLevel
-					};
-				}
-				else
-				{
-					newGitIdentification = new GitVersionIdentification
-					{
-						ReferenceType = GitVersionReferenceType.CurrentChanges,
-						RepositoryPath = RepositoryPath,
-						AbsoluteSolutionPath = SolutionFilePath,
-						GranularityLevel = GranularityLevel
-					};
-				}
 			}
 			else
 			{
@@ -497,6 +476,21 @@ namespace RTSFramework.ViewModels
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};
+			}
+
+			if (DiscoveryType == DiscoveryType.VersionCompare && ToCommit != null)
+			{
+				newGitIdentification = new GitVersionIdentification
+				{
+					ReferenceType = GitVersionReferenceType.SpecificCommit,
+					Commit = new GitCommit { ShaId = ToCommit.Identifier },
+					RepositoryPath = RepositoryPath,
+					AbsoluteSolutionPath = SolutionFilePath,
+					GranularityLevel = GranularityLevel
+				};
+			}
+			else
+			{
 				newGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.CurrentChanges,

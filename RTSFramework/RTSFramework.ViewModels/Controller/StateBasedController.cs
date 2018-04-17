@@ -12,6 +12,7 @@ using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
+using RTSFramework.RTSApproaches.CorrespondenceModel.Models;
 using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.ViewModels.Controller
@@ -66,6 +67,12 @@ namespace RTSFramework.ViewModels.Controller
 
 				impactedTests.Add(impactedTest);
 			};
+
+			var dynamicApproach = rtsApproach as IDynamicRTSApproach<TModel, TDelta, TTestCase, CorrespondenceModel>;
+			if (dynamicApproach != null)
+			{
+				dynamicApproach.CorrespondenceModel = correspondenceModelManager.Value.GetCorrespondenceModelOrDefault(delta.SourceModel);
+			}
 
 			DebugStopWatchTracker.ReportNeededTimeOnDebug(() => rtsApproach.ExecuteRTS(allTests, delta, token), "RTSApproach");
 

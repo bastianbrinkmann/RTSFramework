@@ -73,21 +73,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			{
 				throw new ArgumentException("Invalid path to a module: " + moduleFilePath);
 			}
-			ModuleDefinition module;
-
-			ReaderParameters parameters = new ReaderParameters { ReadSymbols = true };
-			try
-			{
-				module = ModuleDefinition.ReadModule(moduleFilePath, parameters);
-			}
-			catch (Exception)
-			{
-				module = ModuleDefinition.ReadModule(moduleFilePath);
-			}
-
-			return module;
+			return ModuleDefinition.ReadModule(moduleFilePath);
 		}
-
-
 	}
 }

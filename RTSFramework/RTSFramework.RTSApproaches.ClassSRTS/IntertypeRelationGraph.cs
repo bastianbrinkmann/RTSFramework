@@ -26,38 +26,6 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
         public HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> UseEdges { get; } =
             new HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>>();
 
-        public void AddInheritanceEdgeIfBothExist(TypeDefinition from, TypeReference to)
-        {
-            AddEdgeIfBothExist(from, to, InheritanceEdges);
-        }
-
-        public void AddUseEdgeIfBothExist(TypeDefinition from, TypeReference to)
-        {
-            AddEdgeIfBothExist(from, to, UseEdges);
-        }
-
-        private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> edges)
-        {
-            if (from == null || to == null)
-                return;
-
-            var genericType = to as GenericInstanceType;
-            if (genericType != null && genericType.HasGenericArguments)
-            {
-                foreach (var genericArgument in genericType.GenericArguments)
-                {
-                    AddEdgeIfBothExist(from, genericArgument, edges);
-                }
-            }
-
-            var fromNode = Nodes.SingleOrDefault(x => x.TypeIdentifier == from.FullName);
-            var toNode = Nodes.SingleOrDefault(x => x.TypeIdentifier == to.FullName);
-
-            if (fromNode != null && toNode != null &&
-                !edges.Any(x => x.Item1.TypeIdentifier == from.FullName && x.Item2.TypeIdentifier == to.FullName))
-            {
-                edges.Add(new Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>(fromNode, toNode));
-            }
-        }
+        
     }
 }
