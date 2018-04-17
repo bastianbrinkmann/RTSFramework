@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\MSTestExectionResult.cs" />
+    <Compile Include="Models\MSTestExectionWithCodeCoverageResult.cs" />
     <Compile Include="Models\MSTestTestcase.cs" />
     <Compile Include="Models\MSTestTestResult.cs" />
     <Compile Include="MSTestConstants.cs" />

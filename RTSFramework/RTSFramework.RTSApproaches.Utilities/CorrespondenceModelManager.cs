@@ -42,22 +42,14 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return model;
 		}
 
-		private IProgramModel source, target;
-		private List<string> allTestCaseIds;
-
-		public void PrepareCorrespondenceModelCreation<TModel, TTestCase>(IDelta<TModel> delta, IEnumerable<TTestCase> allTests) where TModel : IProgramModel where TTestCase : ITestCase
+		public void CreateCorrespondenceModel<TModel, TTestCase>(IDelta<TModel> delta, IEnumerable<TTestCase> allTests, CoverageData coverageData) 
+			where TModel : IProgramModel 
+			where TTestCase : ITestCase
 		{
-			source = delta.SourceModel;
-			target = delta.TargetModel;
-			allTestCaseIds = allTests.Select(x => x.Id).ToList();
-		}
-
-		public void CreateCorrespondenceModel(CoverageData coverageData) 
-		{
-			var oldModel = GetCorrespondenceModelOrDefault(source);
-			var newModel = oldModel.CloneModel(target.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, target));
-			newModel.RemoveDeletedTests(allTestCaseIds);
+			var oldModel = GetCorrespondenceModelOrDefault(delta.SourceModel);
+			var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);
+			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, delta.TargetModel));
+			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
 
 			PersistCorrespondenceModel(newModel);
 		}

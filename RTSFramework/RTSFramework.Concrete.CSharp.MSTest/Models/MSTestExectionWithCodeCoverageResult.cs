@@ -4,8 +4,8 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
-    public class MSTestExectionResult : ITestProcessingResult
+    public class MSTestExectionWithCodeCoverageResult : MSTestExectionResult, IExecutionWithCodeCoverageResult
     {
-		public List<MSTestTestResult> TestcasesResults { get; } = new List<MSTestTestResult>();
+	    public CoverageData CoverageData { get; set; }
     }
 }

@@ -7,32 +7,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Core.Utilities;
-using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
 	public class MSTestTestsExecutorWithOpenCoverage : MSTestTestsExecutor
 	{
 		private readonly IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter;
-		private readonly CorrespondenceModelManager correspondenceModelManager;
 
 		private const string OpenCoverExe = "OpenCover.Console.exe";
 		private const string OpenCoverPath = "OpenCover";
 
 		public MSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
-													IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter,
-													CorrespondenceModelManager correspondenceModelManager) : base(resultArtefactAdapter)
+													IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
 		{
 			this.openCoverArtefactAdapter = openCoverArtefactAdapter;
-			this.correspondenceModelManager = correspondenceModelManager;
 		}
 
 		public override async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
 		{
-			var result = new MSTestExectionResult();
+			var result = new MSTestExectionWithCodeCoverageResult();
 
 			CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
 			if (CurrentlyExecutedTests.Any())
@@ -44,13 +41,15 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 				await ExecuteOpenCoverByArguments(openCoverArguments, cancellationToken);
 
-				result = ParseVsTestsTrxAnswer();
+				var parsedResult = ParseVsTestsTrxAnswer();
+
+				result.TestcasesResults.AddRange(parsedResult.TestcasesResults);
 
 				var executionResultParams = new MSTestExecutionResultParameters { File = new FileInfo(Path.GetFullPath(@"results.xml")) };
 				executionResultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
 
 				var coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
-				correspondenceModelManager.CreateCorrespondenceModel(coverageData);
+				result.CoverageData = coverageData;
 			}
 
 			return result;
