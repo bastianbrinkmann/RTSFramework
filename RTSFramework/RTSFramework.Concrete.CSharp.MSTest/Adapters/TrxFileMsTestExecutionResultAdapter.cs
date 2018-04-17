@@ -40,8 +40,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                                    ErrorMessage = message?.Value ?? "",
                                    StackTrace = stackTrace?.Value ?? "",
                                    DurationInSeconds = (et - st).TotalSeconds,
-                                   Name = OrderedTestsHelper.GetTestName(testDefinition.testName)
-                               }).ToList();
+                                   Name = OrderedTestsHelper.GetTestName(testDefinition.testName),
+								   OrderedTestName = utr.Attribute("testName")?.Value
+                               }).OrderBy(x => x.OrderedTestName).ToList();
 
                 var executionResult = new MSTestExectionResult();
 

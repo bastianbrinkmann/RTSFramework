@@ -409,10 +409,10 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(TargetDir)\OpenCover" mkdir "$(TargetDir)\OpenCover"
-if not exist "$(TargetDir)\MSTestAdapter" mkdir "$(TargetDir)\MSTestAdapter"
+if not exist "$(TargetDir)\VsTest" mkdir "$(TargetDir)\VsTest"
 
 xcopy /E /Y /I /c "$(SolutionDir)packages\OpenCover.4.6.519\tools" "$(TargetDir)\OpenCover"
-xcopy /E /Y /I /c "$(SolutionDir)packages\MSTest.TestAdapter.1.2.0\build\_common" "$(TargetDir)\MSTestAdapter"</PostBuildEvent>
+xcopy /E /Y /I /c "$(SolutionDir)packages\Microsoft.TestPlatform.15.7.0\tools\net451" "$(TargetDir)\VsTest"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

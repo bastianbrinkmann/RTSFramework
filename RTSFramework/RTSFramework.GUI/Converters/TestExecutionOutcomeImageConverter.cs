@@ -39,7 +39,7 @@ namespace RTSFramework.GUI.Converters
 				case TestExecutionOutcome.NotExecuted:
 					return resourcesFolder + "other.png";
 				default:
-					return "";
+					return null;
 			}
 		}
 

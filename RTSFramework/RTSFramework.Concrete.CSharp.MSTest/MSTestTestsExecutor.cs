@@ -117,7 +117,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = Path.Combine(MSTestConstants.VstestPath, MSTestConstants.Vstestconsole),
+                    FileName = Path.GetFullPath(Path.Combine(MSTestConstants.VstestPath, MSTestConstants.Vstestconsole)),
                     Arguments = arguments,
                     CreateNoWindow = true,
                     UseShellExecute = false,
@@ -137,9 +137,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
         {
             var orderedTestsPath = CreateOrderTestsFile();
 
-            string testAdapterPathArg = "/TestAdapterPath:" + Path.GetFullPath(MSTestConstants.MSTestAdapterPath);
             string loggerArg = "/logger:trx";
-            string arguments = testAdapterPathArg + " " + loggerArg + " " + orderedTestsPath;
+            string arguments = loggerArg + " " + orderedTestsPath;
 
             return arguments;
         }
