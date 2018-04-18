@@ -13,11 +13,11 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class IntermediateLanguageIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
+	public class MonoIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
 	{
 		private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
 
-		public IntermediateLanguageIntertypeRelationGraphBuilder(IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter)
+		public MonoIntertypeRelationGraphBuilder(IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter)
 		{
 			this.assembliesArtefactAdapter = assembliesArtefactAdapter;
 		}
@@ -383,7 +383,7 @@ namespace RTSFramework.RTSApproaches.Static
 			{
 				foreach (var genericArgument in genericType.GenericArguments)
 				{
-					AddEdgeIfBothExist(from, genericArgument, edges, graph);
+					AddUseEdgeIfBothExist(from, genericArgument, graph);
 				}
 			}
 

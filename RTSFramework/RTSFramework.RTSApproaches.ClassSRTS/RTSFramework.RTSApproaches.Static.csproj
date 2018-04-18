@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClassSRTSDeltaExpander.cs" />
-    <Compile Include="IntermediateLanguageIntertypeRelationGraphBuilder.cs" />
+    <Compile Include="MonoIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
