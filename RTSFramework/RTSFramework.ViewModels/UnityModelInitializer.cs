@@ -23,6 +23,7 @@ using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using RTSFramework.RTSApproaches.Core.DataStructures;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 using RTSFramework.RTSApproaches.CorrespondenceModel.Models;
 using RTSFramework.RTSApproaches.Dynamic;
@@ -252,6 +253,8 @@ namespace RTSFramework.ViewModels
 		private static void InitDataStructureProviderForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
 			unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, IntermediateLanguageIntertypeRelationGraphBuilder<TModel>>();
+			//unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, CSharpIntertypeRelationGraphBuilder<TModel>>();
+			
 			unityContainer.RegisterType<IDataStructureProvider<CorrespondenceModel, TModel>, CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
 		}
 

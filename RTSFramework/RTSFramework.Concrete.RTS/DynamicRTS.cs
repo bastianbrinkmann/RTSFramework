@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -11,7 +12,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicRTS<TModel, TModelElement, TTestCase> : TestSelectorBase<TModel, StructuralDelta<TModel, TModelElement>, TTestCase, CorrespondenceModel.Models.CorrespondenceModel>
+	public class DynamicRTS<TModel, TModelElement, TTestCase> : TestSelectorWithDataStructure<TModel, StructuralDelta<TModel, TModelElement>, TTestCase, CorrespondenceModel.Models.CorrespondenceModel>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
@@ -51,18 +52,18 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		private IList<TTestCase> allTests;
 		private StructuralDelta<TModel, TModelElement> currentDelta;
 
-		public override void UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token)
+		public override async Task UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token)
 		{
 			var codeCoverageResult = processingResult as IProcessingResultWithCodeCoverage;
 
 			if (codeCoverageResult != null)
 			{
-				var oldModel = DataStructureProvider.GetDataStructureForProgram(currentDelta.SourceModel, token);
+				var oldModel = await DataStructureProvider.GetDataStructureForProgram(currentDelta.SourceModel, token);
 				var newModel = oldModel.CloneModel(currentDelta.TargetModel.VersionId);
 				newModel.UpdateByNewLinks(GetLinksByCoverageData(codeCoverageResult.CoverageData, currentDelta.TargetModel));
 				newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
 
-				DataStructureProvider.PersistDataStructure(newModel);
+				await DataStructureProvider.PersistDataStructure(newModel);
 			}
 		}
 

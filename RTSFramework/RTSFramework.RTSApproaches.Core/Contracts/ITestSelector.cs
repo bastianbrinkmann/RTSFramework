@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
@@ -14,8 +15,8 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 	{
 		event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
-		void SelectTests(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
+		Task SelectTests(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
 
-		void UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token);
+		Task UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token);
 	}
 }

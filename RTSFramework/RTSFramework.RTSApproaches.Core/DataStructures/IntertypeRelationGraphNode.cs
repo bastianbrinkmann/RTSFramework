@@ -1,4 +1,4 @@
-﻿namespace RTSFramework.RTSApproaches.Static
+﻿namespace RTSFramework.RTSApproaches.Core.DataStructures
 {
     public class IntertypeRelationGraphNode
     {

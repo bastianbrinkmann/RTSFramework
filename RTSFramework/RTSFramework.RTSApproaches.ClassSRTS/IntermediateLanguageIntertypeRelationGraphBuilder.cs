@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
@@ -22,7 +24,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 		private const string MonoModuleTyp = "<Module>";
 
-		public IntertypeRelationGraph GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken cancellationToken)
+		public Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken cancellationToken)
 		{
 			var assemblies = assembliesArtefactAdapter.Parse(sourceModel.AbsoluteSolutionPath);
 
@@ -70,7 +72,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 			PrintTrackedTimes();
 
-			return graph;
+			return Task.FromResult(graph);
 		}
 
 		private IList<TypeDefinition> GetNestedTypes(TypeDefinition type, IntertypeRelationGraph graph)
@@ -403,7 +405,7 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 		}
 
-		public void PersistDataStructure(IntertypeRelationGraph dataStructure)
+		public Task PersistDataStructure(IntertypeRelationGraph dataStructure)
 		{
 			throw new NotImplementedException();
 		}

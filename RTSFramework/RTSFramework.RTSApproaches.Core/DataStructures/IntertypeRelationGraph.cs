@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RTSFramework.RTSApproaches.Static
+namespace RTSFramework.RTSApproaches.Core.DataStructures
 {
     /// <summary>
     /// https://dl.acm.org/citation.cfm?id=2950361

@@ -1,11 +1,12 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.RTSApproaches.Core.Contracts
 {
 	public interface IDataStructureProvider<TDataStructure, TModel> where TModel : IProgramModel
 	{
-		TDataStructure GetDataStructureForProgram(TModel model, CancellationToken cancellationToken);
-		void PersistDataStructure(TDataStructure dataStructure);
+		Task<TDataStructure> GetDataStructureForProgram(TModel model, CancellationToken cancellationToken);
+		Task PersistDataStructure(TDataStructure dataStructure);
 	}
 }

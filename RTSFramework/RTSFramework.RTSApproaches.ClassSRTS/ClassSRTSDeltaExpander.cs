@@ -9,6 +9,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
@@ -22,7 +23,7 @@ namespace RTSFramework.RTSApproaches.Static
 	/// A Generic Platform for Model-Based Regression Testing
 	/// by Zech et al.
 	/// </summary>
-	public class ClassSRTSDeltaExpander<TModel> : TestSelectorBase<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase, IntertypeRelationGraph>
+	public class ClassSRTSDeltaExpander<TModel> : TestSelectorWithDataStructure<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase, IntertypeRelationGraph>
 		where TModel : CSharpProgramModel 
 	{
 		public override event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;

@@ -197,6 +197,7 @@
   <ItemGroup>
     <Compile Include="Adapters\SolutionAssembliesAdapter.cs" />
     <Compile Include="CSharpClassDeltaDiscoverer.cs" />
+    <Compile Include="CSharpIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Models\CSharpClassElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -208,6 +209,10 @@
     <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Core\RTSFramework.RTSApproaches.Core.csproj">
+      <Project>{6BE9B2B8-9548-44A9-AB98-583BC4C3962B}</Project>
+      <Name>RTSFramework.RTSApproaches.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

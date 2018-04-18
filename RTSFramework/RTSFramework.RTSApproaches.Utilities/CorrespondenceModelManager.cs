@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -20,7 +21,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			this.correspondenceModelAdapter = correspondenceModelAdapter;
 		}
 
-		public Models.CorrespondenceModel GetDataStructureForProgram(TModel programModel, CancellationToken cancellationToken)
+		public Task<Models.CorrespondenceModel> GetDataStructureForProgram(TModel programModel, CancellationToken cancellationToken)
 		{
 			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
 
@@ -39,10 +40,10 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 				correspondenceModels.Add(model);
 			}
 
-			return model;
+			return Task.FromResult(model);
 		}
 
-		public void PersistDataStructure(Models.CorrespondenceModel model)
+		public Task PersistDataStructure(Models.CorrespondenceModel model)
 		{
 			var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 
@@ -59,6 +60,8 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			var artefact = GetFile(model.ProgramVersionId, model.GranularityLevel);
 			correspondenceModelAdapter.Unparse(model, artefact);
 			correspondenceModels.Add(model);
+
+			return Task.CompletedTask;
 		}
 
 		private static FileInfo GetFile(string programVersionId, GranularityLevel granularityLevel)
