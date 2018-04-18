@@ -16,13 +16,11 @@ namespace RTSFramework.RTSApproaches.Core.DataStructures
     /// </summary>
     public class IntertypeRelationGraph
     {
-        public HashSet<IntertypeRelationGraphNode> Nodes { get; } = new HashSet<IntertypeRelationGraphNode>();
+        public HashSet<string> Nodes { get; } = new HashSet<string>();
 
-        public HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> InheritanceEdges { get; } = 
-            new HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>>();
+        public HashSet<Tuple<string, string>> InheritanceEdges { get; } = new HashSet<Tuple<string, string>>();
 
-        public HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> UseEdges { get; } =
-            new HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>>();
+        public HashSet<Tuple<string, string>> UseEdges { get; } = new HashSet<Tuple<string, string>>();
 
         
     }

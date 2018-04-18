@@ -62,7 +62,7 @@ namespace RTSFramework.ViewModels.Controller
 				impactedTests.Add(impactedTest);
 			};
 
-			await DebugStopWatchTracker.ReportNeededTimeOnDebug(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
+			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testSelector.SelectTests(allTests, delta, token), "Test Selector");
 
 			Debug.WriteLine($"{impactedTests.Count} Tests impacted");
 
@@ -72,7 +72,7 @@ namespace RTSFramework.ViewModels.Controller
 				"ProcessingOfImpactedTests");
 			token.ThrowIfCancellationRequested();
 
-			await DebugStopWatchTracker.ReportNeededTimeOnDebug(() => testSelector.UpdateInternalDataStructure(processingResult, token), "Internal DataStructure Update");
+			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testSelector.UpdateInternalDataStructure(processingResult, token), "Internal DataStructure Update");
 
 			return processingResult;
 		}

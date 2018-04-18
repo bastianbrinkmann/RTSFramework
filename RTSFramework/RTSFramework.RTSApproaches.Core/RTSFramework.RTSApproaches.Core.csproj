@@ -60,7 +60,6 @@
   <ItemGroup>
     <Compile Include="Contracts\IDataStructureProvider.cs" />
     <Compile Include="DataStructures\IntertypeRelationGraph.cs" />
-    <Compile Include="DataStructures\IntertypeRelationGraphNode.cs" />
     <Compile Include="ImpactedTestEventArgs.cs" />
     <Compile Include="Contracts\ITestSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

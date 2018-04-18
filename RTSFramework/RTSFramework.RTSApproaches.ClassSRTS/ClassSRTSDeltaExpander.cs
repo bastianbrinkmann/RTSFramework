@@ -75,7 +75,7 @@ namespace RTSFramework.RTSApproaches.Static
 		{
 			ReportImpactedTests(type, testCases);
 
-			var usedByTypes = graph.UseEdges.Where(x => x.Item2.TypeIdentifier == type).Select(x => x.Item1.TypeIdentifier);
+			var usedByTypes = graph.UseEdges.Where(x => x.Item2 == type).Select(x => x.Item1);
 
 			foreach (string usedByType in usedByTypes)
 			{
@@ -92,7 +92,7 @@ namespace RTSFramework.RTSApproaches.Static
 			// "Note that ClassSRTS need not include supertypes of the changed types (but must include all subtypes) 
 			// in the transitive closure because a test cannot be affected statically by the changes even if the 
 			// test reaches supertype(s) of the changed types unless the test also reaches a changed type or (one of) its subtypes."
-			var subTypes = graph.InheritanceEdges.Where(x => x.Item2.TypeIdentifier == type).Select(x => x.Item1.TypeIdentifier);
+			var subTypes = graph.InheritanceEdges.Where(x => x.Item2 == type).Select(x => x.Item1);
 
 			foreach (string subtype in subTypes)
 			{

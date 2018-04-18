@@ -92,6 +92,8 @@ namespace RTSFramework.RTSApproaches.Static
 			return types;
 		}
 
+		#region TimeTracking
+
 		private void PrintTrackedTimes()
 		{
 			foreach (var entry in averageTimesDictionary.Where(x => x.Key.StartsWith("AverageTime_")).OrderByDescending(x => x.Value))
@@ -143,6 +145,8 @@ namespace RTSFramework.RTSApproaches.Static
 			averageTimesDictionary[NumberOfExecutionsKey(name)] = numberOfExecutions;
 		}
 
+		#endregion
+
 		private void ProcessTypeDefinition(TypeDefinition type, IntertypeRelationGraph graph)
 		{
 			if (type.BaseType != null)
@@ -164,43 +168,45 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 			if (type.HasMethods)
 			{
-				TrackAverageTimes("Methods", () =>
+				
+				foreach (var method in type.Methods)
 				{
-					foreach (var method in type.Methods)
+					TrackAverageTimes("Method", () =>
 					{
 						ProcessMethodDefinition(method, graph, type);
-					}
-				});
+					});
+				}
+				
 			}
 			if (type.HasProperties)
 			{
-				TrackAverageTimes("Properties", () =>
+				foreach (var property in type.Properties)
 				{
-					foreach (var property in type.Properties)
+					TrackAverageTimes("Property", () =>
 					{
 						ProcessPropertyDefinition(property, graph, type);
-					}
-				});
+					});
+				}
 			}
 			if (type.HasFields)
 			{
-				TrackAverageTimes("Fields", () =>
+				foreach (var field in type.Fields)
 				{
-					foreach (var field in type.Fields)
+					TrackAverageTimes("Field", () =>
 					{
 						ProcessFieldDefinition(field, graph, type);
-					}
-				});
+					});
+				}
 			}
 			if (type.HasEvents)
 			{
-				TrackAverageTimes("Events", () =>
+				foreach (var eventDef in type.Events)
 				{
-					foreach (var eventDef in type.Events)
+					TrackAverageTimes("Event", () =>
 					{
 						ProcessEventDefinition(eventDef, graph, type);
-					}
-				});
+					});
+				}
 			}
 			if (type.HasGenericParameters)
 			{
@@ -324,7 +330,10 @@ namespace RTSFramework.RTSApproaches.Static
 
 				foreach (var instruction in methodDefinition.Body.Instructions)
 				{
-					ProcessInstruction(instruction, graph, currentType);
+					TrackAverageTimes("Instruction", () =>
+					{
+						ProcessInstruction(instruction, graph, currentType);
+					});
 				}
 			}
 
@@ -373,7 +382,7 @@ namespace RTSFramework.RTSApproaches.Static
 			AddEdgeIfBothExist(from, to, graph.UseEdges, graph);
 		}
 
-		private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, HashSet<Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>> edges, IntertypeRelationGraph graph)
+		private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, HashSet<Tuple<string, string>> edges, IntertypeRelationGraph graph)
 		{
 			if (from == null || to == null)
 				return;
@@ -387,21 +396,22 @@ namespace RTSFramework.RTSApproaches.Static
 				}
 			}
 
-			var fromNode = graph.Nodes.SingleOrDefault(x => x.TypeIdentifier == from.FullName);
-			var toNode = graph.Nodes.SingleOrDefault(x => x.TypeIdentifier == to.FullName);
-
-			if (fromNode != null && toNode != null &&
-				!edges.Any(x => x.Item1.TypeIdentifier == from.FullName && x.Item2.TypeIdentifier == to.FullName))
+			if (!graph.Nodes.Contains(from.FullName) || !graph.Nodes.Contains(to.FullName))
 			{
-				edges.Add(new Tuple<IntertypeRelationGraphNode, IntertypeRelationGraphNode>(fromNode, toNode));
+				return;
+			}
+
+			if (!edges.Any(x => x.Item1 == from.FullName && x.Item2 == to.FullName))
+			{
+				edges.Add(new Tuple<string, string>(from.FullName, to.FullName));
 			}
 		}
 
 		private void AddNodeIfNotAlreadyThere(string identifier, IntertypeRelationGraph graph)
 		{
-			if (graph.Nodes.All(x => x.TypeIdentifier != identifier))
+			if (!graph.Nodes.Contains(identifier))
 			{
-				graph.Nodes.Add(new IntertypeRelationGraphNode(identifier));
+				graph.Nodes.Add(identifier);
 			}
 		}
 

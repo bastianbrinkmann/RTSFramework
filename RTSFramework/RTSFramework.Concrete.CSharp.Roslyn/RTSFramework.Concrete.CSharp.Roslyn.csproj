@@ -197,7 +197,7 @@
   <ItemGroup>
     <Compile Include="Adapters\SolutionAssembliesAdapter.cs" />
     <Compile Include="CSharpClassDeltaDiscoverer.cs" />
-    <Compile Include="CSharpIntertypeRelationGraphBuilder.cs" />
+    <Compile Include="RoslynCompiledIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Models\CSharpClassElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
