@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Mono.Cecil;
 
-namespace RTSFramework.RTSApproaches.ClassSRTS
+namespace RTSFramework.RTSApproaches.Static
 {
     /// <summary>
     /// https://dl.acm.org/citation.cfm?id=2950361
-    /// Definition IRG (intertype relation graph):
+    /// Definition 2.1 Intertype Relation Graph (IRG):
     /// An intertype relation graph, IRG, of a given program is a triple (N,EI,EU) where: 
     /// • N is the set of nodes representing all types in the program; 
     /// • EI ⊆ N × N is the set of inheritance edges; 

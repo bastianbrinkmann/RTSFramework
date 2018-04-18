@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
-using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Core.Utilities;
+using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
-	public class CorrespondenceModelManager
+	public class CorrespondenceModelManager<TModel> : IDataStructureProvider<Models.CorrespondenceModel, TModel> where TModel : IProgramModel
 	{
 		private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
 		private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
@@ -20,7 +20,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			this.correspondenceModelAdapter = correspondenceModelAdapter;
 		}
 
-		public Models.CorrespondenceModel GetCorrespondenceModelOrDefault(IProgramModel programModel)
+		public Models.CorrespondenceModel GetDataStructureForProgram(TModel programModel, CancellationToken cancellationToken)
 		{
 			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
 
@@ -42,44 +42,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return model;
 		}
 
-		public void CreateCorrespondenceModel<TModel, TTestCase>(IDelta<TModel> delta, IEnumerable<TTestCase> allTests, CoverageData coverageData) 
-			where TModel : IProgramModel 
-			where TTestCase : ITestCase
-		{
-			var oldModel = GetCorrespondenceModelOrDefault(delta.SourceModel);
-			var newModel = oldModel.CloneModel(delta.TargetModel.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, delta.TargetModel));
-			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
-
-			PersistCorrespondenceModel(newModel);
-		}
-
-		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
-		{
-			var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
-
-			foreach (var coverageEntry in coverageData.CoverageDataEntries)
-			{
-				if (targetModel.GranularityLevel == GranularityLevel.Class)
-				{
-					if (!links[coverageEntry.TestCaseId].Contains(coverageEntry.ClassName))
-					{
-						links[coverageEntry.TestCaseId].Add(coverageEntry.ClassName);
-					}
-					else
-					{
-						var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
-						if (!links[coverageEntry.TestCaseId].Contains(relativePath))
-						{
-							links[coverageEntry.TestCaseId].Add(relativePath);
-						}
-					}
-				}
-			}
-			return links;
-		}
-
-		private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
+		public void PersistDataStructure(Models.CorrespondenceModel model)
 		{
 			var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 

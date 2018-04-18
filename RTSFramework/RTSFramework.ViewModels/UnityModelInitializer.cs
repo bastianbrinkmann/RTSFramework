@@ -20,12 +20,13 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Contracts.RTSApproach;
 using RTSFramework.Core.Models;
-using RTSFramework.RTSApproaches.ClassSRTS;
+using RTSFramework.RTSApproaches.Core;
+using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 using RTSFramework.RTSApproaches.CorrespondenceModel.Models;
 using RTSFramework.RTSApproaches.Dynamic;
+using RTSFramework.RTSApproaches.Static;
 using RTSFramework.ViewModels.Controller;
 using RTSFramework.ViewModels.RunConfigurations;
 using Unity;
@@ -42,11 +43,11 @@ namespace RTSFramework.ViewModels
 			InitAdapters(unityContainer);
 			InitHelper(unityContainer);
 
-			InitCorrespondenceModelManager(unityContainer);
+			InitDataStructureProvider(unityContainer);
 
 			InitDeltaDiscoverer(unityContainer);
 			InitTestsDiscoverer(unityContainer);
-			InitRTSApproaches(unityContainer);
+			InitTestSelectors(unityContainer);
 			InitTestProcessors(unityContainer);
 
 			InitStateBasedController(unityContainer);
@@ -111,12 +112,12 @@ namespace RTSFramework.ViewModels
 						(discoveryType, rtsApproachType, processingType) =>
 						{
 							var deltaDiscovererFactory = unityContainer.Resolve<Func<DiscoveryType, IOfflineDeltaDiscoverer<TModel, TDelta>>>();
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, IRTSApproach<TModel, TDelta, TTestCase>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDelta, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult>>>();
 
 							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>>(
 								new ParameterOverride("deltaDiscoverer", deltaDiscovererFactory(discoveryType)),
-								new ParameterOverride("rtsApproach", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));
 		}
@@ -190,27 +191,29 @@ namespace RTSFramework.ViewModels
 
 		#region RTSApproaches
 
-		private static void InitRTSApproaches(IUnityContainer unityContainer)
+		private static void InitTestSelectors(IUnityContainer unityContainer)
 		{
-			InitRTSApproachesForCSharpModel<GitProgramModel>(unityContainer);
-			InitRTSApproachesForCSharpModel<TFS2010ProgramModel>(unityContainer);
+			InitTestSelectorsForCSharpModel<GitProgramModel>(unityContainer);
+			InitTestSelectorsForCSharpModel<TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitRTSApproachesForCSharpModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
+		private static void InitTestSelectorsForCSharpModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSApproach<TModel>>(RTSApproachType.ClassSRTS.ToString());
-			InitRTSAproachesForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
-			InitRTSAproachesForModelAndElementType<TModel, CSharpClassElement>(unityContainer);
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSDeltaExpander<TModel>>(RTSApproachType.ClassSRTS.ToString());
+
+
+			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
+			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement>(unityContainer);
 		}
 
-		private static void InitRTSAproachesForModelAndElementType<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel where TModelElement : IProgramModelElement
+		private static void InitTestSelectorsForModelAndElementType<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel where TModelElement : IProgramModelElement
 		{
-			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTS<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAll<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTS<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
 
-			unityContainer.RegisterType<Func<RTSApproachType, IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
 				new InjectionFactory(c =>
-				new Func<RTSApproachType, IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name => c.Resolve<IRTSApproach<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name.ToString()))));
+				new Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name => c.Resolve<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(name.ToString()))));
 		}
 
 		#endregion
@@ -238,16 +241,25 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		private static void InitHelper(IUnityContainer unityContainer)
-		{
-			unityContainer.RegisterType<IIntertypeRelationGraphBuilder, IntermediateLanguageIntertypeRelationGraphBuilder>();
+		#region DataStructureProvider
 
-			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
+		private static void InitDataStructureProvider(IUnityContainer unityContainer)
+		{
+			InitDataStructureProviderForModel<GitProgramModel>(unityContainer);
+			InitDataStructureProviderForModel<TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitCorrespondenceModelManager(IUnityContainer unityContainer)
+		private static void InitDataStructureProviderForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			unityContainer.RegisterType<CorrespondenceModelManager>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, IntermediateLanguageIntertypeRelationGraphBuilder<TModel>>();
+			unityContainer.RegisterType<IDataStructureProvider<CorrespondenceModel, TModel>, CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
+		}
+
+		#endregion
+
+		private static void InitHelper(IUnityContainer unityContainer)
+		{
+			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
 		}
 
 		private static void InitAdapters(IUnityContainer unityContainer)

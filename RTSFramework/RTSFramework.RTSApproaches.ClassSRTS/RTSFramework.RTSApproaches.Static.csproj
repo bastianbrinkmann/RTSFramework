@@ -7,8 +7,8 @@
     <ProjectGuid>{67114157-0F76-4031-BF1E-5ACDC88C19CE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RTSFramework.RTSApproaches.ClassSRTS</RootNamespace>
-    <AssemblyName>RTSFramework.RTSApproaches.ClassSRTS</AssemblyName>
+    <RootNamespace>RTSFramework.RTSApproaches.Static</RootNamespace>
+    <AssemblyName>RTSFramework.RTSApproaches.Static</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -55,8 +55,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassSRTSApproach.cs" />
-    <Compile Include="IIntertypeRelationGraphBuilder.cs" />
+    <Compile Include="ClassSRTSDeltaExpander.cs" />
     <Compile Include="IntertypeRelationGraph.cs" />
     <Compile Include="IntermediateLanguageIntertypeRelationGraphBuilder.cs" />
     <Compile Include="IntertypeRelationGraphNode.cs" />
@@ -82,6 +81,10 @@
     <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Core\RTSFramework.RTSApproaches.Core.csproj">
+      <Project>{6BE9B2B8-9548-44A9-AB98-583BC4C3962B}</Project>
+      <Name>RTSFramework.RTSApproaches.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

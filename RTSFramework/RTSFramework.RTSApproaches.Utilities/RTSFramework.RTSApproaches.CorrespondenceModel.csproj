@@ -94,6 +94,10 @@
       <Project>{34343ADE-C3E0-423D-94B6-9D0400F498CB}</Project>
       <Name>RTSFramework.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Core\RTSFramework.RTSApproaches.Core.csproj">
+      <Project>{6BE9B2B8-9548-44A9-AB98-583BC4C3962B}</Project>
+      <Name>RTSFramework.RTSApproaches.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

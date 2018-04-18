@@ -1,7 +1,7 @@
 ﻿using System;
 using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Contracts.RTSApproach
+namespace RTSFramework.RTSApproaches.Core
 {
 	public class ImpactedTestEventArgs<TTestCase> : EventArgs where TTestCase : ITestCase
 	{

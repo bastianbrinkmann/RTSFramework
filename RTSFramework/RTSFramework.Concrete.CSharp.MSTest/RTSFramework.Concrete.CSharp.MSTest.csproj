@@ -73,6 +73,10 @@
     <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Dynamic.csproj">
+      <Project>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</Project>
+      <Name>RTSFramework.RTSApproaches.Dynamic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>

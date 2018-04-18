@@ -18,8 +18,8 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 			//TODO App Settings
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
 			{
-				{ "Configuration", "net_3_5_Debug_ReadOnly" },//{ "Configuration", "Debug" },
-				{ "Platform", "Any CPU" }
+				//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
+				//{ "Platform", "Any CPU" }
 			});
 
 			var solution = await workspace.OpenSolutionAsync(artefact, token);

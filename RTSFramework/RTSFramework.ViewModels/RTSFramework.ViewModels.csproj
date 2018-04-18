@@ -145,9 +145,13 @@
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSFramework.RTSApproaches.ClassSRTS\RTSFramework.RTSApproaches.ClassSRTS.csproj">
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.ClassSRTS\RTSFramework.RTSApproaches.Static.csproj">
       <Project>{67114157-0f76-4031-bf1e-5acdc88c19ce}</Project>
-      <Name>RTSFramework.RTSApproaches.ClassSRTS</Name>
+      <Name>RTSFramework.RTSApproaches.Static</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Core\RTSFramework.RTSApproaches.Core.csproj">
+      <Project>{6BE9B2B8-9548-44A9-AB98-583BC4C3962B}</Project>
+      <Name>RTSFramework.RTSApproaches.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
       <Project>{8e0e2c16-376e-4465-af69-e1b300726080}</Project>

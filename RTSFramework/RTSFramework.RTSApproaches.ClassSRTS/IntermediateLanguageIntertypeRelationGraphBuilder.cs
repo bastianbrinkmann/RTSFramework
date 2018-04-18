@@ -7,10 +7,11 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.RTSApproaches.Core.Contracts;
 
-namespace RTSFramework.RTSApproaches.ClassSRTS
+namespace RTSFramework.RTSApproaches.Static
 {
-	public class IntermediateLanguageIntertypeRelationGraphBuilder : IIntertypeRelationGraphBuilder
+	public class IntermediateLanguageIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
 	{
 		private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
 
@@ -21,7 +22,7 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 
 		private const string MonoModuleTyp = "<Module>";
 
-		public IntertypeRelationGraph BuildIntertypeRelationGraph(CSharpProgramModel sourceModel, CancellationToken cancellationToken)
+		public IntertypeRelationGraph GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken cancellationToken)
 		{
 			var assemblies = assembliesArtefactAdapter.Parse(sourceModel.AbsoluteSolutionPath);
 
@@ -97,7 +98,10 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 				var averageTime = averageTimesDictionary[AverageTimeKey(name)];
 				var executions = averageTimesDictionary[NumberOfExecutionsKey(name)];
 
-				Debug.WriteLine($"{name}: {averageTime} * {executions} = {averageTime*executions}");
+				var averageTimeString = "" + averageTime;
+				var executionsString = "" + executions;
+
+				Debug.WriteLine($"{name.PadRight(30)}: {averageTimeString.PadRight(25)} * {executionsString.PadRight(10)} = {averageTime*executions}");
 			}
 		}
 
@@ -397,6 +401,11 @@ namespace RTSFramework.RTSApproaches.ClassSRTS
 			{
 				graph.Nodes.Add(new IntertypeRelationGraphNode(identifier));
 			}
+		}
+
+		public void PersistDataStructure(IntertypeRelationGraph dataStructure)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace RTSFramework.RTSApproaches.ClassSRTS
+﻿namespace RTSFramework.RTSApproaches.Static
 {
     public class IntertypeRelationGraphNode
     {

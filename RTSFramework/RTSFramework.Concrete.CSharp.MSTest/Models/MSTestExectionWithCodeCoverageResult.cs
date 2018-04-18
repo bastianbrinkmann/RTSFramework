@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using RTSFramework.Contracts;
-using RTSFramework.Contracts.Models;
+﻿using RTSFramework.Contracts.Models;
+using RTSFramework.RTSApproaches.Dynamic;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
-    public class MSTestExectionWithCodeCoverageResult : MSTestExectionResult, IExecutionWithCodeCoverageResult
-    {
+    public class MSTestExectionWithCodeCoverageResult : MSTestExectionResult, IProcessingResultWithCodeCoverage
+	{
 	    public CoverageData CoverageData { get; set; }
     }
 }
