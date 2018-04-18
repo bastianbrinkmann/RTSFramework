@@ -441,12 +441,13 @@ namespace RTSFramework.ViewModels
 
 				RunStatus = RunStatus.Completed;
 			}
-			catch (OperationCanceledException)
-			{
-				RunStatus = RunStatus.Cancelled;
-			}
 			catch (Exception e)
 			{
+				if (cancellationTokenSource.IsCancellationRequested)
+				{
+					RunStatus = RunStatus.Cancelled;
+					return;
+				}
 				RunStatus = RunStatus.Failed;
 				dialogService.ShowError(e.Message);
 			}

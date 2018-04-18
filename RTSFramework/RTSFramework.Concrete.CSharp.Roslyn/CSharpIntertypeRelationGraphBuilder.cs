@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -29,21 +31,38 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 				token.ThrowIfCancellationRequested();
 
 				var compilation = await project.GetCompilationAsync(token);
-				foreach (var type in compilation.GlobalNamespace.GetTypeMembers())
+
+				foreach (var namespaceSymbol in compilation.Assembly.GlobalNamespace.GetNamespaceMembers())
 				{
-					AddNodeIfNotExists(type, graph);
+					AddNodeIfNotExists(namespaceSymbol, graph);
 				}
 			}
 
 			return graph;
 		}
 
-
-		private void AddNodeIfNotExists(INamedTypeSymbol namedType, IntertypeRelationGraph graph)
+		private void AddNodeIfNotExists(INamespaceOrTypeSymbol namedType, IntertypeRelationGraph graph)
 		{
-			if (graph.Nodes.All(x => x.TypeIdentifier != namedType.Name))
+			if (namedType == null)
 			{
-				graph.Nodes.Add(new IntertypeRelationGraphNode(namedType.Name));
+				return;
+			}
+
+			if (namedType.IsType)
+			{
+				var typeName = namedType.ToDisplayString();
+
+				if (graph.Nodes.All(x => x.TypeIdentifier != typeName))
+				{
+					graph.Nodes.Add(new IntertypeRelationGraphNode(typeName));
+				}
+			}
+			else
+			{
+				foreach (var type in namedType.GetMembers())
+				{
+					AddNodeIfNotExists(type as INamespaceOrTypeSymbol, graph);
+				}
 			}
 		}
 
