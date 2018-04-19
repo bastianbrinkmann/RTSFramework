@@ -135,7 +135,8 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, MSTestTestsDiscoverer<TModel>>();
+			//unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, ConsoleMSTestTestsDiscoverer<TModel>>();
+			unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, InProcessMSTestTestsDiscoverer<TModel>>();
 		}
 
 		#endregion

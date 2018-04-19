@@ -12,11 +12,11 @@ using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
+	public class ConsoleMSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
-		public MSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+		public ConsoleMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 		}
@@ -44,7 +44,15 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 							if (method.CustomAttributes.Any(x => x.AttributeType.Name == MSTestConstants.TestMethodAttributeName))
 							{
-								var testCase = new MSTestTestcase(modulePath, method.Name, type.FullName);
+								var id = $"{type.FullName}.{method.Name}";
+
+								var testCase = new MSTestTestcase
+								{
+									Name = method.Name,
+									AssemblyPath = modulePath,
+									Id = id,
+									FullClassName = type.FullName
+								};
 
 								var categoryAttributes =
 									method.CustomAttributes.Where(x => x.AttributeType.Name == MSTestConstants.TestCategoryAttributeName);

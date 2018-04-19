@@ -13,5 +13,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
         internal const string IgnoreAttributeName = "IgnoreAttribute";
 
         internal const string TestResultsFolder = "TestResults";
-    }
+
+		//TestProperties
+	    internal const string PropertyTestClassName = "MSTestDiscoverer.TestClassName";
+		internal const string PropertyIsEnabled = "MSTestDiscoverer.IsEnabled";
+		internal const string PropertyTestCategory = "MSTestDiscoverer.TestCategory";
+
+	}
 }
