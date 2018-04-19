@@ -82,6 +82,7 @@
     <Compile Include="Models\CoverageDataEntry.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />
     <Compile Include="Models\GranularityLevel.cs" />
+    <Compile Include="Models\CompositeTestCaseResult.cs" />
     <Compile Include="Models\IProgramModelElement.cs" />
     <Compile Include="Models\ITestCaseResult.cs" />
     <Compile Include="Models\Delta\StructuralDelta.cs" />

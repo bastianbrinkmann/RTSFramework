@@ -6,6 +6,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {
     public class MSTestExectionResult : ITestProcessingResult
     {
-		public List<MSTestTestResult> TestcasesResults { get; } = new List<MSTestTestResult>();
+		public List<ITestCaseResult<MSTestTestcase>> TestcasesResults { get; } = new List<ITestCaseResult<MSTestTestcase>>();
     }
 }

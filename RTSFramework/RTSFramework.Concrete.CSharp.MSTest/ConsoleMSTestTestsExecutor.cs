@@ -15,11 +15,11 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class MSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
+    public class ConsoleMSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
 
-        public MSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter)
+        public ConsoleMSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter)
         {
             this.resultArtefactAdapter = resultArtefactAdapter;
         }

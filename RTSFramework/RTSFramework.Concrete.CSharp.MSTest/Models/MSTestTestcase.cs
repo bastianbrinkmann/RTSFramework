@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using RTSFramework.Concrete.CSharp.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Models
@@ -16,5 +17,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
         public List<string> Categories { get; } = new List<string>();
 
 		public string AssemblyPath { get; set; }
+
+		public TestCase VsTestTestCase { get; set; }
     }
 }

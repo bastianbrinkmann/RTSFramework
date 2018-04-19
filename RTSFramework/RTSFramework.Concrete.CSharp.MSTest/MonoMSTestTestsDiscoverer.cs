@@ -12,11 +12,11 @@ using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class ConsoleMSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
+	public class MonoMSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
-		public ConsoleMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+		public MonoMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 		}

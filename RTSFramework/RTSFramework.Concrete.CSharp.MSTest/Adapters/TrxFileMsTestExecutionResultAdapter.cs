@@ -51,7 +51,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                     var currentTestCase = artefact.ExecutedTestcases[i];
                     var result = results[j];
 
-                    var currentResult = new MSTestTestResult
+                    ITestCaseResult<MSTestTestcase> currentResult = new MSTestTestResult
                     {
                         TestCase = currentTestCase,
                         Outcome = result.Outcome,
@@ -68,6 +68,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                         var nextResult = results[j];
                         while (nextResult.Name.StartsWith(currentTestCase.Name + " (Data Row"))
                         {
+	                        var compositeResult = currentResult as CompositeTestCaseResult<MSTestTestcase>;
+
+							if (compositeResult == null)
+	                        {
+								compositeResult = new CompositeTestCaseResult<MSTestTestcase>
+								{
+									TestCase = currentTestCase
+								};
+		                        currentResult = compositeResult;
+	                        }
+
                             var childrenResult = new MSTestTestResult
                             {
                                 TestCase = currentTestCase,
@@ -78,8 +89,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
                                 StackTrace = nextResult.StackTrace,
                                 StartTime = nextResult.StartTime
                             };
-                            currentResult.ChildrenResults.Add(childrenResult);
-
+							compositeResult.ChildrenResults.Add(childrenResult);
 
                             j++;
                             if (j >= results.Count)

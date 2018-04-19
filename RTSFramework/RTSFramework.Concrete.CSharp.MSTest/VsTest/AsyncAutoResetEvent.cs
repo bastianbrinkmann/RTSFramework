@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.VsTest
@@ -9,10 +10,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest.VsTest
 		private readonly Queue<TaskCompletionSource<bool>> waits = new Queue<TaskCompletionSource<bool>>();
 		private bool signaled;
 
-		public Task WaitAsync()
+		public Task WaitAsync(CancellationToken token = default(CancellationToken))
 		{
 			lock (waits)
 			{
+				token.Register(Set);
 				if (signaled)
 				{
 					signaled = false;

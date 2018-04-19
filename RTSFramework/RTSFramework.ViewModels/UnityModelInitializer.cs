@@ -6,6 +6,7 @@ using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
+using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Concrete.CSharp.Roslyn;
 using RTSFramework.Concrete.CSharp.Roslyn.Adapters;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
@@ -135,7 +136,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			//unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, ConsoleMSTestTestsDiscoverer<TModel>>();
+			//unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestsDiscoverer<TModel>>();
 			unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, InProcessMSTestTestsDiscoverer<TModel>>();
 		}
 
@@ -225,8 +226,11 @@ namespace RTSFramework.ViewModels
 		private static void InitTestProcessors(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, FileProcessingResult>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
+
+			//unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, InProcessMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
+			
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>>, IdentifiedTestsListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 
 			InitTestProcessorsFactoryForResultType<FileProcessingResult>(unityContainer);
@@ -265,6 +269,7 @@ namespace RTSFramework.ViewModels
 		private static void InitHelper(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<InProcessVsTestConnector>(new ContainerControlledLifetimeManager());
 		}
 
 		private static void InitAdapters(IUnityContainer unityContainer)
