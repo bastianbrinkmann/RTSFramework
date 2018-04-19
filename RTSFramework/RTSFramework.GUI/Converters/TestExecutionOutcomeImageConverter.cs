@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.GUI.Converters
 {

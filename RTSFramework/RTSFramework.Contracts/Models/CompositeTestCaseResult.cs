@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Contracts.Models
 {

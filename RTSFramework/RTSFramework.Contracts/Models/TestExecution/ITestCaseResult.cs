@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace RTSFramework.Contracts.Models
+namespace RTSFramework.Contracts.Models.TestExecution
 {
 	public interface ITestCaseResult<TTestCase> where TTestCase : ITestCase
 	{

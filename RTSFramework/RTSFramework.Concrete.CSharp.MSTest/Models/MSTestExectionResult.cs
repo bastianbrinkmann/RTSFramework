@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Models
 {

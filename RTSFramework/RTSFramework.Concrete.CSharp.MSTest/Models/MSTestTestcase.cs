@@ -19,5 +19,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 		public string AssemblyPath { get; set; }
 
 		public TestCase VsTestTestCase { get; set; }
+
+		public bool IsDataDriven { get; set; }
     }
 }

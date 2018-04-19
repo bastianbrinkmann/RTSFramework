@@ -119,6 +119,7 @@
     <Compile Include="VsTest\DiscoveryEventHandler.cs" />
     <Compile Include="VsTest\InProcessVsTestConnector.cs" />
     <Compile Include="VsTest\RunEventHandler.cs" />
+    <Compile Include="VsTest\VsTestResultEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Dynamic.csproj">

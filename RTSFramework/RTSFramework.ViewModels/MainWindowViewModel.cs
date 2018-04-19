@@ -10,6 +10,7 @@ using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
 using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
@@ -20,6 +21,7 @@ using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
 
@@ -548,16 +550,11 @@ namespace RTSFramework.ViewModels
 			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
+					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
+					break;
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 					var executionResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
-
-					TestResults.Clear();
-					TestResults.AddRange(executionResult.TestcasesResults.Select(x => new TestResultListViewItemViewModel
-					{
-						FullyQualifiedName = x.TestCase.Id,
-						Categories = string.Join(",", x.TestCase.Categories),
-						TestOutcome = x.Outcome
-					}));
+					executionResult.TestcasesResults.ForEach(ProcessExecutionResult);
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
@@ -580,6 +577,12 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
+		private void ProcessExecutionResult(ITestCaseResult<MSTestTestcase> executionResult)
+		{
+			var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == executionResult.TestCase.Id);
+			currentTestViewModel.TestOutcome = executionResult.Outcome;
+		}
+
 		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
@@ -596,6 +599,15 @@ namespace RTSFramework.ViewModels
 						Categories = string.Join(",", args.TestCase.Categories)
 					}));
 			};
+
+			var executor = stateBasedController.TestProcessor as InProcessMSTestTestsExecutor;
+			if (executor != null)
+			{
+				executor.TestResultAvailable += (sender, args) =>
+				{
+					applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
+				};
+			}
 
 			return
 				await Task.Run(

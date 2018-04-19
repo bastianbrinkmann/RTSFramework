@@ -8,11 +8,14 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
 	public class InProcessMSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
 	{
+		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
+
 		private readonly InProcessVsTestConnector vsTestConnector;
 
 		public InProcessMSTestTestsExecutor(InProcessVsTestConnector vsTestConnector)
@@ -20,102 +23,104 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.vsTestConnector = vsTestConnector;
 		}
 
+		private IList<MSTestTestcase> msTestTestcases;
+
 		public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken token)
 		{
-			var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
+			msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
 
 			var vsTestResults = await ExecuteTests(msTestTestcases.Select(x => x.VsTestTestCase), token);
 
 			var result = new MSTestExectionResult();
-			result.TestcasesResults.AddRange(Convert(vsTestResults, msTestTestcases));
+			result.TestcasesResults.AddRange(Convert(vsTestResults));
 			
 			return result;
 		}
 
-		private IList<ITestCaseResult<MSTestTestcase>> Convert(IList<TestResult> vsTestResults, IList<MSTestTestcase> msTestTestcases)
+		private IList<ITestCaseResult<MSTestTestcase>> Convert(IList<TestResult> vsTestResults)
 		{
 			var msTestResults = new List<ITestCaseResult<MSTestTestcase>>();
 
 			foreach (var vsTestResult in vsTestResults)
 			{
-				TestExecutionOutcome outcome;
-				switch (vsTestResult.Outcome)
+				var singleResult = Convert(vsTestResult);
+
+				if (singleResult.TestCase.IsDataDriven)
 				{
-					case Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed:
-						outcome = TestExecutionOutcome.Passed;
-						break;
-					case Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Failed:
-						outcome = TestExecutionOutcome.Failed;
-						break;
-					default:
-						outcome = TestExecutionOutcome.NotExecuted;
-						break;
-				}
-
-				var msTestTestcase = msTestTestcases.Single(x => x.VsTestTestCase.Id == vsTestResult.TestCase.Id);
-
-				var dataDrivenProperty = vsTestResult.TestCase.Properties.SingleOrDefault(x => x.Id == "MSTestDiscoverer.IsDataDriven");
-				bool isDataDriven = dataDrivenProperty != null && vsTestResult.TestCase.GetPropertyValue(dataDrivenProperty, false);
-
-				if (isDataDriven)
-				{
-					var childResult = new MSTestTestResult
+					if (msTestResults.Any(x => x.TestCase.Id == singleResult.TestCase.Id))
 					{
-						TestCase = msTestTestcase,
-						Outcome = outcome,
-						StartTime = vsTestResult.StartTime,
-						EndTime = vsTestResult.EndTime,
-						ErrorMessage = vsTestResult.ErrorMessage,
-						StackTrace = vsTestResult.ErrorStackTrace,
-						DurationInSeconds = vsTestResult.Duration.TotalSeconds
-					};
-
-					if (msTestResults.Any(x => x.TestCase.Id == msTestTestcase.Id))
-					{
-						var compositeTestCase = (CompositeTestCaseResult<MSTestTestcase>) msTestResults.Single(x => x.TestCase.Id == msTestTestcase.Id);
-						compositeTestCase.ChildrenResults.Add(childResult);
+						var compositeTestCase = (CompositeTestCaseResult<MSTestTestcase>) msTestResults.Single(x => x.TestCase.Id == singleResult.TestCase.Id);
+						compositeTestCase.ChildrenResults.Add(singleResult);
 					}
 					else
 					{
 						var compositeTestCase = new CompositeTestCaseResult<MSTestTestcase>
 						{
-							TestCase = msTestTestcase
+							TestCase = singleResult.TestCase
 						};
-						compositeTestCase.ChildrenResults.Add(childResult);
+						compositeTestCase.ChildrenResults.Add(singleResult);
 						msTestResults.Add(compositeTestCase);
 					}
 				}
 				else
 				{
-					msTestResults.Add(new MSTestTestResult
-					{
-						TestCase = msTestTestcase,
-						Outcome = outcome,
-						StartTime = vsTestResult.StartTime,
-						EndTime = vsTestResult.EndTime,
-						ErrorMessage = vsTestResult.ErrorMessage,
-						StackTrace = vsTestResult.ErrorStackTrace,
-						DurationInSeconds = vsTestResult.Duration.TotalSeconds
-					});
+					msTestResults.Add(singleResult);
 				}
 			}
 
 			return msTestResults;
 		}
 
+		private ITestCaseResult<MSTestTestcase> Convert(TestResult vsTestResult)
+		{
+			TestExecutionOutcome outcome;
+			switch (vsTestResult.Outcome)
+			{
+				case Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed:
+					outcome = TestExecutionOutcome.Passed;
+					break;
+				case Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Failed:
+					outcome = TestExecutionOutcome.Failed;
+					break;
+				default:
+					outcome = TestExecutionOutcome.NotExecuted;
+					break;
+			}
+
+			var msTestTestcase = msTestTestcases.Single(x => x.VsTestTestCase.Id == vsTestResult.TestCase.Id);
+
+			return new MSTestTestResult
+			{
+				TestCase = msTestTestcase,
+				Outcome = outcome,
+				StartTime = vsTestResult.StartTime,
+				EndTime = vsTestResult.EndTime,
+				ErrorMessage = vsTestResult.ErrorMessage,
+				StackTrace = vsTestResult.ErrorStackTrace,
+				DurationInSeconds = vsTestResult.Duration.TotalSeconds
+			};
+		}
+
 		private async Task<IList<TestResult>> ExecuteTests(IEnumerable<TestCase> testCases, CancellationToken token)
 		{
 			var waitHandle = new AsyncAutoResetEvent();
 			var handler = new RunEventHandler(waitHandle);
-
+			handler.TestResultAvailable += HandlerOnTestResultAvailable;
 			vsTestConnector.ConsoleWrapper.RunTests(testCases, MSTestConstants.DefaultRunSettings, handler);
 			var registration = token.Register(vsTestConnector.ConsoleWrapper.CancelTestRun);
 
 			await waitHandle.WaitAsync(token);
+			handler.TestResultAvailable -= HandlerOnTestResultAvailable;
 			registration.Dispose();
+
 			token.ThrowIfCancellationRequested();
 
 			return handler.TestResults;
+		}
+
+		private void HandlerOnTestResultAvailable(object sender, VsTestResultEventArgs vsTestResultEventArgs)
+		{
+			TestResultAvailable?.Invoke(this, new TestCaseResultEventArgs<MSTestTestcase>(Convert(vsTestResultEventArgs.VsTestResult)));
 		}
 	}
 }

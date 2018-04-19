@@ -5,6 +5,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Utilities;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {

@@ -1,5 +1,6 @@
 ﻿using Prism.Mvvm;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.ViewModels
 {

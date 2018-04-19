@@ -40,10 +40,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var testNameProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyTestClassName);
 			var isEnabledProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyIsEnabled);
 			var testCategoryProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyTestCategory);
+			var dataDrivenProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyIsDataDriven);
 
 			string testClassName = testNameProperty != null ? vsTestCase.GetPropertyValue(testNameProperty, "") : "";
 			bool isEnabled = isEnabledProperty == null || vsTestCase.GetPropertyValue(isEnabledProperty, true);
 			string[] categories = testCategoryProperty != null ? vsTestCase.GetPropertyValue(testCategoryProperty, new string[0]) : new string[0];
+			bool isDataDriven = dataDrivenProperty != null && vsTestCase.GetPropertyValue(dataDrivenProperty, false);
 
 			var msTestCase = new MSTestTestcase
 			{
@@ -52,7 +54,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				Id = vsTestCase.FullyQualifiedName,
 				FullClassName = testClassName,
 				Ignored = !isEnabled,
-				VsTestTestCase = vsTestCase
+				VsTestTestCase = vsTestCase,
+				IsDataDriven = isDataDriven
 			};
 			msTestCase.Categories.AddRange(categories);
 

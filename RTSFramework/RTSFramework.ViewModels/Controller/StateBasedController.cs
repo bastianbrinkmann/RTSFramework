@@ -22,7 +22,7 @@ namespace RTSFramework.ViewModels.Controller
 	{
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
-		private readonly ITestProcessor<TTestCase, TResult> testProcessor;
+		public ITestProcessor<TTestCase, TResult> TestProcessor { get; }
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
 
@@ -37,7 +37,7 @@ namespace RTSFramework.ViewModels.Controller
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
-			this.testProcessor = testProcessor;
+			TestProcessor = testProcessor;
 			this.testsDiscoverer = testsDiscoverer;
 			this.testSelector = testSelector;
 		}
@@ -68,7 +68,7 @@ namespace RTSFramework.ViewModels.Controller
 
 			token.ThrowIfCancellationRequested();
 
-			var processingResult = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testProcessor.ProcessTests(impactedTests, token),
+			var processingResult = await DebugStopWatchTracker.ReportNeededTimeOnDebug(TestProcessor.ProcessTests(impactedTests, token),
 				"ProcessingOfImpactedTests");
 			token.ThrowIfCancellationRequested();
 
