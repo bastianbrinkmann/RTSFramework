@@ -357,7 +357,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 					var argumentOperation = (IArgumentOperation) operation;
 					AddUseEdgeIfBothExist(type, argumentOperation.Parameter.Type as INamedTypeSymbol, graph);
 					break;
-				case OperationKind.CaseClause:
+				case OperationKind.CatchClause:
 					var catchClause = (ICatchClauseOperation) operation;
 					AddUseEdgeIfBothExist(type, catchClause.ExceptionType as INamedTypeSymbol, graph);
 					break;
