@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,6 +35,11 @@ namespace RTSFramework.RTSApproaches.Static
 			//First Collect All Types as Nodes
 			foreach (var assembly in assemblies)
 			{
+				if (!File.Exists(assembly.AbsolutePath))
+				{
+					continue;
+				}
+
 				ModuleDefinition moduleDefinition = null;
 
 				TrackAverageTimes("LoadingModuleDefinition", () =>
@@ -52,10 +58,9 @@ namespace RTSFramework.RTSApproaches.Static
 							continue;
 						}
 
-						typeDefinitions.Add(type);
-						AddNodeIfNotAlreadyThere(type.FullName, graph);
+						AddNodeIfNotAlreadyThere(type, graph, typeDefinitions);
 
-						typeDefinitions.AddRange(GetNestedTypes(type, graph));
+						AddNestedTypes(type, graph, typeDefinitions);
 					}
 				});
 			}
@@ -75,21 +80,16 @@ namespace RTSFramework.RTSApproaches.Static
 			return Task.FromResult(graph);
 		}
 
-		private IList<TypeDefinition> GetNestedTypes(TypeDefinition type, IntertypeRelationGraph graph)
+		private void AddNestedTypes(TypeDefinition type, IntertypeRelationGraph graph, List<TypeDefinition> typeDefinitions)
 		{
-			var types = new List<TypeDefinition>();
-
 			if (type.HasNestedTypes)
 			{
 				foreach (var nestedType in type.NestedTypes)
 				{
-					types.Add(nestedType);
-					AddNodeIfNotAlreadyThere(nestedType.FullName, graph);
-					types.AddRange(GetNestedTypes(nestedType, graph));
+					AddNodeIfNotAlreadyThere(nestedType, graph, typeDefinitions);
+					AddNestedTypes(nestedType, graph, typeDefinitions);
 				}
 			}
-
-			return types;
 		}
 
 		#region TimeTracking
@@ -407,11 +407,13 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 		}
 
-		private void AddNodeIfNotAlreadyThere(string identifier, IntertypeRelationGraph graph)
+		private void AddNodeIfNotAlreadyThere(TypeDefinition type, IntertypeRelationGraph graph, List<TypeDefinition> typeDefinitions)
 		{
-			if (!graph.Nodes.Contains(identifier))
+			if (!graph.Nodes.Contains(type.FullName) && !type.IsAnonymousType())
 			{
-				graph.Nodes.Add(identifier);
+				typeDefinitions.Add(type);
+
+				graph.Nodes.Add(type.FullName);
 			}
 		}
 
