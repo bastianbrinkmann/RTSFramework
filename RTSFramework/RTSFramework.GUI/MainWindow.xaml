@@ -80,7 +80,8 @@
 			</ListView.ItemContainerStyle>
 			<ListView.View>
 				<GridView>
-					<GridViewColumn Width="250" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />
+					<GridViewColumn Width="150" Header="Class Name" DisplayMemberBinding="{Binding FullClassName}" />
+					<GridViewColumn Width="100" Header="Test Case Name" DisplayMemberBinding="{Binding Name}" />
 					<GridViewColumn Width="100" Header ="Outcome">
 						<GridViewColumn.CellTemplate>
 							<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">

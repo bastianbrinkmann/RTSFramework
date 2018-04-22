@@ -7,5 +7,9 @@ namespace RTSFramework.Contracts.Models
 		string Id { get; }
 
 		List<string> Categories { get; }
+
+		string Name { get; }
+
+		string FullClassName { get; }
 	}
 }

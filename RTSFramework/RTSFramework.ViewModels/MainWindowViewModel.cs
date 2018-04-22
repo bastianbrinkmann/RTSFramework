@@ -571,6 +571,8 @@ namespace RTSFramework.ViewModels
 					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService)
 					{
 						FullyQualifiedName = x.Id,
+						FullClassName = x.FullClassName,
+						Name = x.Name,
 						Categories = string.Join(",", x.Categories)
 					}));
 					break;
@@ -601,6 +603,8 @@ namespace RTSFramework.ViewModels
 					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
 					{
 						FullyQualifiedName = args.TestCase.Id,
+						Name = args.TestCase.Name,
+						FullClassName =  args.TestCase.FullClassName,
 						Categories = string.Join(",", args.TestCase.Categories)
 					}));
 			};

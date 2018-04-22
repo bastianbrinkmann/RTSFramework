@@ -10,7 +10,6 @@ namespace RTSFramework.ViewModels
 {
 	public class TestResultListViewItemViewModel : BindableBase
 	{
-		private string fullyQualifiedName;
 		private TestExecutionOutcome testOutcome;
 		private string categories;
 		private DateTimeOffset startTime;
@@ -19,6 +18,9 @@ namespace RTSFramework.ViewModels
 		private ICommand showErrorMessageCommand;
 		private string errorMessage;
 		private string stackTrace;
+		private string name;
+		private string fullClassName;
+		private string fullyQualifiedName;
 
 		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
@@ -29,6 +31,26 @@ namespace RTSFramework.ViewModels
 					dialogService.ShowError($"Error Message: {ErrorMessage}\n\nStackTrace: {StackTrace}", "Test Run Error");
 				}
 			});
+		}
+
+		public string FullClassName
+		{
+			get { return fullClassName; }
+			set
+			{
+				fullClassName = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public string Name
+		{
+			get { return name; }
+			set
+			{
+				name = value;
+				RaisePropertyChanged();
+			}
 		}
 
 		public string StackTrace
@@ -91,16 +113,6 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public string FullyQualifiedName
-		{
-			get { return fullyQualifiedName; }
-			set
-			{
-				fullyQualifiedName = value;
-				RaisePropertyChanged();
-			}
-		}
-
 		public string Categories
 		{
 			get { return categories; }
@@ -117,6 +129,16 @@ namespace RTSFramework.ViewModels
 			set
 			{
 				testOutcome = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public string FullyQualifiedName
+		{
+			get { return fullyQualifiedName; }
+			set
+			{
+				fullyQualifiedName = value;
 				RaisePropertyChanged();
 			}
 		}
