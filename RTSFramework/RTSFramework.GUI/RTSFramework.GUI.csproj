@@ -258,6 +258,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Behaviors\HandleDoubleClickBehavior.cs" />
     <Compile Include="Converters\CommitComboboxItemConverter.cs" />
     <Compile Include="Converters\DateTimeWithTimeConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />

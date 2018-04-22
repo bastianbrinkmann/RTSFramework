@@ -8,6 +8,7 @@
         xmlns:converters="clr-namespace:RTSFramework.GUI.Converters"
         xmlns:viewModels="clr-namespace:RTSFramework.ViewModels;assembly=RTSFramework.ViewModels"
         xmlns:runConfig="clr-namespace:RTSFramework.ViewModels.RunConfigurations;assembly=RTSFramework.ViewModels"
+        xmlns:behaviors="clr-namespace:RTSFramework.GUI.Behaviors"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
@@ -71,6 +72,12 @@
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
 		<ListView x:Name="LvTests" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
+			<ListView.ItemContainerStyle >
+				<Style TargetType="ListViewItem" >
+					<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+					<Setter Property="behaviors:HandleDoubleClickBehavior.Command" Value="{Binding ShowErrorMessageCommand}" />
+				</Style>
+			</ListView.ItemContainerStyle>
 			<ListView.View>
 				<GridView>
 					<GridViewColumn Width="250" Header="Fully Qualified Name" DisplayMemberBinding="{Binding FullyQualifiedName}" />

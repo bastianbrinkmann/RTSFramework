@@ -568,7 +568,7 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.ListReporting:
 					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					TestResults.Clear();
-					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel
+					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService)
 					{
 						FullyQualifiedName = x.Id,
 						Categories = string.Join(",", x.Categories)
@@ -584,6 +584,8 @@ namespace RTSFramework.ViewModels
 			currentTestViewModel.StartTime = executionResult.StartTime;
 			currentTestViewModel.EndTime = executionResult.EndTime;
 			currentTestViewModel.DurationInSeconds = executionResult.DurationInSeconds;
+			currentTestViewModel.ErrorMessage = executionResult.ErrorMessage;
+			currentTestViewModel.StackTrace = executionResult.StackTrace;
 		}
 
 		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
@@ -596,7 +598,7 @@ namespace RTSFramework.ViewModels
 			stateBasedController.ImpactedTest += (sender, args) =>
 			{
 				applicationUiExecutor.ExecuteOnUi(() =>
-					TestResults.Add(new TestResultListViewItemViewModel
+					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
 					{
 						FullyQualifiedName = args.TestCase.Id,
 						Categories = string.Join(",", args.TestCase.Categories)
