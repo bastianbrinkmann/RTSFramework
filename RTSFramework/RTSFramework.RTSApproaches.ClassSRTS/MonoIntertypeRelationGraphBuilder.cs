@@ -40,29 +40,21 @@ namespace RTSFramework.RTSApproaches.Static
 					continue;
 				}
 
-				ModuleDefinition moduleDefinition = null;
 
-				TrackAverageTimes("LoadingModuleDefinition", () =>
+				var moduleDefinition = ModuleDefinition.ReadModule(assembly.AbsolutePath);
+				foreach (var type in moduleDefinition.Types)
 				{
-					moduleDefinition = ModuleDefinition.ReadModule(assembly.AbsolutePath);
-				});
+					cancellationToken.ThrowIfCancellationRequested();
 
-				TrackAverageTimes("AddingNodes", () =>
-				{
-					foreach (var type in moduleDefinition.Types)
+					if (type.Name == MonoModuleTyp)
 					{
-						cancellationToken.ThrowIfCancellationRequested();
-
-						if (type.Name == MonoModuleTyp)
-						{
-							continue;
-						}
-
-						AddNodeIfNotAlreadyThere(type, graph, typeDefinitions);
-
-						AddNestedTypes(type, graph, typeDefinitions);
+						continue;
 					}
-				});
+
+					AddNodeIfNotAlreadyThere(type, graph, typeDefinitions);
+
+					AddNestedTypes(type, graph, typeDefinitions);
+				}
 			}
 
 			//Second, Build Edges
@@ -76,8 +68,6 @@ namespace RTSFramework.RTSApproaches.Static
 				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 				ProcessTypeDefinition(type, graph);
 			});
-
-			PrintTrackedTimes();
 
 			return Task.FromResult(graph);
 		}
@@ -94,141 +84,62 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 		}
 
-		#region TimeTracking
-
-		private void PrintTrackedTimes()
-		{
-			foreach (var entry in averageTimesDictionary.Where(x => x.Key.StartsWith("AverageTime_")).OrderByDescending(x => x.Value))
-			{
-				var name = entry.Key.Substring(12, entry.Key.Length - 12);
-				var averageTime = averageTimesDictionary[AverageTimeKey(name)];
-				var executions = averageTimesDictionary[NumberOfExecutionsKey(name)];
-
-				var averageTimeString = "" + averageTime;
-				var executionsString = "" + executions;
-
-				Debug.WriteLine($"{name.PadRight(30)}: {averageTimeString.PadRight(25)} * {executionsString.PadRight(10)} = {averageTime*executions}");
-			}
-		}
-
-		private Dictionary<string, double> averageTimesDictionary = new Dictionary<string, double>();
-
-		private string AverageTimeKey(string name)
-		{
-			return "AverageTime_" + name;
-		}
-
-		private string NumberOfExecutionsKey(string name)
-		{
-			return "NumberOfExecutions_" + name;
-		}
-
-		private void TrackAverageTimes(string name, Action action)
-		{
-			if (!averageTimesDictionary.ContainsKey(AverageTimeKey(name)))
-			{
-				averageTimesDictionary.Add(AverageTimeKey(name), 0);
-				averageTimesDictionary.Add(NumberOfExecutionsKey(name), 0);
-			}
-
-			double averageTime = averageTimesDictionary[AverageTimeKey(name)];
-			double numberOfExecutions = averageTimesDictionary[NumberOfExecutionsKey(name)];
-			double totalTime = averageTime * numberOfExecutions;
-
-			var stopWatch = new Stopwatch();
-			stopWatch.Start();
-			action();
-			stopWatch.Stop();
-
-			totalTime += stopWatch.Elapsed.TotalSeconds;
-			numberOfExecutions += 1;
-
-			averageTimesDictionary[AverageTimeKey(name)] = totalTime / numberOfExecutions;
-			averageTimesDictionary[NumberOfExecutionsKey(name)] = numberOfExecutions;
-		}
-
-		#endregion
-
 		private void ProcessTypeDefinition(TypeDefinition type, IntertypeRelationGraph graph)
 		{
 			if (type.BaseType != null)
 			{
-				TrackAverageTimes("BaseType", () =>
-				{
-					AddInheritanceEdgeIfBothExist(type, type.BaseType, graph);
-				});
+				AddInheritanceEdgeIfBothExist(type, type.BaseType, graph);
 			}
 			if (type.HasInterfaces)
 			{
-				TrackAverageTimes("Interfaces", () =>
+				foreach (var interfaceDef in type.Interfaces)
 				{
-					foreach (var interfaceDef in type.Interfaces)
-					{
-						AddInheritanceEdgeIfBothExist(type, interfaceDef.InterfaceType, graph);
-					}
-				});
+					AddInheritanceEdgeIfBothExist(type, interfaceDef.InterfaceType, graph);
+				}
 			}
 			if (type.HasMethods)
 			{
-				
+
 				foreach (var method in type.Methods)
 				{
-					TrackAverageTimes("Method", () =>
-					{
-						ProcessMethodDefinition(method, graph, type);
-					});
+					ProcessMethodDefinition(method, graph, type);
 				}
-				
+
 			}
 			if (type.HasProperties)
 			{
 				foreach (var property in type.Properties)
 				{
-					TrackAverageTimes("Property", () =>
-					{
-						ProcessPropertyDefinition(property, graph, type);
-					});
+					ProcessPropertyDefinition(property, graph, type);
 				}
 			}
 			if (type.HasFields)
 			{
 				foreach (var field in type.Fields)
 				{
-					TrackAverageTimes("Field", () =>
-					{
-						ProcessFieldDefinition(field, graph, type);
-					});
+					ProcessFieldDefinition(field, graph, type);
 				}
 			}
 			if (type.HasEvents)
 			{
 				foreach (var eventDef in type.Events)
 				{
-					TrackAverageTimes("Event", () =>
-					{
-						ProcessEventDefinition(eventDef, graph, type);
-					});
+					ProcessEventDefinition(eventDef, graph, type);
 				}
 			}
 			if (type.HasGenericParameters)
 			{
-				TrackAverageTimes("GenericParameters", () =>
+				foreach (var genericParameter in type.GenericParameters)
 				{
-					foreach (var genericParameter in type.GenericParameters)
-					{
-						ProcessGenericParameter(genericParameter, graph, type);
-					}
-				});
+					ProcessGenericParameter(genericParameter, graph, type);
+				}
 			}
 			if (type.HasCustomAttributes)
 			{
-				TrackAverageTimes("CustomAttributes", () =>
+				foreach (var attribute in type.CustomAttributes)
 				{
-					foreach (var attribute in type.CustomAttributes)
-					{
-						AddUseEdgeIfBothExist(type, attribute.AttributeType, graph);
-					}
-				});
+					AddUseEdgeIfBothExist(type, attribute.AttributeType, graph);
+				}
 			}
 		}
 
@@ -332,10 +243,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 				foreach (var instruction in methodDefinition.Body.Instructions)
 				{
-					TrackAverageTimes("Instruction", () =>
-					{
-						ProcessInstruction(instruction, graph, currentType);
-					});
+					ProcessInstruction(instruction, graph, currentType);
 				}
 			}
 
