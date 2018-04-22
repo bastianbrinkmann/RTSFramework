@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RTSFramework.RTSApproaches.Core.DataStructures
 {
@@ -18,7 +19,29 @@ namespace RTSFramework.RTSApproaches.Core.DataStructures
     {
         public HashSet<string> Nodes { get; } = new HashSet<string>();
 
-        public HashSet<Tuple<string, string>> InheritanceEdges { get; } = new HashSet<Tuple<string, string>>();
+		public void AddInheritanceEdgeIfNotExists(string from, string to)
+		{
+			lock (InheritanceEdges)
+			{
+				if (!InheritanceEdges.Any(x => x.Item1 == from && x.Item2 == to))
+				{
+					InheritanceEdges.Add(new Tuple<string, string>(from, to));
+				}
+			}
+		}
+
+		public void AddUseEdgeIfNotExists(string from, string to)
+		{
+			lock (UseEdges)
+			{
+				if (!UseEdges.Any(x => x.Item1 == from && x.Item2 == to))
+				{
+					UseEdges.Add(new Tuple<string, string>(from, to));
+				}
+			}
+		}
+
+		public HashSet<Tuple<string, string>> InheritanceEdges { get; } = new HashSet<Tuple<string, string>>();
 
         public HashSet<Tuple<string, string>> UseEdges { get; } = new HashSet<Tuple<string, string>>();
 

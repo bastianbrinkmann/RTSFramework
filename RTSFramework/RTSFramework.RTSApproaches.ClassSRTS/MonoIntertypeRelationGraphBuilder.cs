@@ -66,14 +66,16 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 
 			//Second, Build Edges
-			foreach (var type in typeDefinitions)
+			var parallelOptions = new ParallelOptions
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return null;
-				}
+				CancellationToken = cancellationToken,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+			Parallel.ForEach(typeDefinitions, parallelOptions, type =>
+			{
+				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 				ProcessTypeDefinition(type, graph);
-			}
+			});
 
 			PrintTrackedTimes();
 
@@ -374,15 +376,15 @@ namespace RTSFramework.RTSApproaches.Static
 
 		private void AddInheritanceEdgeIfBothExist(TypeDefinition from, TypeReference to, IntertypeRelationGraph graph)
 		{
-			AddEdgeIfBothExist(from, to, graph.InheritanceEdges, graph);
+			AddEdgeIfBothExist(from, to, false, graph);
 		}
 
 		private void AddUseEdgeIfBothExist(TypeDefinition from, TypeReference to, IntertypeRelationGraph graph)
 		{
-			AddEdgeIfBothExist(from, to, graph.UseEdges, graph);
+			AddEdgeIfBothExist(from, to, true, graph);
 		}
 
-		private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, HashSet<Tuple<string, string>> edges, IntertypeRelationGraph graph)
+		private void AddEdgeIfBothExist(TypeDefinition from, TypeReference to, bool useEdge, IntertypeRelationGraph graph)
 		{
 			if (from == null || to == null)
 				return;
@@ -401,9 +403,13 @@ namespace RTSFramework.RTSApproaches.Static
 				return;
 			}
 
-			if (!edges.Any(x => x.Item1 == from.FullName && x.Item2 == to.FullName))
+			if (useEdge)
 			{
-				edges.Add(new Tuple<string, string>(from.FullName, to.FullName));
+				graph.AddUseEdgeIfNotExists(from.FullName, to.FullName);
+			}
+			else
+			{
+				graph.AddInheritanceEdgeIfNotExists(from.FullName, to.FullName);
 			}
 		}
 

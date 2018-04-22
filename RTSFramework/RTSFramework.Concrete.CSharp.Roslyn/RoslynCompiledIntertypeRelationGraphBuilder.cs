@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Operations;
@@ -16,7 +14,8 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-	public class RoslynCompiledIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
+	public class RoslynCompiledIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel>
+		where TCSharpModel : CSharpProgramModel
 	{
 		private List<Compilation> compilations;
 
@@ -24,11 +23,11 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 		{
 			var graph = new IntertypeRelationGraph();
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
-			// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-			{
-				//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
-				//{ "Platform", "Any CPU" }
-			});
+				// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
+				{
+					//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
+					//{ "Platform", "Any CPU" }
+				});
 
 			var solution = await workspace.OpenSolutionAsync(sourceModel.AbsoluteSolutionPath, token);
 
@@ -52,85 +51,78 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 			}
 
 			//Build edges
-			foreach (INamedTypeSymbol type in typeSymbols)
+			var parallelOptions = new ParallelOptions
 			{
-				if (type.BaseType != null)
-				{
-					TrackAverageTimes("BaseType", () =>
-					{
-						AddInheritanceEdgeIfBothExist(type, type.BaseType, graph);
-					});
-				}
-
-				TrackAverageTimes("Interfaces", () =>
-				{
-					foreach (var typeInterface in type.Interfaces)
-					{
-						AddInheritanceEdgeIfBothExist(type, typeInterface, graph);
-					}
-				});
-
-				TrackAverageTimes("Attributes", () =>
-				{
-					ProcessAttributes(type, type, graph);
-				});
-
-				foreach (var symbol in type.GetMembers())
-				{
-					TrackAverageTimes("MemberAttributesTypeParams", () =>
-					{
-						ProcessAttributes(type, symbol, graph);
-
-						foreach (var typeParameter in type.TypeParameters)
-						{
-							foreach (var constraint in typeParameter.ConstraintTypes)
-							{
-								AddUseEdgeIfBothExist(type, constraint as INamedTypeSymbol, graph);
-							}
-						}
-					});
-
-					var method = symbol as IMethodSymbol;
-					if (method != null)
-					{
-						TrackAverageTimes("Method", () =>
-						{
-							ProcessMethodSymbol(type, method, graph);
-						});
-					}
-
-					var property = symbol as IPropertySymbol;
-					if (property != null)
-					{
-						TrackAverageTimes("Property", () =>
-						{
-							ProcessPropertySymbol(type, property, graph);
-						});
-					}
-
-					var field = symbol as IFieldSymbol;
-					if (field != null)
-					{
-						TrackAverageTimes("Field", () =>
-						{
-							ProcessFieldSymbol(type, field, graph);
-						});
-					}
-
-					var eventSymbol = symbol as IEventSymbol;
-					if (eventSymbol != null)
-					{
-						TrackAverageTimes("Event", () =>
-						{
-							ProcessEventSymbol(type, eventSymbol, graph);
-						});
-					}
-				}
-			}
+				CancellationToken = token,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+			Parallel.ForEach(typeSymbols, parallelOptions, type =>
+			{
+				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+				ProcessTypeSymbol(type, graph);
+			});
 
 			PrintTrackedTimes();
 
 			return graph;
+		}
+
+		private void ProcessTypeSymbol(INamedTypeSymbol type, IntertypeRelationGraph graph)
+		{
+			if (type.BaseType != null)
+			{
+				TrackAverageTimes("BaseType", () => { AddInheritanceEdgeIfBothExist(type, type.BaseType, graph); });
+			}
+
+			TrackAverageTimes("Interfaces", () =>
+			{
+				foreach (var typeInterface in type.Interfaces)
+				{
+					AddInheritanceEdgeIfBothExist(type, typeInterface, graph);
+				}
+			});
+
+			TrackAverageTimes("Attributes", () => { ProcessAttributes(type, type, graph); });
+
+			foreach (var symbol in type.GetMembers())
+			{
+				TrackAverageTimes("MemberAttributesTypeParams", () =>
+				{
+					ProcessAttributes(type, symbol, graph);
+
+					foreach (var typeParameter in type.TypeParameters)
+					{
+						foreach (var constraint in typeParameter.ConstraintTypes)
+						{
+							AddUseEdgeIfBothExist(type, constraint as INamedTypeSymbol, graph);
+						}
+					}
+				});
+
+				var method = symbol as IMethodSymbol;
+				if (method != null)
+				{
+					TrackAverageTimes("Method", () => { ProcessMethodSymbol(type, method, graph); });
+				}
+
+				var property = symbol as IPropertySymbol;
+				if (property != null)
+				{
+					TrackAverageTimes("Property", () => { ProcessPropertySymbol(type, property, graph); });
+				}
+
+				var field = symbol as IFieldSymbol;
+				if (field != null)
+				{
+					TrackAverageTimes("Field", () => { ProcessFieldSymbol(type, field, graph); });
+				}
+
+				var eventSymbol = symbol as IEventSymbol;
+				if (eventSymbol != null)
+				{
+					TrackAverageTimes("Event", () => { ProcessEventSymbol(type, eventSymbol, graph); });
+				}
+			}
 		}
 
 		#region TimeTracking
@@ -275,20 +267,14 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 		{
 			IOperation operation = semanticModel.GetOperation(node);
 
-			TrackAverageTimes("Operation", () =>
-			{
-				ProcessOperation(type, operation, graph);
-			});
+			TrackAverageTimes("Operation", () => { ProcessOperation(type, operation, graph); });
 		}
 
 		private void ProcessOperation(INamedTypeSymbol type, IOperation operation, IntertypeRelationGraph graph)
 		{
 			foreach (var child in operation.Children)
 			{
-				TrackAverageTimes("Operation", () =>
-				{
-					ProcessOperation(type, child, graph);
-				});
+				TrackAverageTimes("Operation", () => { ProcessOperation(type, child, graph); });
 			}
 
 			//AddUseEdgeIfBothExist(type, operation.Type as INamedTypeSymbol, graph);
@@ -296,7 +282,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 			switch (operation.Kind)
 			{
 				case OperationKind.DynamicMemberReference:
-					var dynmemberRef = (IDynamicMemberReferenceOperation)operation;
+					var dynmemberRef = (IDynamicMemberReferenceOperation) operation;
 					AddUseEdgeIfBothExist(type, dynmemberRef.ContainingType as INamedTypeSymbol, graph);
 					foreach (var typeArg in dynmemberRef.TypeArguments)
 					{
@@ -307,32 +293,32 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 				case OperationKind.FieldReference:
 				case OperationKind.MethodReference:
 				case OperationKind.PropertyReference:
-					var memberReference = (IMemberReferenceOperation)operation;
+					var memberReference = (IMemberReferenceOperation) operation;
 					AddUseEdgeIfBothExist(type, memberReference.Member.ContainingType, graph);
 					AddUseEdgeIfBothExist(type, memberReference.Member.ContainingType, graph);
 					break;
 				case OperationKind.TypeOf:
-					var typeOfOp = (ITypeOfOperation)operation;
+					var typeOfOp = (ITypeOfOperation) operation;
 					AddUseEdgeIfBothExist(type, typeOfOp.TypeOperand as INamedTypeSymbol, graph);
 					break;
 				case OperationKind.ObjectCreation: //TODO: Method Rerference also?
-					var objectCreation = (IObjectCreationOperation)operation;
+					var objectCreation = (IObjectCreationOperation) operation;
 					AddUseEdgeIfBothExist(type, objectCreation.Constructor?.ContainingType, graph);
 					break;
 				case OperationKind.IsType:
-					var isType = (IIsTypeOperation)operation;
+					var isType = (IIsTypeOperation) operation;
 					AddUseEdgeIfBothExist(type, isType.TypeOperand as INamedTypeSymbol, graph);
 					break;
 				case OperationKind.Tuple:
-					var tuple = (ITupleOperation)operation;
+					var tuple = (ITupleOperation) operation;
 					AddUseEdgeIfBothExist(type, tuple.NaturalType as INamedTypeSymbol, graph);
 					break;
 				case OperationKind.SizeOf:
-					var sizeOf = (ISizeOfOperation)operation;
+					var sizeOf = (ISizeOfOperation) operation;
 					AddUseEdgeIfBothExist(type, sizeOf.TypeOperand as INamedTypeSymbol, graph);
 					break;
 				case OperationKind.FieldInitializer: //TODO Init without reference?
-					var fieldInit = (IFieldInitializerOperation)operation; 
+					var fieldInit = (IFieldInitializerOperation) operation;
 					foreach (var initializedField in fieldInit.InitializedFields)
 					{
 						AddUseEdgeIfBothExist(type, initializedField.Type as INamedTypeSymbol, graph);
@@ -383,7 +369,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 
 			if (namedType.IsType)
 			{
-				typeSymbols.Add((INamedTypeSymbol)namedType);
+				typeSymbols.Add((INamedTypeSymbol) namedType);
 
 				var typeName = GetTypeIdentifier(namedType);
 				if (!graph.Nodes.Contains(typeName))
@@ -414,15 +400,15 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 
 		private void AddInheritanceEdgeIfBothExist(INamedTypeSymbol from, INamedTypeSymbol to, IntertypeRelationGraph graph)
 		{
-			AddEdgeIfBothExist(from, to, graph.InheritanceEdges, graph);
+			AddEdgeIfBothExist(from, to, false, graph);
 		}
 
 		private void AddUseEdgeIfBothExist(INamedTypeSymbol from, INamedTypeSymbol to, IntertypeRelationGraph graph)
 		{
-			AddEdgeIfBothExist(from, to, graph.UseEdges, graph);
+			AddEdgeIfBothExist(from, to, true, graph);
 		}
 
-		private void AddEdgeIfBothExist(INamedTypeSymbol from, INamedTypeSymbol to, HashSet<Tuple<string, string>> edges, IntertypeRelationGraph graph)
+		private void AddEdgeIfBothExist(INamedTypeSymbol from, INamedTypeSymbol to, bool useEdge, IntertypeRelationGraph graph)
 		{
 			if (from == null || to == null || from.TypeKind == TypeKind.Error || to.TypeKind == TypeKind.Error || Equals(from, to))
 				return;
@@ -442,12 +428,15 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 				return;
 			}
 
-			if (!edges.Any(x => x.Item1 == fromName && x.Item2 == toName))
+			if (useEdge)
 			{
-				edges.Add(new Tuple<string, string>(fromName, toName));
+				graph.AddUseEdgeIfNotExists(fromName, toName);
+			}
+			else
+			{
+				graph.AddInheritanceEdgeIfNotExists(fromName, toName);
 			}
 		}
-
 
 		#endregion
 
