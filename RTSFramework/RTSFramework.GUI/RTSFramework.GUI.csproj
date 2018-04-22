@@ -261,6 +261,7 @@
     <Compile Include="Converters\CommitComboboxItemConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\TestExecutionOutcomeImageConverter.cs" />
+    <Compile Include="Converters\ProgressStateConverter.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
     <Compile Include="DependencyInjection\UnityGUIInitializer.cs" />
     <Compile Include="DependencyInjection\UnityProvider.cs" />

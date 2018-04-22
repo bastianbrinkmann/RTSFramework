@@ -11,6 +11,9 @@
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
+	<Window.TaskbarItemInfo>
+		<TaskbarItemInfo ProgressState="{Binding IsRunning, Converter={converters:ProgressStateConverter}}" />
+	</Window.TaskbarItemInfo>
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="95"/>
