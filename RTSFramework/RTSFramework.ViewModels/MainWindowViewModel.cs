@@ -581,6 +581,9 @@ namespace RTSFramework.ViewModels
 		{
 			var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == executionResult.TestCase.Id);
 			currentTestViewModel.TestOutcome = executionResult.Outcome;
+			currentTestViewModel.StartTime = executionResult.StartTime;
+			currentTestViewModel.EndTime = executionResult.EndTime;
+			currentTestViewModel.DurationInSeconds = executionResult.DurationInSeconds;
 		}
 
 		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase

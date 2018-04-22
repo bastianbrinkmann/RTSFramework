@@ -88,7 +88,10 @@
 							</DataTemplate>
 						</GridViewColumn.CellTemplate>
 					</GridViewColumn>
-					<GridViewColumn Width="150" Header="Categories" DisplayMemberBinding="{Binding Categories}"/>
+					<GridViewColumn Width="100" Header="Categories" DisplayMemberBinding="{Binding Categories}"/>
+					<GridViewColumn Width="100" Header="StartTime" DisplayMemberBinding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
+					<GridViewColumn Width="100" Header="EndTime" DisplayMemberBinding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />
+					<GridViewColumn Width="100" Header="Duration (in sec)" DisplayMemberBinding="{Binding DurationInSeconds}" />
 				</GridView>
 			</ListView.View>
 		</ListView>

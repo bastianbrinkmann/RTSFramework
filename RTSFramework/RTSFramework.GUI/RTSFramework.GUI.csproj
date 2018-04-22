@@ -259,6 +259,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\CommitComboboxItemConverter.cs" />
+    <Compile Include="Converters\DateTimeWithTimeConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\TestExecutionOutcomeImageConverter.cs" />
     <Compile Include="Converters\ProgressStateConverter.cs" />
