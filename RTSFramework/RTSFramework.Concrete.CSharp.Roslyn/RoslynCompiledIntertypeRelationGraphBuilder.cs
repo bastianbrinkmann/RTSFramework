@@ -19,6 +19,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 	{
 		private List<Compilation> compilations;
 
+		//TODO: Builds IRG for P' not P!
 		public async Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken token)
 		{
 			var graph = new IntertypeRelationGraph();

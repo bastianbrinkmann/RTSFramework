@@ -103,6 +103,19 @@ namespace RTSFramework.RTSApproaches.Static
 					ExtendAffectedTypesAndReportImpactedTests(subtype, graph, affectedTypes, testCases, cancellationToken);
 				}
 			}
+
+			//However this is not true if dependency injection is used - instances of objects are injected dynamically
+			var superTypes = graph.InheritanceEdges.Where(x => x.Item1 == type).Select(x => x.Item2);
+
+			foreach (string superType in superTypes)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				if (!affectedTypes.Contains(superType))
+				{
+					affectedTypes.Add(superType);
+					ExtendAffectedTypesAndReportImpactedTests(superType, graph, affectedTypes, testCases, cancellationToken);
+				}
+			}
 		}
 	}
 }
