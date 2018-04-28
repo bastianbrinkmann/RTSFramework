@@ -76,7 +76,7 @@
   <ItemGroup>
     <Compile Include="Models\FileElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\DebugStopWatchTracker.cs" />
+    <Compile Include="Utilities\LoggingHelper.cs" />
     <Compile Include="Utilities\ProcessExtensions.cs" />
     <Compile Include="Utilities\RelativePathHelper.cs" />
   </ItemGroup>

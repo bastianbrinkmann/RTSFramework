@@ -44,13 +44,15 @@ namespace RTSFramework.ViewModels.Controller
 
 		public async Task<TResult> ExecuteImpactedTests(TArtefact oldArtefact, TArtefact newArtefact, CancellationToken token)
 		{
+			LoggingHelper.InitLogFile();
+
 			var oldModel = artefactAdapter.Parse(oldArtefact);
 			var newModel = artefactAdapter.Parse(newArtefact);
 
-			var delta = DebugStopWatchTracker.ReportNeededTimeOnDebug(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
+			var delta = LoggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await DebugStopWatchTracker.ReportNeededTimeOnDebug(testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
+			var allTests = await LoggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
 			token.ThrowIfCancellationRequested();
 
 			var impactedTests = new List<TTestCase>();
@@ -62,17 +64,17 @@ namespace RTSFramework.ViewModels.Controller
 				impactedTests.Add(impactedTest);
 			};
 
-			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testSelector.SelectTests(allTests, delta, token), "Test Selector");
+			await LoggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
 
-			Debug.WriteLine($"{impactedTests.Count} Tests impacted");
+			LoggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
 			token.ThrowIfCancellationRequested();
 
-			var processingResult = await DebugStopWatchTracker.ReportNeededTimeOnDebug(TestProcessor.ProcessTests(impactedTests, token),
+			var processingResult = await LoggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, token),
 				"ProcessingOfImpactedTests");
 			token.ThrowIfCancellationRequested();
 
-			await DebugStopWatchTracker.ReportNeededTimeOnDebug(testSelector.UpdateInternalDataStructure(processingResult, token), "Internal DataStructure Update");
+			await LoggingHelper.ReportNeededTime(() => testSelector.UpdateInternalDataStructure(processingResult, token), "Internal DataStructure Update");
 
 			return processingResult;
 		}
