@@ -71,38 +71,41 @@
 			<ComboBox x:Name="CbToCommit" VerticalAlignment="Center" ItemsSource="{Binding ToCommitModels}" SelectedItem="{Binding ToCommit}" Height="22" Visibility="{Binding IsToCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="2" Grid.Column="3" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
-		<ListView x:Name="LvTests" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}" Grid.RowSpan="2">
-			<ListView.ItemContainerStyle >
-				<Style TargetType="ListViewItem" >
+
+		<DataGrid x:Name="DgTests" IsReadOnly="True" AutoGenerateColumns="False" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}"
+				  ScrollViewer.CanContentScroll="True" 
+				  ScrollViewer.VerticalScrollBarVisibility="Auto"
+				  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+			<DataGrid.ItemContainerStyle >
+				<Style TargetType="DataGridRow" >
 					<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
 					<Setter Property="behaviors:HandleDoubleClickBehavior.Command" Value="{Binding ShowErrorMessageCommand}" />
 				</Style>
-			</ListView.ItemContainerStyle>
-			<ListView.View>
-				<GridView>
-					<GridViewColumn Width="150" Header="Class Name" DisplayMemberBinding="{Binding FullClassName}" />
-					<GridViewColumn Width="100" Header="Test Case Name" DisplayMemberBinding="{Binding Name}" />
-					<GridViewColumn Width="100" Header ="Outcome">
-						<GridViewColumn.CellTemplate>
-							<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
-								<Grid>
-									<Grid.ColumnDefinitions>
-										<ColumnDefinition Width="16" />
-										<ColumnDefinition Width="*" />
-									</Grid.ColumnDefinitions>
-									<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" Grid.Column="0" />
-									<TextBlock Text="{Binding TestOutcome}" Grid.Column="1" Margin="5,0,0,0"/>
-								</Grid>
-							</DataTemplate>
-						</GridViewColumn.CellTemplate>
-					</GridViewColumn>
-					<GridViewColumn Width="100" Header="Categories" DisplayMemberBinding="{Binding Categories}"/>
-					<GridViewColumn Width="100" Header="StartTime" DisplayMemberBinding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
-					<GridViewColumn Width="100" Header="EndTime" DisplayMemberBinding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />
-					<GridViewColumn Width="100" Header="Duration (in sec)" DisplayMemberBinding="{Binding DurationInSeconds}" />
-				</GridView>
-			</ListView.View>
-		</ListView>
+			</DataGrid.ItemContainerStyle>
+			
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="150" Header="Class Name" Binding="{Binding FullClassName}" />
+				<DataGridTextColumn Width="100" Header="Test Case Name" Binding="{Binding Name}" />
+				<DataGridTemplateColumn Width="100" Header ="Outcome">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="16" />
+									<ColumnDefinition Width="*" />
+								</Grid.ColumnDefinitions>
+								<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" Grid.Column="0" />
+								<TextBlock Text="{Binding TestOutcome}" Grid.Column="1" Margin="5,0,0,0"/>
+							</Grid>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Width="100" Header="Categories" Binding="{Binding Categories}"/>
+				<DataGridTextColumn Width="100" Header="StartTime" Binding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
+				<DataGridTextColumn Width="100" Header="EndTime" Binding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />
+				<DataGridTextColumn Width="100" Header="Duration (in sec)" Binding="{Binding DurationInSeconds}" />
+			</DataGrid.Columns>
+		</DataGrid>	
 		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Background="{StaticResource BackgroundColor}">
 			<StatusBar.ItemsPanel>
 				<ItemsPanelTemplate>
