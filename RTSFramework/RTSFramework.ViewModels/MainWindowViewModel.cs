@@ -582,12 +582,30 @@ namespace RTSFramework.ViewModels
 		private void ProcessExecutionResult(ITestCaseResult<MSTestTestcase> executionResult)
 		{
 			var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == executionResult.TestCase.Id);
-			currentTestViewModel.TestOutcome = executionResult.Outcome;
-			currentTestViewModel.StartTime = executionResult.StartTime;
-			currentTestViewModel.EndTime = executionResult.EndTime;
-			currentTestViewModel.DurationInSeconds = executionResult.DurationInSeconds;
-			currentTestViewModel.ErrorMessage = executionResult.ErrorMessage;
-			currentTestViewModel.StackTrace = executionResult.StackTrace;
+
+			if (executionResult.TestCase.IsDataDriven)
+			{
+				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService)
+				{
+					TestOutcome = executionResult.Outcome,
+					StartTime = executionResult.StartTime,
+					EndTime = executionResult.EndTime,
+					DurationInSeconds = executionResult.DurationInSeconds,
+					ErrorMessage = executionResult.ErrorMessage,
+					StackTrace = executionResult.StackTrace
+				});
+
+				currentTestViewModel.HasChildResults = true;
+			}
+			else
+			{
+				currentTestViewModel.TestOutcome = executionResult.Outcome;
+				currentTestViewModel.StartTime = executionResult.StartTime;
+				currentTestViewModel.EndTime = executionResult.EndTime;
+				currentTestViewModel.DurationInSeconds = executionResult.DurationInSeconds;
+				currentTestViewModel.ErrorMessage = executionResult.ErrorMessage;
+				currentTestViewModel.StackTrace = executionResult.StackTrace;
+			}
 		}
 
 		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase

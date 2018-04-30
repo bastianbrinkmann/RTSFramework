@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -21,6 +23,9 @@ namespace RTSFramework.ViewModels
 		private string name;
 		private string fullClassName;
 		private string fullyQualifiedName;
+		private bool hasChildResults;
+		private bool areChildResultsShown;
+		private ObservableCollection<TestResultListViewItemViewModel> childResults;
 
 		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
@@ -31,6 +36,50 @@ namespace RTSFramework.ViewModels
 					dialogService.ShowError($"Error Message: {ErrorMessage}\n\nStackTrace: {StackTrace}", "Test Run Error");
 				}
 			});
+
+			ChildResults = new ObservableCollection<TestResultListViewItemViewModel>();
+		}
+
+		public void AddChildResults(TestResultListViewItemViewModel childResult)
+		{
+			ChildResults.Add(childResult);
+
+			StartTime = childResults.Min(x => x.StartTime);
+			EndTime = childResults.Max(x => x.EndTime);
+			DurationInSeconds = childResults.Sum(x => x.DurationInSeconds);
+			TestOutcome = childResults.All(x => x.TestOutcome == TestExecutionOutcome.Passed) ? TestExecutionOutcome.Passed : TestExecutionOutcome.Failed;
+		}
+
+		#region Properties
+
+		public ObservableCollection<TestResultListViewItemViewModel> ChildResults
+		{
+			get { return childResults; }
+			set
+			{
+				childResults = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool AreChildResultsShown
+		{
+			get { return areChildResultsShown; }
+			set
+			{
+				areChildResultsShown = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool HasChildResults
+		{
+			get { return hasChildResults; }
+			set
+			{
+				hasChildResults = value;
+				RaisePropertyChanged();
+			}
 		}
 
 		public string FullClassName
@@ -142,5 +191,7 @@ namespace RTSFramework.ViewModels
 				RaisePropertyChanged();
 			}
 		}
+
+		#endregion
 	}
 }
