@@ -259,6 +259,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\HandleDoubleClickBehavior.cs" />
+    <Compile Include="Converters\CollapseExpandImageConverter.cs" />
     <Compile Include="Converters\CommitComboboxItemConverter.cs" />
     <Compile Include="Converters\DateTimeWithTimeConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
@@ -389,6 +390,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\loading.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\collapse.png" />
+    <Resource Include="Resources\expand.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

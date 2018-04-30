@@ -12,6 +12,19 @@
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
+	<Window.Resources>
+		<DataTemplate x:Key="TestOutcomePresenter" DataType="viewModels:TestResultListViewItemViewModel">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" Grid.Column="0" />
+				<TextBlock Text="{Binding TestOutcome}" Grid.Column="1" Margin="5,0,0,0"/>
+			</Grid>
+		</DataTemplate>
+	</Window.Resources>
+	
 	<Window.TaskbarItemInfo>
 		<TaskbarItemInfo ProgressState="{Binding IsRunning, Converter={converters:ProgressStateConverter}}" />
 	</Window.TaskbarItemInfo>
@@ -86,40 +99,31 @@
 			</DataGrid.ItemContainerStyle>
 
 			<DataGrid.RowDetailsTemplate>
-				<DataTemplate  DataType="viewModels:TestResultListViewItemViewModel">
-					<Border BorderThickness="2,0,0,0" Margin="30,0,0,0" BorderBrush="Black">
-						<StackPanel>
-							<TextBlock Text="{Binding ErrorMessage}" />
-							<TextBlock Text="{Binding StackTrace}" />
-						</StackPanel>
-					</Border>
+				<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
+					<DataGrid IsReadOnly="True" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ChildResults}">
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="150" Header="Display Name" Binding="{Binding DisplayName}" />
+							<DataGridTemplateColumn Width="100" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}" SortMemberPath="TestOutcome" CanUserSort="True" />
+							<DataGridTextColumn Width="100" Header="StartTime" Binding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
+							<DataGridTextColumn Width="100" Header="EndTime" Binding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />
+							<DataGridTextColumn Width="100" Header="Duration (in sec)" Binding="{Binding DurationInSeconds}" />
+						</DataGrid.Columns>
+					</DataGrid>
 				</DataTemplate>
 			</DataGrid.RowDetailsTemplate>
-
 			<DataGrid.Columns>
 				<DataGridTemplateColumn>
 					<DataGridTemplateColumn.CellTemplate>
 						<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
-							<Button Click="ShowHideDetails" Visibility="{Binding HasChildResults, Converter={converters:VisibilityConverter}}" >Details</Button>
+							<Button Margin="2,0,2,0" Background="Transparent" Click="ShowHideDetails" Visibility="{Binding HasChildResults, Converter={converters:VisibilityConverter}}" >
+								<Image Width="16" Source="{Binding AreChildResultsShown, Converter={converters:CollapseExpandImageConverter}}" />
+							</Button>
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
 				</DataGridTemplateColumn>
 				<DataGridTextColumn Width="150" Header="Class Name" Binding="{Binding FullClassName}" />
 				<DataGridTextColumn Width="100" Header="Test Case Name" Binding="{Binding Name}" />
-				<DataGridTemplateColumn Width="100" Header ="Outcome">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
-							<Grid>
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="16" />
-									<ColumnDefinition Width="*" />
-								</Grid.ColumnDefinitions>
-								<Image Width="16" Source="{Binding TestOutcome, Converter={converters:TestExecutionOutcomeImageConverter}}" Grid.Column="0" />
-								<TextBlock Text="{Binding TestOutcome}" Grid.Column="1" Margin="5,0,0,0"/>
-							</Grid>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="100" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}"  SortMemberPath="TestOutcome" CanUserSort="True" />
 				<DataGridTextColumn Width="100" Header="Categories" Binding="{Binding Categories}"/>
 				<DataGridTextColumn Width="100" Header="StartTime" Binding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
 				<DataGridTextColumn Width="100" Header="EndTime" Binding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />

@@ -592,7 +592,8 @@ namespace RTSFramework.ViewModels
 					EndTime = executionResult.EndTime,
 					DurationInSeconds = executionResult.DurationInSeconds,
 					ErrorMessage = executionResult.ErrorMessage,
-					StackTrace = executionResult.StackTrace
+					StackTrace = executionResult.StackTrace,
+					DisplayName = executionResult.DisplayName
 				});
 
 				currentTestViewModel.HasChildResults = true;

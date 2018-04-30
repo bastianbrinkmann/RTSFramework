@@ -15,9 +15,9 @@ namespace RTSFramework.GUI.Converters
 
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			DateTimeOffset time = (DateTimeOffset)value;
+			DateTimeOffset? time = (DateTimeOffset?) value;
 
-			return time.ToString("HH:mm:ss:fff");
+			return time?.ToString("HH:mm:ss:fff");
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

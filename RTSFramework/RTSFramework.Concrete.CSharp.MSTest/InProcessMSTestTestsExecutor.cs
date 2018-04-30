@@ -97,7 +97,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				EndTime = vsTestResult.EndTime,
 				ErrorMessage = vsTestResult.ErrorMessage,
 				StackTrace = vsTestResult.ErrorStackTrace,
-				DurationInSeconds = vsTestResult.Duration.TotalSeconds
+				DurationInSeconds = vsTestResult.Duration.TotalSeconds,
+				DisplayName = vsTestResult.DisplayName
 			};
 		}
 

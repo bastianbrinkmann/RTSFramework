@@ -14,6 +14,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
         public MSTestTestcase TestCase { get; set; }
-
+	    public string DisplayName { get; set; }
     }
 }

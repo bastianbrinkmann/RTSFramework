@@ -26,6 +26,7 @@ namespace RTSFramework.ViewModels
 		private bool hasChildResults;
 		private bool areChildResultsShown;
 		private ObservableCollection<TestResultListViewItemViewModel> childResults;
+		private string displayName;
 
 		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
@@ -188,6 +189,16 @@ namespace RTSFramework.ViewModels
 			set
 			{
 				fullyQualifiedName = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public string DisplayName
+		{
+			get { return displayName; }
+			set
+			{
+				displayName = value;
 				RaisePropertyChanged();
 			}
 		}

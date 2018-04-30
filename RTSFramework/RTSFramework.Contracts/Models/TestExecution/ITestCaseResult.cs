@@ -4,6 +4,7 @@ namespace RTSFramework.Contracts.Models.TestExecution
 {
 	public interface ITestCaseResult<TTestCase> where TTestCase : ITestCase
 	{
+		string DisplayName { get; }
 		TTestCase TestCase { get; }
 		string ErrorMessage { get; }
 		string StackTrace { get; }

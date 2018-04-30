@@ -17,5 +17,7 @@ namespace RTSFramework.Contracts.Models
 
 		public TestExecutionOutcome Outcome
 			=> ChildrenResults.TrueForAll(x => x.Outcome == TestExecutionOutcome.Passed) ? TestExecutionOutcome.Passed : TestExecutionOutcome.Failed;
+
+		public string DisplayName => null;
 	}
 }
