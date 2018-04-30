@@ -10,7 +10,16 @@
 		internal const string IgnoreAttributeName = "IgnoreAttribute";
 
 		internal const string TestResultsFolder = "TestResults";
-		internal const string DefaultRunSettings = "<RunSettings><RunConfiguration></RunConfiguration></RunSettings>";
+
+		internal static string DefaultRunSettings = "<RunSettings>" +
+												   "<RunConfiguration>" +
+												   "</RunConfiguration>" +
+												   "<MSTest>" +
+												   "<AssemblyResolution>" +
+												   "<Directory path=\"{0}\" includeSubDirectories=\"false\"/>" +
+												   "</AssemblyResolution>" +
+												   "</MSTest>" +
+												   "</RunSettings>";
 
 		//TestProperties
 		internal const string PropertyTestClassName = "MSTestDiscoverer.TestClassName";

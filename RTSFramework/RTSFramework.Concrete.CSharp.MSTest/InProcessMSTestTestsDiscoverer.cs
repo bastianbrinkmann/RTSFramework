@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,7 +68,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var waitHandle = new AsyncAutoResetEvent();
 			var handler = new DiscoveryEventHandler(waitHandle);
 
-			vsTestConnector.ConsoleWrapper.DiscoverTests(sources, MSTestConstants.DefaultRunSettings, handler);
+			vsTestConnector.ConsoleWrapper.DiscoverTests(sources, string.Format(MSTestConstants.DefaultRunSettings, Directory.GetCurrentDirectory()), handler);
 			var registration = token.Register(vsTestConnector.ConsoleWrapper.CancelDiscovery);
 
 			await waitHandle.WaitAsync(token);

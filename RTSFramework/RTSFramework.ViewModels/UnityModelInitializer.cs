@@ -226,11 +226,13 @@ namespace RTSFramework.ViewModels
 		private static void InitTestProcessors(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, FileProcessingResult>, CsvTestsReporter<MSTestTestcase>>(ProcessingType.CsvReporting.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
+
+			//unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, MSTestExecutorWithInstrumenting>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 
 			//unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, MSTestExectionResult>, InProcessMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
-			
+
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>>, IdentifiedTestsListReporter<MSTestTestcase>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 
 			InitTestProcessorsFactoryForResultType<FileProcessingResult>(unityContainer);
@@ -242,9 +244,18 @@ namespace RTSFramework.ViewModels
 		{
 			unityContainer.RegisterType<Func<ProcessingType, ITestProcessor<MSTestTestcase, TResult>>>(
 				new InjectionFactory(c =>
-				new Func<ProcessingType, ITestProcessor<MSTestTestcase, TResult>>(name => c.Resolve<ITestProcessor<MSTestTestcase, TResult>>(name.ToString()))));
-		}
+				new Func<ProcessingType, ITestProcessor<MSTestTestcase, TResult>>(name =>
+				{
+					if (name == ProcessingType.MSTestExecutionCreateCorrespondenceModel)
+					{
+						var executor = c.Resolve<ITestProcessor<MSTestTestcase, TResult>>(ProcessingType.MSTestExecution.ToString());
+						return c.Resolve<ITestProcessor<MSTestTestcase, TResult>>(name.ToString(),
+							new ParameterOverride("executor", executor));
+					}
 
+					return c.Resolve<ITestProcessor<MSTestTestcase, TResult>>(name.ToString());
+				})));
+		}
 		#endregion
 
 		#region DataStructureProvider

@@ -320,6 +320,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.DependencyMonitor\RTSFramework.Concrete.CSharp.DependencyMonitor.csproj">
+      <Project>{525c28a4-e224-4d9c-9096-08a3fdb06b45}</Project>
+      <Name>RTSFramework.Concrete.CSharp.DependencyMonitor</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.CSharp.MSTest\RTSFramework.Concrete.CSharp.MSTest.csproj">
       <Project>{1a7501d7-db03-4f97-9d7d-d52193359c74}</Project>
       <Name>RTSFramework.Concrete.CSharp.MSTest</Name>

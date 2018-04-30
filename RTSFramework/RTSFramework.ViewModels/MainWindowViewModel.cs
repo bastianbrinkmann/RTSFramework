@@ -637,6 +637,16 @@ namespace RTSFramework.ViewModels
 				};
 			}
 
+			var executorWithCorrespondenceModel = stateBasedController.TestProcessor as MSTestExecutorWithInstrumenting;
+			if (executorWithCorrespondenceModel != null)
+			{
+				executorWithCorrespondenceModel.TestResultAvailable += (sender, args) =>
+				{
+					applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
+				};
+			}
+
+
 			return
 				await Task.Run(
 					() => stateBasedController.ExecuteImpactedTests(oldArtefact, newArtefact, cancellationTokenSource.Token),
