@@ -291,7 +291,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 		}
 
-
 		private void InstrumentTestMethod(MethodDefinition testMethod)
 		{
 			var methodArgument = $"{testMethod.DeclaringType.FullName}.{testMethod.Name}";
