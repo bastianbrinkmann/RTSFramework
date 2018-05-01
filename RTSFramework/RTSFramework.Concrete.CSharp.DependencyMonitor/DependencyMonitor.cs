@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System.Collections.Generic;
+using System.IO;
 
 namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 {
@@ -27,7 +28,7 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 		public static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
 		public static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
-		public static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd(System.String)";
+		public static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
 		static DependencyMonitor()
 		{
@@ -36,7 +37,13 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 		public static void T(string typeWithFullPath)
 		{
-			Dependencies[currentTestMethodName].Add(typeWithFullPath);
+			if (Dependencies.ContainsKey(currentTestMethodName))
+			{
+				if (!Dependencies[currentTestMethodName].Contains(typeWithFullPath))
+				{
+					Dependencies[currentTestMethodName].Add(typeWithFullPath);
+				}
+			}
 		}
 
 		public static void TestMethodStart(string testMethod)
@@ -60,8 +67,24 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 			}
 		}
 
-		public static void TestMethodEnd(string testMethodWithFullPath)
+		public static void TestMethodEnd()
 		{
+			using (var writer = File.AppendText("Testfile.txt"))
+			{
+				writer.WriteLine(currentTestMethodName);
+				if (!Dependencies.ContainsKey(currentTestMethodName))
+				{
+					return;
+				}
+
+				foreach (var reference in Dependencies[currentTestMethodName])
+				{
+					writer.WriteLine(reference);
+				}
+
+				writer.WriteLine();
+			}
+
 			currentTestMethodName = string.Empty;
 		}
 	}

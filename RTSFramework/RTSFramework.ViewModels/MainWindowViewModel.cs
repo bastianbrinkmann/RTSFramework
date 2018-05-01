@@ -550,11 +550,8 @@ namespace RTSFramework.ViewModels
 			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
-					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
-					break;
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-					var executionResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
-					executionResult.TestcasesResults.ForEach(ProcessExecutionResult);
+					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
@@ -563,7 +560,6 @@ namespace RTSFramework.ViewModels
 					{
 						Process.Start(csvCreationResult.FilePath);
 					}
-
 					break;
 				case ProcessingType.ListReporting:
 					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);

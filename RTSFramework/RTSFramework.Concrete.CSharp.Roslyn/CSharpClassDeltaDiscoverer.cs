@@ -11,86 +11,97 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-    public class CSharpClassDeltaDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpClassElement>> where TModel : IProgramModel
-    {
-        private readonly IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer;
+	public class CSharpClassDeltaDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpClassElement>> where TModel : IProgramModel
+	{
+		private readonly IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer;
 
-        public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer)
-        {
-            this.internalDiscoverer = internalDiscoverer;
-        }
+		public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer)
+		{
+			this.internalDiscoverer = internalDiscoverer;
+		}
 
-        public StructuralDelta<TModel, CSharpClassElement> Discover(TModel oldModel, TModel newModel)
-        {
-            var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
-            return Convert(fileDelta);
-        }
+		public StructuralDelta<TModel, CSharpClassElement> Discover(TModel oldModel, TModel newModel)
+		{
+			var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
+			return Convert(fileDelta);
+		}
 
-        private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
-        {
-	        var result = new StructuralDelta<TModel, CSharpClassElement>(delta.SourceModel, delta.TargetModel);
+		private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
+		{
+			var result = new StructuralDelta<TModel, CSharpClassElement>(delta.SourceModel, delta.TargetModel);
 
-            foreach (var cSharpFile in delta.ChangedElements)
-            {
-                result.ChangedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
-            }
-            foreach (var cSharpFile in delta.AddedElements)
-            {
-                result.AddedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
-            }
-            foreach (var cSharpFile in delta.DeletedElements)
-            {
-                result.DeletedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
-            }
+			foreach (var cSharpFile in delta.ChangedElements)
+			{
+				result.ChangedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
+			}
+			foreach (var cSharpFile in delta.AddedElements)
+			{
+				result.AddedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
+			}
+			foreach (var cSharpFile in delta.DeletedElements)
+			{
+				result.DeletedElements.AddRange(GetContainedClasses(cSharpFile.GetContent()));
+			}
 
-            return result;
-        }
+			return result;
+		}
 
-        /// <summary>
-        /// Note that changed interfaces can not cause tests to be impacted as tests are executed on classes not interfaces
-        /// That's why interface definitions are omitted here
-        /// </summary>
-        /// <param name="fileContent"></param>
-        /// <returns></returns>
-        private IEnumerable<CSharpClassElement> GetContainedClasses(string fileContent)
-        {
-            var classes = new List<CSharpClassElement>();
+		/// <summary>
+		/// Note that changed interfaces can not cause tests to be impacted as tests are executed on classes not interfaces
+		/// That's why interface definitions are omitted here
+		/// </summary>
+		/// <param name="fileContent"></param>
+		/// <returns></returns>
+		private IEnumerable<CSharpClassElement> GetContainedClasses(string fileContent)
+		{
+			var classes = new List<CSharpClassElement>();
 
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(fileContent);
+			SyntaxTree tree = CSharpSyntaxTree.ParseText(fileContent);
 
-            var classDeclarations = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
-            foreach (var classDeclaration in classDeclarations)
-            {
-                string className;
-                var parentNamespace = classDeclaration.Parent as NamespaceDeclarationSyntax;
-                if (parentNamespace != null)
-                {
-                    var nameSpaceName = GetFullNamespaceName(parentNamespace);
+			var classDeclarations = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
+			foreach (var classDeclaration in classDeclarations)
+			{
+				string className;
+				var parentNamespace = classDeclaration.Parent as NamespaceDeclarationSyntax;
+				if (parentNamespace != null)
+				{
+					var nameSpaceName = GetFullNamespaceName(parentNamespace);
 
-                    className = $"{nameSpaceName}.{classDeclaration.Identifier}";
-                }
-                else
-                {
-                    className = classDeclaration.Identifier.ToString();
-                }
+					className = $"{nameSpaceName}.{GetClassName(classDeclaration)}";
+				}
+				else
+				{
+					className = GetClassName(classDeclaration);
+				}
 
-                classes.Add(new CSharpClassElement(className));
-            }
+				classes.Add(new CSharpClassElement(className));
+			}
 
-            return classes;
-        }
+			return classes;
+		}
 
-        private string GetFullNamespaceName(NamespaceDeclarationSyntax node)
-        {
-            var parent = node.Parent as NamespaceDeclarationSyntax;
-            if (parent != null)
-                return $"{GetFullNamespaceName(parent)}.{GetNamespaceName(node)}";
-            return GetNamespaceName(node);
-        }
+		private string GetClassName(ClassDeclarationSyntax classDeclaration)
+		{
+			var className = $"{classDeclaration.Identifier}";
 
-	    private string GetNamespaceName(NamespaceDeclarationSyntax node)
-	    {
-		    return node.Name.ToString();
-	    }
-    }
+			if (classDeclaration.TypeParameterList != null && classDeclaration.TypeParameterList.Parameters.Any())
+			{
+				className += "`" + classDeclaration.TypeParameterList.Parameters.Count;
+			}
+			return className;
+		}
+
+		private string GetFullNamespaceName(NamespaceDeclarationSyntax node)
+		{
+			var parent = node.Parent as NamespaceDeclarationSyntax;
+			if (parent != null)
+				return $"{GetFullNamespaceName(parent)}.{GetNamespaceName(node)}";
+			return GetNamespaceName(node);
+		}
+
+		private string GetNamespaceName(NamespaceDeclarationSyntax node)
+		{
+			return node.Name.ToString();
+		}
+	}
 }

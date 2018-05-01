@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
@@ -69,6 +71,12 @@ namespace RTSFramework.ViewModels.Controller
 			LoggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
 			token.ThrowIfCancellationRequested();
+
+			var executorWithCorrespondenceModel = TestProcessor as MSTestExecutorWithInstrumenting;
+			if (executorWithCorrespondenceModel != null)
+			{
+				executorWithCorrespondenceModel.Model = newModel;
+			}
 
 			var processingResult = await LoggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, token),
 				"ProcessingOfImpactedTests");
