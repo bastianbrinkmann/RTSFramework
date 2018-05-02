@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
+using Newtonsoft.Json;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
@@ -56,8 +57,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		public IProgramModel Model { get; set; }
 
 		private List<string> assemblies;
+		private List<string> assemblyNames;
 
-		public Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
+		public async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath("RTSFramework.Concrete.CSharp.DependencyMonitor.dll"));
 			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.ClassFullName);
@@ -69,27 +71,29 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var testAssemblies = msTestTestcases.Select(x => x.AssemblyPath).Distinct().ToList();
 			var parsingResult = assembliesAdapter.Parse(((CSharpProgramModel)Model).AbsoluteSolutionPath, cancellationToken).Result;
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
-			var assemblyNames = assemblies.Select(Path.GetFileName).ToList();
+			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 
-			foreach (string assembly in assemblies.Except(testAssemblies))
-			{
-				var moduleDefinition = ModuleDefinition.ReadModule(assembly);
-				foreach (var type in moduleDefinition.GetTypes())
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-
-					if (type.Name == MonoModuleTyp)
-					{
-						continue;
-					}
-
-					InstrumentType(type);
-				}
-
-				UpdateModule(moduleDefinition);
-			}
+			InstrumentProgramAssemblies(cancellationToken, testAssemblies);
 
 			//Test Dlls
+			InstrumentTestAssemblies(cancellationToken, testAssemblies, msTestTestcases);
+
+			executor.TestResultAvailable += TestResultAvailable;
+			var executionResult = await executor.ProcessTests(msTestTestcases, cancellationToken);
+
+			var coverageData = GetCoverageDataFromDependencyMonitor();
+
+			var codeCoverageResult = new MSTestExectionWithCodeCoverageResult
+			{
+				CoverageData = coverageData
+			};
+			codeCoverageResult.TestcasesResults.AddRange(executionResult.TestcasesResults);
+
+			return codeCoverageResult;
+		}
+
+		private void InstrumentTestAssemblies(CancellationToken cancellationToken, List<string> testAssemblies, IList<MSTestTestcase> msTestTestcases)
+		{
 			foreach (var testAssembly in testAssemblies)
 			{
 				var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
@@ -120,9 +124,64 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				UpdateModule(moduleDefinition);
 				UpdateAssemblyCopies(testAssembly, assemblyNames);
 			}
+		}
 
-			executor.TestResultAvailable += TestResultAvailable;
-			return executor.ProcessTests(msTestTestcases, cancellationToken);
+		private void InstrumentProgramAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
+		{
+			foreach (string assembly in assemblies.Except(testAssemblies))
+			{
+				var moduleDefinition = ModuleDefinition.ReadModule(assembly);
+				foreach (var type in moduleDefinition.GetTypes())
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+
+					if (type.Name == MonoModuleTyp)
+					{
+						continue;
+					}
+
+					InstrumentType(type);
+				}
+
+				UpdateModule(moduleDefinition);
+			}
+		}
+
+		private const string DependenciesFolder = @"TestResults\Dependencies";
+
+		private CoverageData GetCoverageDataFromDependencyMonitor()
+		{
+			var coverageData = new HashSet<CoverageDataEntry>();
+
+			foreach (var file in Directory.GetFiles(DependenciesFolder))
+			{
+				using (FileStream stream = File.OpenRead(file))
+				{
+					using (StreamReader streamReader = new StreamReader(stream))
+					{
+						using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+						{
+							var serializer = JsonSerializer.Create(new JsonSerializerSettings {Formatting = Formatting.Indented});
+							var dependencies = serializer.Deserialize<HashSet<string>>(jsonReader);
+
+							var testId = Path.GetFileNameWithoutExtension(file);
+
+							foreach (var dependency in dependencies)
+							{
+								coverageData.Add(new CoverageDataEntry
+								{
+									TestCaseId = testId,
+									ClassName = dependency
+								});
+							}
+						}
+					}
+				}
+
+				File.Delete(file);
+			}
+
+			return new CoverageData(coverageData);
 		}
 
 		private void UpdateAssemblyCopies(string testAssembly, List<string> assemblyNames)

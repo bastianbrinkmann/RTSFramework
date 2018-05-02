@@ -13,8 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 {
@@ -24,68 +26,57 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 		private static string currentTestMethodName = string.Empty;
 
-		private static Dictionary<string, HashSet<string>> Dependencies = new Dictionary<string, HashSet<string>>();
+		private static HashSet<string> dependencies;
 
 		public static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
 		public static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
 		public static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
+		private const string DependenciesFolder = @"..\..\Dependencies\";
+
 		static DependencyMonitor()
 		{
-			//Init?
+			if (!Directory.Exists(DependenciesFolder))
+			{
+				Directory.CreateDirectory(DependenciesFolder);
+			}
 		}
 
 		public static void T(string typeWithFullPath)
 		{
-			if (Dependencies.ContainsKey(currentTestMethodName))
+			if (dependencies != null && !dependencies.Contains(typeWithFullPath))
 			{
-				if (!Dependencies[currentTestMethodName].Contains(typeWithFullPath))
-				{
-					Dependencies[currentTestMethodName].Add(typeWithFullPath);
-				}
+				dependencies.Add(typeWithFullPath);
 			}
 		}
 
 		public static void TestMethodStart(string testMethod)
 		{
 			currentTestMethodName = testMethod;
+			dependencies = new HashSet<string>();
+
 			if (testMethod != null)
 			{
-				if (!Dependencies.ContainsKey(testMethod))
-				{
-					Dependencies.Add(testMethod, new HashSet<string>());
-				}
-
 				int dotIndex = testMethod.LastIndexOf('.');
 
 				string className = testMethod.Substring(0, dotIndex);
-				// always add test class into dependency list
-				if (!Dependencies[testMethod].Contains(className))
-				{
-					Dependencies[testMethod].Add(className);
-				}
+				dependencies.Add(className);
 			}
 		}
 
 		public static void TestMethodEnd()
 		{
-			using (var writer = File.AppendText("Testfile.txt"))
+			using (var fileStream = File.Create(DependenciesFolder + currentTestMethodName + ".json"))
 			{
-				writer.WriteLine(currentTestMethodName);
-				if (!Dependencies.ContainsKey(currentTestMethodName))
+				using (StreamWriter writer = new StreamWriter(fileStream))
 				{
-					return;
+					var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
+					serializer.Serialize(writer, dependencies);
 				}
-
-				foreach (var reference in Dependencies[currentTestMethodName])
-				{
-					writer.WriteLine(reference);
-				}
-
-				writer.WriteLine();
 			}
 
 			currentTestMethodName = string.Empty;
+			dependencies = null;
 		}
 	}
 }
