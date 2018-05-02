@@ -21,19 +21,13 @@ namespace RTSFramework.RTSApproaches.Core
 			DataStructureProvider = dataStructureProvider;
 		}
 
-		public abstract event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
-		public async Task SelectTests(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
+		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
 		{
 			TDataStructure dataStructure = await DataStructureProvider.GetDataStructureForProgram(delta.SourceModel, cancellationToken);
 			cancellationToken.ThrowIfCancellationRequested();
-			SelectTests(dataStructure, testCases, delta, cancellationToken);
+			return await SelectTests(dataStructure, testCases, delta, cancellationToken);
 		}
 
-		protected abstract void SelectTests(TDataStructure dataStructure, IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
-
-		public virtual Task UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token)
-		{
-			return Task.CompletedTask;
-		}
+		protected abstract Task<IList<TTestCase>> SelectTests(TDataStructure dataStructure, IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
 	}
 }

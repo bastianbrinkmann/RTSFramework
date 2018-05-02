@@ -11,11 +11,14 @@ using RTSFramework.Concrete.CSharp.MSTest.Adapters;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class ConsoleMSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
+    public class ConsoleMSTestTestsExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
 
@@ -26,11 +29,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
 
-        public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
-        {
+        public virtual async Task<ITestExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		{
 	        var executionResult = new MSTestExectionResult();
 
-			CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+	        CurrentlyExecutedTests = impactedTests;
             CurrentlyExecutedTests = CurrentlyExecutedTests.Where(x => !x.Ignored).ToList();
             if (CurrentlyExecutedTests.Any())
             {
@@ -192,5 +195,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
             return fullPath;
         }
+
+		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
     }
 }

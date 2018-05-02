@@ -20,6 +20,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 
 		public TestCase VsTestTestCase { get; set; }
 
-		public bool IsDataDriven { get; set; }
+		public bool IsChildTestCase { get; set; }
     }
 }

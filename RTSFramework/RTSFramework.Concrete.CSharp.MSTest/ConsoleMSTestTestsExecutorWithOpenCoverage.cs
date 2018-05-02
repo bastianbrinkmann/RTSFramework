@@ -10,11 +10,12 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class ConsoleMSTestTestsExecutorWithOpenCoverage : ConsoleMSTestTestsExecutor
+	public class ConsoleMSTestTestsExecutorWithOpenCoverage<TDelta, TModel> : ConsoleMSTestTestsExecutor<TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
 		private readonly IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter;
 
@@ -27,11 +28,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.openCoverArtefactAdapter = openCoverArtefactAdapter;
 		}
 
-		public override async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
+		public override async Task<ITestExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 			var result = new MSTestExectionWithCodeCoverageResult();
 
-			CurrentlyExecutedTests = tests as IList<MSTestTestcase> ?? tests.ToList();
+			CurrentlyExecutedTests = impactedTests;
 			if (CurrentlyExecutedTests.Any())
 			{
 				var vsTestArguments = BuildVsTestsArguments();

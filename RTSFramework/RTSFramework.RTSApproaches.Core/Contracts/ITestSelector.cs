@@ -13,10 +13,6 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
-		event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
-
-		Task SelectTests(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
-
-		Task UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token);
+		Task<IList<TTestCase>>  SelectTests(IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
 	}
 }

@@ -24,18 +24,18 @@ namespace RTSFramework.ViewModels.Controller
 	{
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
-		public ITestProcessor<TTestCase, TResult> TestProcessor { get; }
+		public ITestProcessor<TTestCase, TResult, TDelta, TModel> TestProcessor { get; }
+		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
+
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
-
-		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
 			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
 			ITestSelector<TModel, TDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult> testProcessor)
+			ITestProcessor<TTestCase, TResult, TDelta, TModel> testProcessor)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
@@ -57,32 +57,16 @@ namespace RTSFramework.ViewModels.Controller
 			var allTests = await LoggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
 			token.ThrowIfCancellationRequested();
 
-			var impactedTests = new List<TTestCase>();
-			testSelector.ImpactedTest += (sender, args) =>
+			var impactedTests = await LoggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
+
+			foreach (var impactedTest in impactedTests)
 			{
-				var impactedTest = args.TestCase;
-				ImpactedTest?.Invoke(sender, args);
-
-				impactedTests.Add(impactedTest);
-			};
-
-			await LoggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
+				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest));
+			}
 
 			LoggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
-			token.ThrowIfCancellationRequested();
-
-			var executorWithCorrespondenceModel = TestProcessor as MSTestExecutorWithInstrumenting;
-			if (executorWithCorrespondenceModel != null)
-			{
-				executorWithCorrespondenceModel.Model = newModel;
-			}
-
-			var processingResult = await LoggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, token),
-				"ProcessingOfImpactedTests");
-			token.ThrowIfCancellationRequested();
-
-			await LoggingHelper.ReportNeededTime(() => testSelector.UpdateInternalDataStructure(processingResult, token), "Internal DataStructure Update");
+			var processingResult = await LoggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, allTests, delta, token), "ProcessingOfImpactedTests");
 
 			return processingResult;
 		}

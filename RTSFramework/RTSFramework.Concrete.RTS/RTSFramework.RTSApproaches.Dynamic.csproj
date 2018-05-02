@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DynamicRTS.cs" />
+    <Compile Include="TestExecutorWithInstrumenting.cs" />
     <Compile Include="IProcessingResultWithCodeCoverage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

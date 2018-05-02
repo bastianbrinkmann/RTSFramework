@@ -22,6 +22,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
 
@@ -551,7 +552,7 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, MSTestExectionResult>(oldArtefact, newArtefact);
+					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
@@ -575,11 +576,11 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		private void ProcessExecutionResult(ITestCaseResult<MSTestTestcase> executionResult)
+		private void ProcessExecutionResult<TTestCase>(ITestCaseResult<TTestCase> executionResult) where TTestCase : ITestCase
 		{
 			var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == executionResult.TestCase.Id);
 
-			if (executionResult.TestCase.IsDataDriven)
+			if (executionResult.TestCase.IsChildTestCase)
 			{
 				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService)
 				{
@@ -624,7 +625,7 @@ namespace RTSFramework.ViewModels
 					}));
 			};
 
-			var executor = stateBasedController.TestProcessor as InProcessMSTestTestsExecutor;
+			var executor = stateBasedController.TestProcessor as ITestExecutor<TTestCase, TDelta, TModel>;
 			if (executor != null)
 			{
 				executor.TestResultAvailable += (sender, args) =>
@@ -632,16 +633,6 @@ namespace RTSFramework.ViewModels
 					applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
 				};
 			}
-
-			var executorWithCorrespondenceModel = stateBasedController.TestProcessor as MSTestExecutorWithInstrumenting;
-			if (executorWithCorrespondenceModel != null)
-			{
-				executorWithCorrespondenceModel.TestResultAvailable += (sender, args) =>
-				{
-					applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
-				};
-			}
-
 
 			return
 				await Task.Run(

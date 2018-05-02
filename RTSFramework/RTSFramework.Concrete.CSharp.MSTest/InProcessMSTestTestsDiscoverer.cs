@@ -24,7 +24,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.vsTestConnector = vsTestConnector;
 		}
 
-		public async Task<IEnumerable<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
+		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
 		{
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
@@ -33,7 +33,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			return vsTestCases.Select(Convert);
+			return vsTestCases.Select(Convert).ToList();
 		}
 
 		private MSTestTestcase Convert(TestCase vsTestCase)
@@ -56,7 +56,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				FullClassName = testClassName,
 				Ignored = !isEnabled,
 				VsTestTestCase = vsTestCase,
-				IsDataDriven = isDataDriven
+				IsChildTestCase = isDataDriven
 			};
 			msTestCase.Categories.AddRange(categories);
 

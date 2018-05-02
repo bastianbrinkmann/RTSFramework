@@ -9,11 +9,12 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestsExecutor : ITestProcessor<MSTestTestcase, MSTestExectionResult>
+	public class InProcessMSTestTestsExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
 		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
 
@@ -26,11 +27,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private IList<MSTestTestcase> msTestTestcases;
 
-		public virtual async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken token)
+		public virtual async Task<ITestExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
-			msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
+			msTestTestcases = impactedTests;
 
-			var vsTestResults = await ExecuteTests(msTestTestcases.Select(x => x.VsTestTestCase), token);
+			var vsTestResults = await ExecuteTests(msTestTestcases.Select(x => x.VsTestTestCase), cancellationToken);
 
 			var result = new MSTestExectionResult();
 			result.TestcasesResults.AddRange(Convert(vsTestResults));
@@ -46,7 +47,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			{
 				var singleResult = Convert(vsTestResult);
 
-				if (singleResult.TestCase.IsDataDriven)
+				if (singleResult.TestCase.IsChildTestCase)
 				{
 					if (msTestResults.Any(x => x.TestCase.Id == singleResult.TestCase.Id))
 					{

@@ -29,15 +29,13 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
-using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MSTestExecutorWithInstrumenting : ITestProcessor<MSTestTestcase, MSTestExectionResult>
+	public class MSTestInstrumentor<TModel> : ITestInstrumentor<TModel, MSTestTestcase> where TModel : CSharpProgramModel
 	{
-		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
-
 		private const string MonoModuleTyp = "<Module>";
+		private const string DependenciesFolder = @"TestResults\Dependencies";
 
 		private ModuleDefinition dependencyMonitorModule;
 		private TypeDefinition dependencyMonitorType;
@@ -45,21 +43,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private MethodReference testMethodEndReference;
 		private MethodReference typeVisitedMethodReference;
 
-		private readonly InProcessMSTestTestsExecutor executor;
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 
-		public MSTestExecutorWithInstrumenting(InProcessMSTestTestsExecutor executor, CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
 		{
-			this.executor = executor;
 			this.assembliesAdapter = assembliesAdapter;
 		}
-
-		public IProgramModel Model { get; set; }
 
 		private List<string> assemblies;
 		private List<string> assemblyNames;
 
-		public async Task<MSTestExectionResult> ProcessTests(IEnumerable<MSTestTestcase> tests, CancellationToken cancellationToken)
+		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath("RTSFramework.Concrete.CSharp.DependencyMonitor.dll"));
 			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.ClassFullName);
@@ -67,29 +61,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TestMethodEndFullName);
 			typeVisitedMethodReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TypeMethodFullName);
 
-			var msTestTestcases = tests as IList<MSTestTestcase> ?? tests.ToList();
-			var testAssemblies = msTestTestcases.Select(x => x.AssemblyPath).Distinct().ToList();
-			var parsingResult = assembliesAdapter.Parse(((CSharpProgramModel)Model).AbsoluteSolutionPath, cancellationToken).Result;
+			var testAssemblies = tests.Select(x => x.AssemblyPath).Distinct().ToList();
+			var parsingResult = await assembliesAdapter.Parse(toInstrument.AbsoluteSolutionPath, token);
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 
-			InstrumentProgramAssemblies(cancellationToken, testAssemblies);
-
-			//Test Dlls
-			InstrumentTestAssemblies(cancellationToken, testAssemblies, msTestTestcases);
-
-			executor.TestResultAvailable += TestResultAvailable;
-			var executionResult = await executor.ProcessTests(msTestTestcases, cancellationToken);
-
-			var coverageData = GetCoverageDataFromDependencyMonitor();
-
-			var codeCoverageResult = new MSTestExectionWithCodeCoverageResult
-			{
-				CoverageData = coverageData
-			};
-			codeCoverageResult.TestcasesResults.AddRange(executionResult.TestcasesResults);
-
-			return codeCoverageResult;
+			InstrumentProgramAssemblies(token, testAssemblies);
+			InstrumentTestAssemblies(token, testAssemblies, tests);
 		}
 
 		private void InstrumentTestAssemblies(CancellationToken cancellationToken, List<string> testAssemblies, IList<MSTestTestcase> msTestTestcases)
@@ -100,7 +78,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				foreach (var type in moduleDefinition.GetTypes())
 				{
 					cancellationToken.ThrowIfCancellationRequested();
-
+					//TODO Check first whether already instrumented
 					if (type.Name == MonoModuleTyp)
 					{
 						continue;
@@ -122,7 +100,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				}
 
 				UpdateModule(moduleDefinition);
-				UpdateAssemblyCopies(testAssembly, assemblyNames);
+				UpdateAssemblyCopies(testAssembly);
 			}
 		}
 
@@ -147,9 +125,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 		}
 
-		private const string DependenciesFolder = @"TestResults\Dependencies";
-
-		private CoverageData GetCoverageDataFromDependencyMonitor()
+		public CoverageData GetCoverageDataFromDependencyMonitor()
 		{
 			var coverageData = new HashSet<CoverageDataEntry>();
 
@@ -184,7 +160,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return new CoverageData(coverageData);
 		}
 
-		private void UpdateAssemblyCopies(string testAssembly, List<string> assemblyNames)
+		private void UpdateAssemblyCopies(string testAssembly)
 		{
 			var directory = Path.GetDirectoryName(testAssembly);
 			if (directory != null)
@@ -423,5 +399,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				il.InsertBefore(callInstruction, ldStrInstruction);
 			}
 		}
+
+		
 	}
 }

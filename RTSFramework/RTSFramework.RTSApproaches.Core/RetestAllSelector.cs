@@ -14,22 +14,9 @@ namespace RTSFramework.RTSApproaches.Core
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
-		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
-
-		public Task SelectTests(IEnumerable<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
+		public Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
 		{
-			foreach (TTestCase testcase in testCases)
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(testcase));
-			}
-
-			return Task.CompletedTask;
-		}
-
-		public Task UpdateInternalDataStructure(ITestProcessingResult processingResult, CancellationToken token)
-		{
-			return Task.CompletedTask;
+			return Task.FromResult(testCases);
 		}
 	}
 }

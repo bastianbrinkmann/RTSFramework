@@ -21,7 +21,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.assembliesAdapter = assembliesAdapter;
 		}
 
-		public async Task<IEnumerable<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
+		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
 		{
 			var testCases = new List<MSTestTestcase>();
 

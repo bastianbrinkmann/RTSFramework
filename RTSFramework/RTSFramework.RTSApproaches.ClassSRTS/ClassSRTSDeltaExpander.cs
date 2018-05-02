@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
@@ -26,16 +27,14 @@ namespace RTSFramework.RTSApproaches.Static
 	public class ClassSRTSDeltaExpander<TModel> : TestSelectorWithDataStructure<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase, IntertypeRelationGraph>
 		where TModel : CSharpProgramModel 
 	{
-		public override event EventHandler<ImpactedTestEventArgs<MSTestTestcase>> ImpactedTest;
-
 		public ClassSRTSDeltaExpander(IDataStructureProvider<IntertypeRelationGraph, TModel> dataStructureProvider) : base(dataStructureProvider)
 		{
 			
 		}
 
-		protected override void SelectTests(IntertypeRelationGraph graph, IEnumerable<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		protected override Task<IList<MSTestTestcase>>  SelectTests(IntertypeRelationGraph graph, IList<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
-			ExpandDelta(graph, testCases, delta, cancellationToken);
+			return ExpandDelta(graph, testCases, delta, cancellationToken);
 		}
 
 		/// <summary>
@@ -44,36 +43,32 @@ namespace RTSFramework.RTSApproaches.Static
 		/// A Generic Platform for Model-Based Regression Testing
 		/// by Zech et al.
 		/// </summary>
-		private void ExpandDelta(IntertypeRelationGraph graph, IEnumerable<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		private Task<IList<MSTestTestcase>> ExpandDelta(IntertypeRelationGraph graph, IList<MSTestTestcase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
+			IList<MSTestTestcase> impactedTests = new List<MSTestTestcase>();
+
 			var changedTypes = new List<string>();
 
 			changedTypes.AddRange(delta.ChangedElements.Select(x => x.Id));
 			changedTypes.AddRange(delta.DeletedElements.Select(x => x.Id));
-
-			var msTestTestcases = testCases as IList<MSTestTestcase> ?? testCases.ToList();
 
 			var affectedTypes = new List<string>(changedTypes);
 
 			foreach (var type in changedTypes)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, msTestTestcases, cancellationToken);
+				ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 			}
+
+			return Task.FromResult(impactedTests);
 		}
 
-		private void ReportImpactedTests(string type, IList<MSTestTestcase> testcases)
+		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> allTests, IList<MSTestTestcase> impactedTests, CancellationToken cancellationToken)
 		{
-			var impactedTests = testcases.Where(x => x.FullClassName == type);
-			foreach (var impactedTest in impactedTests)
+			foreach (var test in allTests.Where(x => x.FullClassName == type))
 			{
-				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<MSTestTestcase>(impactedTest));
+				impactedTests.Add(test);
 			}
-		}
-
-		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> testCases, CancellationToken cancellationToken)
-		{
-			ReportImpactedTests(type, testCases);
 
 			var usedByTypes = graph.UseEdges.Where(x => x.Item2 == type).Select(x => x.Item1);
 
@@ -83,7 +78,7 @@ namespace RTSFramework.RTSApproaches.Static
 				if (!affectedTypes.Contains(usedByType))
 				{
 					affectedTypes.Add(usedByType);
-					ExtendAffectedTypesAndReportImpactedTests(usedByType, graph, affectedTypes, testCases, cancellationToken);
+					ExtendAffectedTypesAndReportImpactedTests(usedByType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 
@@ -100,7 +95,7 @@ namespace RTSFramework.RTSApproaches.Static
 				if (!affectedTypes.Contains(subtype))
 				{
 					affectedTypes.Add(subtype);
-					ExtendAffectedTypesAndReportImpactedTests(subtype, graph, affectedTypes, testCases, cancellationToken);
+					ExtendAffectedTypesAndReportImpactedTests(subtype, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 
@@ -113,7 +108,7 @@ namespace RTSFramework.RTSApproaches.Static
 				if (!affectedTypes.Contains(superType))
 				{
 					affectedTypes.Add(superType);
-					ExtendAffectedTypesAndReportImpactedTests(superType, graph, affectedTypes, testCases, cancellationToken);
+					ExtendAffectedTypesAndReportImpactedTests(superType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 		}
