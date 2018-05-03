@@ -69,13 +69,13 @@ namespace RTSFramework.RTSApproaches.Dynamic
 					{
 						links[coverageEntry.TestCaseId].Add(coverageEntry.ClassName);
 					}
-					else
+				}
+				else if(targetModel.GranularityLevel == GranularityLevel.File)
+				{
+					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
+					if (!links[coverageEntry.TestCaseId].Contains(relativePath))
 					{
-						var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
-						if (!links[coverageEntry.TestCaseId].Contains(relativePath))
-						{
-							links[coverageEntry.TestCaseId].Add(relativePath);
-						}
+						links[coverageEntry.TestCaseId].Add(relativePath);
 					}
 				}
 			}

@@ -62,7 +62,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
 		private static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
-
 		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
