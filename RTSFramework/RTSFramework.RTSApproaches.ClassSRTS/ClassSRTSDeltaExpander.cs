@@ -49,6 +49,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 			var changedTypes = new List<string>();
 
+			changedTypes.AddRange(delta.AddedElements.Select(x => x.Id));
 			changedTypes.AddRange(delta.ChangedElements.Select(x => x.Id));
 			changedTypes.AddRange(delta.DeletedElements.Select(x => x.Id));
 
