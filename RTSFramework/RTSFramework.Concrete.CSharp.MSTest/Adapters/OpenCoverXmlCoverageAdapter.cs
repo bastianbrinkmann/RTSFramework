@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
 	public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>
 	{
+		public GranularityLevel GranularityLevel { get; set; }
+
 		public CoverageData Parse(MSTestExecutionResultParameters resultParameters)
 		{
 			var serializer = new XmlSerializer(typeof(CoverageSession),
@@ -47,9 +50,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 			}
 		}
 
-		private HashSet<CoverageDataEntry> GetCollectedCoverageEntries(CoverageSession session, Dictionary<uint, MSTestTestcase> coverageIdsTestCases)
+		private HashSet<Tuple<string, string>> GetCollectedCoverageEntries(CoverageSession session, Dictionary<uint, MSTestTestcase> coverageIdsTestCases)
 		{
-			var coverageEntries = new HashSet<CoverageDataEntry>();
+			var coverageEntries = new HashSet<Tuple<string, string>>();
 
 			foreach (var module in session.Modules)
 			{
@@ -93,19 +96,21 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 							foreach (var methodRef in sequencePoint.TrackedMethodRefs)
 							{
 								var associatedTestcase = coverageIdsTestCases[methodRef.UniqueId];
-
-								if (!coverageEntries.Any(
-									x => x.ClassName == className.FullName &&
-										 x.FileName == filePath &&
-										 x.TestCaseId == associatedTestcase.Id))
+								
+								if (GranularityLevel == GranularityLevel.Class)
 								{
-									coverageEntries.Add(new CoverageDataEntry
+									if (!coverageEntries.Any(x => x.Item1 == associatedTestcase.Id && x.Item2 == className.FullName))
 									{
-										ClassName = className.FullName,
-										FileName = filePath,
-										TestCaseId = associatedTestcase.Id
-									});
-								}
+										coverageEntries.Add(new Tuple<string, string>(associatedTestcase.Id, className.FullName));
+									}
+								}/*TODO Granularity Level File
+								else if (GranularityLevel == GranularityLevel.File)
+								{
+									if (!coverageEntries.Any(x => x.Item1 == associatedTestcase.Id && x.Item2 == filePath))
+									{
+										coverageEntries.Add(new Tuple<string, string>(associatedTestcase.Id, filePath));
+									}
+								}*/
 							}
 						}
 					}
@@ -116,7 +121,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 
 		public void Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
 	}
 }
+ 
+ 
+ 

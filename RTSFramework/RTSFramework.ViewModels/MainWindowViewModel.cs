@@ -149,11 +149,13 @@ namespace RTSFramework.ViewModels
 			switch (propertyChangedEventArgs.PropertyName)
 			{
 				case nameof(RTSApproachType):
-					if (RTSApproachType == RTSApproachType.ClassSRTS)
+					/*TODO Support File Level?
+					 * 
+					 * if (RTSApproachType == RTSApproachType.ClassSRTS)
 					{
 						GranularityLevel = GranularityLevel.Class;
 					}
-					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;
+					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;*/
 					break;
 				case nameof(ProgramModelType):
 					IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
@@ -535,9 +537,11 @@ namespace RTSFramework.ViewModels
 		{
 			switch (GranularityLevel)
 			{
-				case GranularityLevel.File:
+				/* TODO Granularity Level File
+				 * 
+				 * case GranularityLevel.File:
 					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramArtefact, newProgramArtefact);
-					break;
+					break;*/
 				case GranularityLevel.Class:
 					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramArtefact, newProgramArtefact);
 					break;

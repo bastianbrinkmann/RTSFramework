@@ -84,7 +84,6 @@
     <Compile Include="ITestInstrumentor.cs" />
     <Compile Include="ITestProcessingResult.cs" />
     <Compile Include="Models\CoverageData.cs" />
-    <Compile Include="Models\CoverageDataEntry.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />
     <Compile Include="Models\GranularityLevel.cs" />
     <Compile Include="Models\CompositeTestCaseResult.cs" />

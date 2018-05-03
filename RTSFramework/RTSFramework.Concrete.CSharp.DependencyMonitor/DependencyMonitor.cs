@@ -59,6 +59,7 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 			{
 				int dotIndex = testMethod.LastIndexOf('.');
 
+				//TODO Granularity Level File
 				string className = testMethod.Substring(0, dotIndex);
 				dependencies.Add(className);
 			}

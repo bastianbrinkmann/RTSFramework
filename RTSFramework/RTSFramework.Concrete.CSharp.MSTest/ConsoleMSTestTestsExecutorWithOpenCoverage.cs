@@ -17,13 +17,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 {
 	public class ConsoleMSTestTestsExecutorWithOpenCoverage<TDelta, TModel> : ConsoleMSTestTestsExecutor<TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
-		private readonly IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter;
+		private readonly OpenCoverXmlCoverageAdapter openCoverArtefactAdapter;
 
 		private const string OpenCoverExe = "OpenCover.Console.exe";
 		private const string OpenCoverPath = "OpenCover";
 
 		public ConsoleMSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
-													IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter,
+													OpenCoverXmlCoverageAdapter openCoverArtefactAdapter,
 													ISettingsProvider settingsProvider) : base(resultArtefactAdapter, settingsProvider)
 		{
 			this.openCoverArtefactAdapter = openCoverArtefactAdapter;
@@ -50,6 +50,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				var executionResultParams = new MSTestExecutionResultParameters { File = new FileInfo(Path.GetFullPath(@"results.xml")) };
 				executionResultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
 
+				openCoverArtefactAdapter.GranularityLevel = impactedForDelta.TargetModel.GranularityLevel;
 				var coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
 				result.CoverageData = coverageData;
 			}

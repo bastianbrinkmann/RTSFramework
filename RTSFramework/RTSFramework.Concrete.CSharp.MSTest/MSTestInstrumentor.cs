@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Pdb;
 using Mono.Cecil.Rocks;
 using Newtonsoft.Json;
 using RTSFramework.Concrete.CSharp.Core.Models;
@@ -46,6 +47,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly ILoggingHelper loggingHelper;
 
+		private Dictionary<string, string> classToFileNamesMapping = new Dictionary<string, string>();
+
 		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
 			ILoggingHelper loggingHelper)
 		{
@@ -56,6 +59,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private List<string> assemblies;
 		private List<string> assemblyNames;
 		private IList<MSTestTestcase> msTestTestcases;
+		private GranularityLevel granularityLevel;
 
 		private const string DependencyMonitorClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
 		private static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
@@ -75,14 +79,96 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 			msTestTestcases = tests;
+			granularityLevel = toInstrument.GranularityLevel;
+
+			/* TODO Granularity Level File
+			 * 
+			 * if (granularityLevel == GranularityLevel.File)
+			{
+				InitClassFilesMapping(token);
+			}*/
 
 			loggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token, testAssemblies), "Instrumenting Program Assemblies");
 			loggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token, testAssemblies), "Instrumenting Test Assemblies");
 		}
 
+		#region File Level
+
+		private void InitClassFilesMapping(CancellationToken token)
+		{
+			var parallelOptions = new ParallelOptions
+			{
+				CancellationToken = token,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+			Parallel.ForEach(assemblies, parallelOptions, assembly =>
+			{
+				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+
+				var module = LoadModuleDefinitionWithSymbols(assembly);
+				foreach (var type in module.GetTypes())
+				{
+					if (type.Name == MonoModuleTyp)
+					{
+						continue;
+					}
+
+					if (!classToFileNamesMapping.ContainsKey(type.FullName))
+					{
+						var fileName = TrackFileName(type);
+						if (fileName != null)
+						{
+							classToFileNamesMapping.Add(type.FullName, fileName);
+						}
+					}
+				}
+				module.Dispose();
+			});
+		}
+
+		private string TrackFileName(TypeDefinition type)
+		{
+			if (type.HasMethods)
+			{
+				foreach (var method in type.Methods)
+				{
+					if (method.DebugInformation != null && method.DebugInformation.HasSequencePoints)
+					{
+						foreach (var sequencePoint in method.DebugInformation.SequencePoints)
+						{
+							if (sequencePoint.Document != null)
+							{
+								return sequencePoint.Document.Url;
+							}
+						}
+					}
+				}
+			}
+
+			return null;
+		}
+		private ModuleDefinition LoadModuleDefinitionWithSymbols(string assembly)
+		{
+			try
+			{
+				var readerParameters = new ReaderParameters
+				{
+					ReadSymbols = true,
+					SymbolReaderProvider = new PdbReaderProvider()
+				};
+				return ModuleDefinition.ReadModule(assembly, readerParameters);
+			}
+			catch (Exception e)
+			{
+				throw new ArgumentException($"Error loading symbols for assembly {assembly}.", e);
+			}
+		}
+
+		#endregion
+
 		public CoverageData GetCoverageData()
 		{
-			var coverageData = new HashSet<CoverageDataEntry>();
+			var coverageData = new HashSet<Tuple<string, string>>();
 
 			foreach (var file in Directory.GetFiles(DependenciesFolder))
 			{
@@ -99,11 +185,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 							foreach (var dependency in dependencies)
 							{
-								coverageData.Add(new CoverageDataEntry
-								{
-									TestCaseId = testId,
-									ClassName = dependency
-								});
+								coverageData.Add(new Tuple<string, string>(testId, dependency));
 							}
 						}
 					}
@@ -239,7 +321,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			using (var writer = File.Create(fileName + "_new"))
 			{
-				moduleDefinition.Write(writer);
+				var writerParameters = new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() };
+				moduleDefinition.Write(writer, writerParameters);
 			}
 
 			moduleDefinition.Dispose();
@@ -315,16 +398,36 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			{
 				Instruction instruction = pair.Item1;
 				TypeReference dependency = pair.Item2;
+				string dependencyIdentifier = GetTypeReferenceIdentifier(dependency);
+
+				if (dependencyIdentifier == null)
+					continue;
+
 				if (instruction == null)
 				{
-					InsertCallToDependencyMonitorBeginning(method, typeVisitedMethodReference, dependency.FullName);
+					InsertCallToDependencyMonitorBeginning(method, typeVisitedMethodReference, dependencyIdentifier);
 				}
 				else
 				{
-					InsertCallToDependencyMonitor(method, instruction, typeVisitedMethodReference, dependency.FullName);
+					InsertCallToDependencyMonitor(method, instruction, typeVisitedMethodReference, dependencyIdentifier);
 				}
 			}
 			method.Body.OptimizeMacros();
+		}
+
+		private string GetTypeReferenceIdentifier(TypeReference dependency)
+		{
+			if (granularityLevel == GranularityLevel.Class)
+			{
+				return dependency.FullName;
+			}
+			/* TODO Granularity Level File
+			 * 
+			 * if (granularityLevel == GranularityLevel.File)
+			{
+				return classToFileNamesMapping.ContainsKey(dependency.FullName) ? classToFileNamesMapping[dependency.FullName] : null;
+			}*/
+			return null;
 		}
 
 		/// <summary>
@@ -405,7 +508,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		}
 
 		#endregion
-
 
 		private void InstrumentTestMethod(MethodDefinition testMethod)
 		{

@@ -3,6 +3,6 @@
 	public enum GranularityLevel
     {
         Class,
-        File
+        //File
     }
 }

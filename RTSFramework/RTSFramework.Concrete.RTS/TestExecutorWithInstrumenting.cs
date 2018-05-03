@@ -59,25 +59,31 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
 		{
-			var links = coverageData.CoverageDataEntries.Select(x => x.TestCaseId).Distinct().ToDictionary(x => x, x => new HashSet<string>());
+			var links = coverageData.CoverageDataEntries.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
 			foreach (var coverageEntry in coverageData.CoverageDataEntries)
 			{
 				if (targetModel.GranularityLevel == GranularityLevel.Class)
 				{
-					if (!links[coverageEntry.TestCaseId].Contains(coverageEntry.ClassName))
+					if (!links[coverageEntry.Item1].Contains(coverageEntry.Item2))
 					{
-						links[coverageEntry.TestCaseId].Add(coverageEntry.ClassName);
+						links[coverageEntry.Item1].Add(coverageEntry.Item2);
 					}
 				}
-				else if(targetModel.GranularityLevel == GranularityLevel.File)
+				/* TODO Granularity Level File?
+				 * 
+				 * else if(targetModel.GranularityLevel == GranularityLevel.File)
 				{
-					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.FileName);
-					if (!links[coverageEntry.TestCaseId].Contains(relativePath))
+					if (!coverageEntry.Item2.EndsWith(".cs"))
 					{
-						links[coverageEntry.TestCaseId].Add(relativePath);
+						continue;
 					}
-				}
+					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.Item2);
+					if (!links[coverageEntry.Item1].Contains(relativePath))
+					{
+						links[coverageEntry.Item1].Add(relativePath);
+					}
+				}*/
 			}
 			return links;
 		}
