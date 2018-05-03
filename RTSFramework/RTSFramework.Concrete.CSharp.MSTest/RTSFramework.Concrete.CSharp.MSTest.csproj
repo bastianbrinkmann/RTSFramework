@@ -123,10 +123,6 @@
     <Compile Include="VsTest\VsTestResultEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.DependencyMonitor\RTSFramework.Concrete.CSharp.DependencyMonitor.csproj">
-      <Project>{525c28a4-e224-4d9c-9096-08a3fdb06b45}</Project>
-      <Name>RTSFramework.Concrete.CSharp.DependencyMonitor</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Concrete.RTS\RTSFramework.RTSApproaches.Dynamic.csproj">
       <Project>{748E5AC2-68C2-4B3F-9350-A02726C932A9}</Project>
       <Name>RTSFramework.RTSApproaches.Dynamic</Name>

@@ -28,7 +28,6 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Utilities;
-using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
@@ -58,13 +57,19 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private List<string> assemblyNames;
 		private IList<MSTestTestcase> msTestTestcases;
 
+		private const string DependencyMonitorClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
+		private static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
+		private static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
+		private static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
+
+
 		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
-			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.ClassFullName);
-			testMethodStartedReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TestMethodStartFullName);
-			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TestMethodEndFullName);
-			typeVisitedMethodReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TypeMethodFullName);
+			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitorClassFullName);
+			testMethodStartedReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodStartFullName);
+			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodEndFullName);
+			typeVisitedMethodReference = dependencyMonitorType.Methods.Single(x => x.FullName == TypeMethodFullName);
 
 			var testAssemblies = tests.Select(x => x.AssemblyPath).Distinct().ToList();
 			var parsingResult = await assembliesAdapter.Parse(toInstrument.AbsoluteSolutionPath, token);
