@@ -26,8 +26,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 			this.settingsProvider = settingsProvider;
 		}
 
-		//TODO: Builds IRG for P' not P!
-		public async Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken token)
+		public async Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel model, CancellationToken token)
 		{
 			var graph = new IntertypeRelationGraph();
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
@@ -36,7 +35,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 				{ "Platform", settingsProvider.Platform }
 			});
 
-			var solution = await workspace.OpenSolutionAsync(sourceModel.AbsoluteSolutionPath, token);
+			var solution = await workspace.OpenSolutionAsync(model.AbsoluteSolutionPath, token);
 
 			compilations = new List<Compilation>();
 

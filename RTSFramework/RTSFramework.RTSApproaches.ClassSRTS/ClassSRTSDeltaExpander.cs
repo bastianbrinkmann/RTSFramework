@@ -24,16 +24,22 @@ namespace RTSFramework.RTSApproaches.Static
 	/// A Generic Platform for Model-Based Regression Testing
 	/// by Zech et al.
 	/// </summary>
-	public class ClassSRTSDeltaExpander<TModel> : TestSelectorWithDataStructure<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase, IntertypeRelationGraph>
+	public class ClassSRTSDeltaExpander<TModel> : ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>
 		where TModel : CSharpProgramModel 
 	{
-		public ClassSRTSDeltaExpander(IDataStructureProvider<IntertypeRelationGraph, TModel> dataStructureProvider) : base(dataStructureProvider)
+		private readonly IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder;
+
+		public ClassSRTSDeltaExpander(IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder)
 		{
-			
+			this.irgBuilder = irgBuilder;
 		}
 
-		protected override Task<IList<MSTestTestcase>>  SelectTests(IntertypeRelationGraph graph, IList<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public async Task<IList<MSTestTestcase>>  SelectTests(IList<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
+			//Using the IRG for P' is possible as it is built using the intermediate language
+			//Therefore, the program at least compiles - preventing issues from for example deleted files
+			var graph = await irgBuilder.GetDataStructureForProgram(delta.TargetModel, cancellationToken);
+
 			return ExpandDelta(graph, testCases, delta, cancellationToken);
 		}
 
@@ -43,7 +49,7 @@ namespace RTSFramework.RTSApproaches.Static
 		/// A Generic Platform for Model-Based Regression Testing
 		/// by Zech et al.
 		/// </summary>
-		private Task<IList<MSTestTestcase>> ExpandDelta(IntertypeRelationGraph graph, IList<MSTestTestcase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		private IList<MSTestTestcase> ExpandDelta(IntertypeRelationGraph graph, IList<MSTestTestcase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			IList<MSTestTestcase> impactedTests = new List<MSTestTestcase>();
 
@@ -51,7 +57,6 @@ namespace RTSFramework.RTSApproaches.Static
 
 			changedTypes.AddRange(delta.AddedElements.Select(x => x.Id));
 			changedTypes.AddRange(delta.ChangedElements.Select(x => x.Id));
-			changedTypes.AddRange(delta.DeletedElements.Select(x => x.Id));
 
 			var affectedTypes = new List<string>(changedTypes);
 
@@ -61,7 +66,7 @@ namespace RTSFramework.RTSApproaches.Static
 				ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 			}
 
-			return Task.FromResult(impactedTests);
+			return impactedTests;
 		}
 
 		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> allTests, IList<MSTestTestcase> impactedTests, CancellationToken cancellationToken)
@@ -100,7 +105,9 @@ namespace RTSFramework.RTSApproaches.Static
 				}
 			}
 
-			//However this is not true if dependency injection is used - instances of objects are injected dynamically
+			//However, this might not be true if dependency injection is used:
+			//Instances of objects are injected dynamically which happens out of scope of the static analysis
+			//-> Pessimistic approach selects also all super types
 			var superTypes = graph.InheritanceEdges.Where(x => x.Item1 == type).Select(x => x.Item2);
 
 			foreach (string superType in superTypes)

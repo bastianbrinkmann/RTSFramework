@@ -70,7 +70,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 						links[coverageEntry.Item1].Add(coverageEntry.Item2);
 					}
 				}
-				/* TODO Granularity Level File?
+				/* TODO Granularity Level File
 				 * 
 				 * else if(targetModel.GranularityLevel == GranularityLevel.File)
 				{

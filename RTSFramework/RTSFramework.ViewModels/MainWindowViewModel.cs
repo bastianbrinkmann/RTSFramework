@@ -149,7 +149,7 @@ namespace RTSFramework.ViewModels
 			switch (propertyChangedEventArgs.PropertyName)
 			{
 				case nameof(RTSApproachType):
-					/*TODO Support File Level?
+					/*TODO Granularity Level File
 					 * 
 					 * if (RTSApproachType == RTSApproachType.ClassSRTS)
 					{

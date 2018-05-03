@@ -64,7 +64,6 @@
     <Compile Include="Contracts\ITestSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetestAllSelector.cs" />
-    <Compile Include="TestSelectorWithDataStructure.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">

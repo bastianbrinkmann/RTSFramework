@@ -25,9 +25,9 @@ namespace RTSFramework.RTSApproaches.Static
 
 		private const string MonoModuleTyp = "<Module>";
 
-		public Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken cancellationToken)
+		public Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel model, CancellationToken cancellationToken)
 		{
-			var assemblies = assembliesArtefactAdapter.Parse(sourceModel.AbsoluteSolutionPath);
+			var assemblies = assembliesArtefactAdapter.Parse(model.AbsoluteSolutionPath);
 
 			var graph = new IntertypeRelationGraph();
 			var typeDefinitions = new List<TypeDefinition>();
@@ -39,7 +39,6 @@ namespace RTSFramework.RTSApproaches.Static
 				{
 					continue;
 				}
-
 
 				var moduleDefinition = ModuleDefinition.ReadModule(assembly.AbsolutePath);
 				foreach (var type in moduleDefinition.Types)

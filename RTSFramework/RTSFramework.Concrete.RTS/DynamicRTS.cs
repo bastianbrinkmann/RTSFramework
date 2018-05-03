@@ -12,17 +12,22 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicRTS<TModel, TModelElement, TTestCase> : TestSelectorWithDataStructure<TModel, StructuralDelta<TModel, TModelElement>, TTestCase, CorrespondenceModel.Models.CorrespondenceModel>
+	public class DynamicRTS<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 	{
-		public DynamicRTS(IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> correspondenceModelProvider) : base(correspondenceModelProvider)
+		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> correspondenceModelProvider;
+
+		public DynamicRTS(IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> correspondenceModelProvider)
 		{
+			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		protected override Task<IList<TTestCase>> SelectTests(CorrespondenceModel.Models.CorrespondenceModel correspondenceModel, IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
+			var correspondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.SourceModel, cancellationToken);
+
 			IList<TTestCase> impactedTests = new List<TTestCase>();
 
 			foreach (var testcase in testCases)
@@ -45,7 +50,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				}
 			}
 
-			return Task.FromResult(impactedTests);
+			return impactedTests;
 		}
 	}
 }
