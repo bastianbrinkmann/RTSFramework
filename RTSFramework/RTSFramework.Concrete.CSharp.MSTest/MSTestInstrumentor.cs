@@ -27,6 +27,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
@@ -67,8 +68,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 			msTestTestcases = tests;
 
-			InstrumentProgramAssemblies(token, testAssemblies);
-			InstrumentTestAssemblies(token, testAssemblies);
+			LoggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token, testAssemblies), "Instrumenting Program Assemblies");
+			LoggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token, testAssemblies), "Instrumenting Test Assemblies");
 		}
 
 		public CoverageData GetCoverageData()
@@ -211,6 +212,35 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return false;
 		}
 
+		#region Assemblies Handling
+		private void UpdateModule(ModuleDefinition moduleDefinition)
+		{
+			var fileName = moduleDefinition.FileName;
+
+			using (var writer = File.Create(fileName + "_new"))
+			{
+				moduleDefinition.Write(writer);
+			}
+
+			moduleDefinition.Dispose();
+
+			if (File.Exists(fileName + "_old"))
+			{
+				File.Delete(fileName + "_old");
+			}
+
+			File.Move(fileName, fileName + "_old");
+
+			try
+			{
+				File.Move(fileName + "_new", fileName);
+			}
+			catch (Exception)
+			{
+				throw new ArgumentException($"The assembly '{fileName}' is locked!");
+			}
+		}
+
 		private void UpdateAssemblyCopies(string testAssembly)
 		{
 			var directory = Path.GetDirectoryName(testAssembly);
@@ -233,6 +263,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				}
 			}
 		}
+
+		#endregion
+
+		#region Instrumenting Type for Dependencies
 
 		private void InstrumentType(TypeDefinition typeDefinition)
 		{
@@ -349,33 +383,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				   instruction.OpCode == OpCodes.Stsfld;
 		}
 
-		private void UpdateModule(ModuleDefinition moduleDefinition)
-		{
-			var fileName = moduleDefinition.FileName;
+		#endregion
 
-			using (var writer = File.Create(fileName + "_new"))
-			{
-				moduleDefinition.Write(writer);
-			}
-
-			moduleDefinition.Dispose();
-
-			if (File.Exists(fileName + "_old"))
-			{
-				File.Delete(fileName + "_old");
-			}
-
-			File.Move(fileName, fileName + "_old");
-
-			try
-			{
-				File.Move(fileName + "_new", fileName);
-			}
-			catch (Exception)
-			{
-				throw new ArgumentException($"The assembly '{fileName}' is locked!");
-			}
-		}
 
 		private void InstrumentTestMethod(MethodDefinition testMethod)
 		{
@@ -384,6 +393,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, methodArgument);
 			InsertCallToDependencyMonitorEnd(testMethod, testMethodEndReference);
 		}
+
+		#region Instrumenting Instructions
 
 		private void InsertCallToDependencyMonitorBeginning(MethodDefinition methodToInstrument, MethodReference dependencyMonitorMethodToCall, string methodArgument)
 		{
@@ -402,7 +413,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				InsertCallToDependencyMonitor(methodToInstrument, lastInstruction, dependencyMonitorMethodToCall);
 			}
 		}
-		
+
 		private void InsertCallToDependencyMonitor(MethodDefinition methodToInstrument, Instruction insertCallBefore, MethodReference dependencyMonitorMethodToCall, string methodArgument = null)
 		{
 			MethodReference methodToCall = dependencyMonitorMethodToCall;
@@ -421,5 +432,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				il.InsertBefore(callInstruction, ldStrInstruction);
 			}
 		}
+
+		#endregion
+
 	}
 }
