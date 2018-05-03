@@ -40,7 +40,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
 			executor.TestResultAvailable -= TestResultAvailable;
 
-			var coverage = instrumentor.GetCoverageDataFromDependencyMonitor();
+			var coverage = instrumentor.GetCoverageData();
 
 			await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, cancellationToken);
 

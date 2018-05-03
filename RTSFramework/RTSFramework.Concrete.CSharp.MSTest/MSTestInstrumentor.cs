@@ -12,8 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,6 +34,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 	{
 		private const string MonoModuleTyp = "<Module>";
 		private const string DependenciesFolder = @"TestResults\Dependencies";
+		private const string MonitorAssemblyName = "RTSFramework.Concrete.CSharp.DependencyMonitor";
 
 		private ModuleDefinition dependencyMonitorModule;
 		private TypeDefinition dependencyMonitorType;
@@ -55,7 +54,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
-			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath("RTSFramework.Concrete.CSharp.DependencyMonitor.dll"));
+			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
 			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.ClassFullName);
 			testMethodStartedReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TestMethodStartFullName);
 			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == DependencyMonitor.DependencyMonitor.TestMethodEndFullName);
@@ -75,10 +74,14 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			foreach (var testAssembly in testAssemblies)
 			{
 				var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
+				if (AlreadInstrumented(moduleDefinition))
+				{
+					continue;
+				}
+
 				foreach (var type in moduleDefinition.GetTypes())
 				{
 					cancellationToken.ThrowIfCancellationRequested();
-					//TODO Check first whether already instrumented
 					if (type.Name == MonoModuleTyp)
 					{
 						continue;
@@ -90,6 +93,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					{
 						foreach (var method in type.Methods)
 						{
+							cancellationToken.ThrowIfCancellationRequested();
 							var id = $"{type.FullName}.{method.Name}";
 							if (msTestTestcases.Any(x => x.Id == id))
 							{
@@ -109,6 +113,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			foreach (string assembly in assemblies.Except(testAssemblies))
 			{
 				var moduleDefinition = ModuleDefinition.ReadModule(assembly);
+				if (AlreadInstrumented(moduleDefinition))
+				{
+					continue;
+				}
+
 				foreach (var type in moduleDefinition.GetTypes())
 				{
 					cancellationToken.ThrowIfCancellationRequested();
@@ -125,7 +134,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 		}
 
-		public CoverageData GetCoverageDataFromDependencyMonitor()
+		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)
+		{
+			if (moduleDefinition.HasAssemblyReferences)
+			{
+				return moduleDefinition.AssemblyReferences.Any(x => x.Name == MonitorAssemblyName);
+			}
+
+			return false;
+		}
+
+		public CoverageData GetCoverageData()
 		{
 			var coverageData = new HashSet<CoverageDataEntry>();
 
@@ -351,38 +370,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				InsertCallToDependencyMonitor(methodToInstrument, lastInstruction, dependencyMonitorMethodToCall);
 			}
 		}
-
-		private bool AlreadyInstrumented(MethodReference dependencyMonitorMethodToCall, Instruction instr, string methodArgument)
-		{
-			if (methodArgument == null)
-			{
-				return AlreadyInstrumented(dependencyMonitorMethodToCall, instr);
-			}
-
-			return instr.OpCode == OpCodes.Ldstr &&
-				   instr.Operand is string
-				   && string.Equals((string)instr.Operand, methodArgument, StringComparison.Ordinal)
-				   && instr.Next != null
-				   && instr.Next.OpCode == OpCodes.Call
-				   && instr.Next.Operand is MethodReference
-				   && string.Equals(((MethodReference)instr.Next.Operand).FullName, dependencyMonitorMethodToCall.FullName);
-		}
-
-		private bool AlreadyInstrumented(MethodReference dependencyMonitorMethodToCall, Instruction instr)
-		{
-			return instr.Previous != null
-					&& instr.Previous.OpCode == OpCodes.Call
-					&& instr.Previous.Operand is MethodReference
-					&& string.Equals(((MethodReference)instr.Previous.Operand).FullName, dependencyMonitorMethodToCall.FullName);
-		}
-
+		
 		private void InsertCallToDependencyMonitor(MethodDefinition methodToInstrument, Instruction insertCallBefore, MethodReference dependencyMonitorMethodToCall, string methodArgument = null)
 		{
-			if (AlreadyInstrumented(dependencyMonitorMethodToCall, insertCallBefore, methodArgument))
-			{
-				return;
-			}
-
 			MethodReference methodToCall = dependencyMonitorMethodToCall;
 			if (methodToInstrument.Module.FileName != dependencyMonitorMethodToCall.Module.FileName)
 			{
