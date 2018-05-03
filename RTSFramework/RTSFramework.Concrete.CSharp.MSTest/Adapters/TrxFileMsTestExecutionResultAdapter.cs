@@ -118,7 +118,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
             throw new NotImplementedException();
         }
 
-        //TODO Move closer to testcaseresulttype
         private TestExecutionOutcome ParseOutcome(string outcome)
         {
             TestExecutionOutcome enumValue;

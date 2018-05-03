@@ -125,6 +125,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private void InstrumentTestAssembly(string testAssembly, CancellationToken cancellationToken)
 		{
+			if (!File.Exists(testAssembly))
+			{
+				LoggingHelper.WriteMessage($"Warning: {testAssembly} does not exist!");
+				return;
+			}
+
 			var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
 			if (AlreadInstrumented(moduleDefinition))
 			{
@@ -179,6 +185,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private void InstrumentProgramAssembly(string assembly, CancellationToken cancellationToken)
 		{
+			if (!File.Exists(assembly))
+			{
+				LoggingHelper.WriteMessage($"Warning: {assembly} does not exist!");
+				return;
+			}
+
 			var moduleDefinition = ModuleDefinition.ReadModule(assembly);
 			if (AlreadInstrumented(moduleDefinition))
 			{

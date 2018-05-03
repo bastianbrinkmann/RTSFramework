@@ -48,7 +48,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 	        return executionResult;
         }
 
-        //TODO Read filepath from console instead?
         protected FileInfo GetTrxFile()
         {
             var directory = new DirectoryInfo(MSTestConstants.TestResultsFolder);

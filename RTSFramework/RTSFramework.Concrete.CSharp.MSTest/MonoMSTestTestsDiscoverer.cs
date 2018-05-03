@@ -28,7 +28,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
-			//TODO Filtering of Test dlls?
+			//TODO App Config: EndsWithFilter
 			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith("Test.dll"));
 
 			foreach (var modulePath in sources)

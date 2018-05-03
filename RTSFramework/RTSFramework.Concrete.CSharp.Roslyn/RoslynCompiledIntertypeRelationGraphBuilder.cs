@@ -24,7 +24,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 		{
 			var graph = new IntertypeRelationGraph();
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
-			// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
+			// TODO
 			{
 				//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
 				//{ "Platform", "Any CPU" }
@@ -236,7 +236,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 					var typeOfOp = (ITypeOfOperation)operation;
 					AddUseEdgeIfBothExist(type, typeOfOp.TypeOperand as INamedTypeSymbol, graph);
 					break;
-				case OperationKind.ObjectCreation: //TODO: Method Rerference also?
+				case OperationKind.ObjectCreation:
 					var objectCreation = (IObjectCreationOperation)operation;
 					AddUseEdgeIfBothExist(type, objectCreation.Constructor?.ContainingType, graph);
 					break;
@@ -252,7 +252,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 					var sizeOf = (ISizeOfOperation)operation;
 					AddUseEdgeIfBothExist(type, sizeOf.TypeOperand as INamedTypeSymbol, graph);
 					break;
-				case OperationKind.FieldInitializer: //TODO Init without reference?
+				case OperationKind.FieldInitializer:
 					var fieldInit = (IFieldInitializerOperation)operation;
 					foreach (var initializedField in fieldInit.InitializedFields)
 					{
