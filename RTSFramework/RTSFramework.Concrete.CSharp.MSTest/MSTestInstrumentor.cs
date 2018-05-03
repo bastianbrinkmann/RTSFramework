@@ -51,6 +51,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private List<string> assemblies;
 		private List<string> assemblyNames;
+		private IList<MSTestTestcase> msTestTestcases;
 
 		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
@@ -64,84 +65,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var parsingResult = await assembliesAdapter.Parse(toInstrument.AbsoluteSolutionPath, token);
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
+			msTestTestcases = tests;
 
 			InstrumentProgramAssemblies(token, testAssemblies);
-			InstrumentTestAssemblies(token, testAssemblies, tests);
-		}
-
-		private void InstrumentTestAssemblies(CancellationToken cancellationToken, List<string> testAssemblies, IList<MSTestTestcase> msTestTestcases)
-		{
-			foreach (var testAssembly in testAssemblies)
-			{
-				var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
-				if (AlreadInstrumented(moduleDefinition))
-				{
-					continue;
-				}
-
-				foreach (var type in moduleDefinition.GetTypes())
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-					if (type.Name == MonoModuleTyp)
-					{
-						continue;
-					}
-
-					InstrumentType(type);
-
-					if (type.HasMethods)
-					{
-						foreach (var method in type.Methods)
-						{
-							cancellationToken.ThrowIfCancellationRequested();
-							var id = $"{type.FullName}.{method.Name}";
-							if (msTestTestcases.Any(x => x.Id == id))
-							{
-								InstrumentTestMethod(method);
-							}
-						}
-					}
-				}
-
-				UpdateModule(moduleDefinition);
-				UpdateAssemblyCopies(testAssembly);
-			}
-		}
-
-		private void InstrumentProgramAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
-		{
-			foreach (string assembly in assemblies.Except(testAssemblies))
-			{
-				var moduleDefinition = ModuleDefinition.ReadModule(assembly);
-				if (AlreadInstrumented(moduleDefinition))
-				{
-					continue;
-				}
-
-				foreach (var type in moduleDefinition.GetTypes())
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-
-					if (type.Name == MonoModuleTyp)
-					{
-						continue;
-					}
-
-					InstrumentType(type);
-				}
-
-				UpdateModule(moduleDefinition);
-			}
-		}
-
-		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)
-		{
-			if (moduleDefinition.HasAssemblyReferences)
-			{
-				return moduleDefinition.AssemblyReferences.Any(x => x.Name == MonitorAssemblyName);
-			}
-
-			return false;
+			InstrumentTestAssemblies(token, testAssemblies);
 		}
 
 		public CoverageData GetCoverageData()
@@ -156,7 +83,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					{
 						using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
 						{
-							var serializer = JsonSerializer.Create(new JsonSerializerSettings {Formatting = Formatting.Indented});
+							var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
 							var dependencies = serializer.Deserialize<HashSet<string>>(jsonReader);
 
 							var testId = Path.GetFileNameWithoutExtension(file);
@@ -177,6 +104,111 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 
 			return new CoverageData(coverageData);
+		}
+
+		#region Instrumenting TestAssemblies
+
+		private void InstrumentTestAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
+		{
+			var parallelOptions = new ParallelOptions
+			{
+				CancellationToken = cancellationToken,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+			Parallel.ForEach(testAssemblies, parallelOptions, testAssembly =>
+			{
+				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+				InstrumentTestAssembly(testAssembly, parallelOptions.CancellationToken);
+			});
+		}
+
+		private void InstrumentTestAssembly(string testAssembly, CancellationToken cancellationToken)
+		{
+			var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
+			if (AlreadInstrumented(moduleDefinition))
+			{
+				return;
+			}
+
+			foreach (var type in moduleDefinition.GetTypes())
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				if (type.Name == MonoModuleTyp)
+				{
+					continue;
+				}
+
+				InstrumentType(type);
+
+				if (type.HasMethods)
+				{
+					foreach (var method in type.Methods)
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						var id = $"{type.FullName}.{method.Name}";
+						if (msTestTestcases.Any(x => x.Id == id))
+						{
+							InstrumentTestMethod(method);
+						}
+					}
+				}
+			}
+
+			UpdateModule(moduleDefinition);
+			UpdateAssemblyCopies(testAssembly);
+		}
+
+		#endregion
+
+		#region Instrumenting ProgramAssemblies
+
+		private void InstrumentProgramAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
+		{
+			var parallelOptions = new ParallelOptions
+			{
+				CancellationToken = cancellationToken,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+			Parallel.ForEach(assemblies.Except(testAssemblies), parallelOptions, assembly =>
+			{
+				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+				InstrumentProgramAssembly(assembly, parallelOptions.CancellationToken);
+			});
+		}
+
+		private void InstrumentProgramAssembly(string assembly, CancellationToken cancellationToken)
+		{
+			var moduleDefinition = ModuleDefinition.ReadModule(assembly);
+			if (AlreadInstrumented(moduleDefinition))
+			{
+				return;
+			}
+
+			foreach (var type in moduleDefinition.GetTypes())
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (type.Name == MonoModuleTyp)
+				{
+					continue;
+				}
+
+				InstrumentType(type);
+			}
+
+			UpdateModule(moduleDefinition);
+		}
+
+		#endregion
+
+		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)
+		{
+			if (moduleDefinition.HasAssemblyReferences)
+			{
+				return moduleDefinition.AssemblyReferences.Any(x => x.Name == MonitorAssemblyName);
+			}
+
+			return false;
 		}
 
 		private void UpdateAssemblyCopies(string testAssembly)
@@ -389,7 +421,5 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				il.InsertBefore(callInstruction, ldStrInstruction);
 			}
 		}
-
-		
 	}
 }
