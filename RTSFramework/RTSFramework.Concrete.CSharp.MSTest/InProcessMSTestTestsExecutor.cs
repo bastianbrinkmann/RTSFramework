@@ -19,10 +19,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
 
 		private readonly InProcessVsTestConnector vsTestConnector;
+		private readonly ISettingsProvider settingsProvider;
 
-		public InProcessMSTestTestsExecutor(InProcessVsTestConnector vsTestConnector)
+		public InProcessMSTestTestsExecutor(InProcessVsTestConnector vsTestConnector, ISettingsProvider settingsProvider)
 		{
 			this.vsTestConnector = vsTestConnector;
+			this.settingsProvider = settingsProvider;
 		}
 
 		private IList<MSTestTestcase> msTestTestcases;
@@ -35,7 +37,18 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var result = new MSTestExectionResult();
 			result.TestcasesResults.AddRange(Convert(vsTestResults));
-			
+
+			if (settingsProvider.CleanupTestResultsDirectory)
+			{
+				var resultsPath = Path.GetFullPath(MSTestConstants.TestResultsFolder);
+				DirectoryInfo resulsDirectory = new DirectoryInfo(resultsPath);
+
+				foreach (DirectoryInfo dir in resulsDirectory.EnumerateDirectories("Deploy*"))
+				{
+					dir.Delete(true);
+				}
+			}
+
 			return result;
 		}
 
@@ -109,8 +122,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var waitHandle = new AsyncAutoResetEvent();
 			var handler = new RunEventHandler(waitHandle);
 			handler.TestResultAvailable += HandlerOnTestResultAvailable;
-			vsTestConnector.ConsoleWrapper.RunTests(testCases, string.Format(MSTestConstants.DefaultRunSettings, Directory.GetCurrentDirectory()), handler);
 			var registration = token.Register(vsTestConnector.ConsoleWrapper.CancelTestRun);
+			vsTestConnector.ConsoleWrapper.RunTests(testCases, string.Format(MSTestConstants.DefaultRunSettings, Directory.GetCurrentDirectory()), handler);
 
 			await waitHandle.WaitAsync(token);
 			handler.TestResultAvailable -= HandlerOnTestResultAvailable;

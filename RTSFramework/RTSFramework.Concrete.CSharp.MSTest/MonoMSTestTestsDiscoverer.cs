@@ -15,10 +15,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 	public class MonoMSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
+		private readonly ISettingsProvider settingsProvider;
 
-		public MonoMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+		public MonoMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
+			ISettingsProvider settingsProvider)
 		{
 			this.assembliesAdapter = assembliesAdapter;
+			this.settingsProvider = settingsProvider;
 		}
 
 		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
@@ -28,8 +31,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
-			//TODO App Config: EndsWithFilter
-			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith("Test.dll"));
+			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith(settingsProvider.TestAssembliesFilter));
 
 			foreach (var modulePath in sources)
 			{

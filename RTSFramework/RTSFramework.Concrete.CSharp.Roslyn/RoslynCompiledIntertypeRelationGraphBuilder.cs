@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Operations;
 using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Contracts;
 using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.Core.DataStructures;
 
@@ -17,17 +18,22 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 	public class RoslynCompiledIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel>
 		where TCSharpModel : CSharpProgramModel
 	{
+		private readonly ISettingsProvider settingsProvider;
 		private List<Compilation> compilations;
+
+		public RoslynCompiledIntertypeRelationGraphBuilder(ISettingsProvider settingsProvider)
+		{
+			this.settingsProvider = settingsProvider;
+		}
 
 		//TODO: Builds IRG for P' not P!
 		public async Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel sourceModel, CancellationToken token)
 		{
 			var graph = new IntertypeRelationGraph();
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
-			// TODO
 			{
-				//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
-				//{ "Platform", "Any CPU" }
+				{ "Configuration", settingsProvider.Configuration },
+				{ "Platform", settingsProvider.Platform }
 			});
 
 			var solution = await workspace.OpenSolutionAsync(sourceModel.AbsoluteSolutionPath, token);

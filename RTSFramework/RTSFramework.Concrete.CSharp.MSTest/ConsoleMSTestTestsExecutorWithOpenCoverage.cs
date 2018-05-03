@@ -23,7 +23,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private const string OpenCoverPath = "OpenCover";
 
 		public ConsoleMSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
-													IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter) : base(resultArtefactAdapter)
+													IArtefactAdapter<MSTestExecutionResultParameters, CoverageData> openCoverArtefactAdapter,
+													ISettingsProvider settingsProvider) : base(resultArtefactAdapter, settingsProvider)
 		{
 			this.openCoverArtefactAdapter = openCoverArtefactAdapter;
 		}

@@ -2,13 +2,27 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using RTSFramework.Contracts;
+using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Core.Utilities
 {
-	public static class LoggingHelper
+	public class LoggingHelper : ILoggingHelper
 	{
-		public static void InitLogFile()
+		private readonly ISettingsProvider settingsProvider;
+
+		public LoggingHelper(ISettingsProvider settingsProvider)
 		{
+			this.settingsProvider = settingsProvider;
+		}
+
+		public void InitLogFile()
+		{
+			if (!settingsProvider.LogToFile)
+			{
+				return;
+			}
+
 			logFile = new FileInfo(Path.GetFullPath($"LogFiles\\logfile_{DateTime.Now:yy_MM_dd_hh_mm_ss}.txt"));
 
 			if (logFile.DirectoryName != null && !Directory.Exists(logFile.DirectoryName))
@@ -17,26 +31,29 @@ namespace RTSFramework.Core.Utilities
 			}
 		}
 
-		private static FileInfo logFile;
+		private FileInfo logFile;
 
-		public static void WriteMessage(string message)
+		public void WriteMessage(string message)
 		{
 			Debug.WriteLine(message);
 
-			using (var writer = logFile.AppendText())
+			if (settingsProvider.LogToFile)
 			{
-				writer.WriteLine(message);
+				using (var writer = logFile.AppendText())
+				{
+					writer.WriteLine(message);
+				}
 			}
 		}
 
-		private static void WriteMessage(string actionName, double seconds)
+		private void WriteMessage(string actionName, double seconds)
 		{
 			var message = $"{actionName} took {seconds} Seconds";
 
 			WriteMessage(message);
 		}
 
-		public static T ReportNeededTime<T>(Func<T> action, string actionName)
+		public T ReportNeededTime<T>(Func<T> action, string actionName)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -48,7 +65,7 @@ namespace RTSFramework.Core.Utilities
 			return result;
 		}
 
-		public static void ReportNeededTime(Action action, string actionName)
+		public void ReportNeededTime(Action action, string actionName)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -58,7 +75,7 @@ namespace RTSFramework.Core.Utilities
 			WriteMessage(actionName, stopwatch.Elapsed.TotalSeconds);
 		}
 
-		public static async Task ReportNeededTime(Func<Task> action, string actionName)
+		public async Task ReportNeededTime(Func<Task> action, string actionName)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -68,7 +85,7 @@ namespace RTSFramework.Core.Utilities
 			WriteMessage(actionName, stopwatch.Elapsed.TotalSeconds);
 		}
 
-		public static async Task<T> ReportNeededTime<T>(Func<Task<T>> action, string actionName)
+		public async Task<T> ReportNeededTime<T>(Func<Task<T>> action, string actionName)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();

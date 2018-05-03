@@ -17,11 +17,15 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
+		private readonly ISettingsProvider settingsProvider;
 
-		public InProcessMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, InProcessVsTestConnector vsTestConnector)
+		public InProcessMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
+			InProcessVsTestConnector vsTestConnector,
+			ISettingsProvider settingsProvider)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
+			this.settingsProvider = settingsProvider;
 		}
 
 		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
@@ -29,7 +33,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
-			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith("Test.dll"));
+			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith(settingsProvider.TestAssembliesFilter));
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
@@ -67,9 +71,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		{
 			var waitHandle = new AsyncAutoResetEvent();
 			var handler = new DiscoveryEventHandler(waitHandle);
+			var registration = token.Register(vsTestConnector.ConsoleWrapper.CancelDiscovery);
 
 			vsTestConnector.ConsoleWrapper.DiscoverTests(sources, string.Format(MSTestConstants.DefaultRunSettings, Directory.GetCurrentDirectory()), handler);
-			var registration = token.Register(vsTestConnector.ConsoleWrapper.CancelDiscovery);
 
 			await waitHandle.WaitAsync(token);
 			registration.Dispose();

@@ -27,6 +27,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
+using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
@@ -44,10 +45,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private MethodReference typeVisitedMethodReference;
 
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
+		private readonly ILoggingHelper loggingHelper;
 
-		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter)
+		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
+			ILoggingHelper loggingHelper)
 		{
 			this.assembliesAdapter = assembliesAdapter;
+			this.loggingHelper = loggingHelper;
 		}
 
 		private List<string> assemblies;
@@ -68,8 +72,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 			msTestTestcases = tests;
 
-			LoggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token, testAssemblies), "Instrumenting Program Assemblies");
-			LoggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token, testAssemblies), "Instrumenting Test Assemblies");
+			loggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token, testAssemblies), "Instrumenting Program Assemblies");
+			loggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token, testAssemblies), "Instrumenting Test Assemblies");
 		}
 
 		public CoverageData GetCoverageData()
@@ -127,7 +131,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		{
 			if (!File.Exists(testAssembly))
 			{
-				LoggingHelper.WriteMessage($"Warning: {testAssembly} does not exist!");
+				loggingHelper.WriteMessage($"Warning: {testAssembly} does not exist!");
 				return;
 			}
 
@@ -187,7 +191,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		{
 			if (!File.Exists(assembly))
 			{
-				LoggingHelper.WriteMessage($"Warning: {assembly} does not exist!");
+				loggingHelper.WriteMessage($"Warning: {assembly} does not exist!");
 				return;
 			}
 
@@ -376,6 +380,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			{
 				return false;
 			}
+			//callee not this
 			MethodReference callee = instruction.Operand as MethodReference;
 			return !callee?.HasThis ?? false;
 		}

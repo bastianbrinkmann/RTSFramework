@@ -1,32 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Core.Models;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 {
 	public class SolutionAssembliesAdapter : CancelableArtefactAdapter<string, IList<CSharpAssembly>>
 	{
+		private readonly ISettingsProvider settingsProvider;
+
+		public SolutionAssembliesAdapter(ISettingsProvider settingsProvider)
+		{
+			this.settingsProvider = settingsProvider;
+		}
+
 		public override async Task<IList<CSharpAssembly>> Parse(string artefact, CancellationToken token)
 		{
 			var result = new List<CSharpAssembly>();
 
-			//TODO App Settings
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
 			{
-				//{ "Configuration", "Debug" },//{ "Configuration", "net_3_5_Debug_ReadOnly" },
-				//{ "Platform", "Any CPU" }
+				{ "Configuration", settingsProvider.Configuration },
+				{ "Platform", settingsProvider.Platform }
 			});
 
 			var solution = await workspace.OpenSolutionAsync(artefact, token);
 
 			foreach (var project in solution.Projects)
 			{
-				//TODO Check somehow whether project needs to be rebuilt?
+				if (!File.Exists(project.OutputFilePath))
+				{
+					throw new ArgumentException($"The assembly {project.OutputFilePath} for project {project.Name} does not exist!" +
+												"\nCheck the configuration and platform configured in the app settings.");
+				}
+
 				token.ThrowIfCancellationRequested();
 				result.Add(new CSharpAssembly { AbsolutePath = project.OutputFilePath });
 			}

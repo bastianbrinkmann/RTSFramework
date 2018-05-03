@@ -21,11 +21,14 @@ namespace RTSFramework.Concrete.CSharp.MSTest
     public class ConsoleMSTestTestsExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
+	    private readonly ISettingsProvider settingsProvider;
 
-        public ConsoleMSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter)
-        {
-            this.resultArtefactAdapter = resultArtefactAdapter;
-        }
+	    public ConsoleMSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
+			ISettingsProvider settingsProvider)
+	    {
+		    this.resultArtefactAdapter = resultArtefactAdapter;
+		    this.settingsProvider = settingsProvider;
+	    }
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
 
@@ -72,8 +75,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 resultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
                 var results = resultArtefactAdapter.Parse(resultParams);
 
-	            bool cleanUpResultDirectory = false; //TODO: App Config Setting
-	            if (cleanUpResultDirectory)
+	            if (settingsProvider.CleanupTestResultsDirectory)
 	            {
 					var resultsDirectory = trxFile.Directory;
 					if (resultsDirectory != null)
@@ -182,7 +184,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
                 storage = fullPath,
                 name = "Testrun",
                 TestLinks = testLinks.ToArray(),
-                //TODO: Could be a configurable feature of AutomatedTestFramework
                 continueAfterFailure = true
             };
 

@@ -10,6 +10,7 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -29,44 +30,47 @@ namespace RTSFramework.ViewModels.Controller
 
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
+		private readonly ILoggingHelper loggingHelper;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
 			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
 			ITestSelector<TModel, TDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult, TDelta, TModel> testProcessor)
+			ITestProcessor<TTestCase, TResult, TDelta, TModel> testProcessor,
+			ILoggingHelper loggingHelper)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
 			TestProcessor = testProcessor;
 			this.testsDiscoverer = testsDiscoverer;
 			this.testSelector = testSelector;
+			this.loggingHelper = loggingHelper;
 		}
 
 		public async Task<TResult> ExecuteImpactedTests(TArtefact oldArtefact, TArtefact newArtefact, CancellationToken token)
 		{
-			LoggingHelper.InitLogFile();
+			loggingHelper.InitLogFile();
 
 			var oldModel = artefactAdapter.Parse(oldArtefact);
 			var newModel = artefactAdapter.Parse(newArtefact);
 
-			var delta = LoggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
+			var delta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await LoggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
 			token.ThrowIfCancellationRequested();
 
-			var impactedTests = await LoggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
+			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
 
 			foreach (var impactedTest in impactedTests)
 			{
 				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest));
 			}
 
-			LoggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
+			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
-			var processingResult = await LoggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, allTests, delta, token), "ProcessingOfImpactedTests");
+			var processingResult = await loggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, allTests, delta, token), "ProcessingOfImpactedTests");
 
 			return processingResult;
 		}
