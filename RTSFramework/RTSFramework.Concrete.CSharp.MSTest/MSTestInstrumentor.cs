@@ -321,8 +321,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			using (var writer = File.Create(fileName + "_new"))
 			{
-				var writerParameters = new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() };
-				moduleDefinition.Write(writer, writerParameters);
+				moduleDefinition.Write(writer);
 			}
 
 			moduleDefinition.Dispose();
