@@ -57,6 +57,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		}
 
 		private List<string> assemblies;
+		private List<string> testAssemblies;
 		private List<string> assemblyNames;
 		private IList<MSTestTestcase> msTestTestcases;
 		private GranularityLevel granularityLevel;
@@ -66,6 +67,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
 		private static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
+		private List<Tuple<string, int>> testNamesToExecutionIds;
+
 		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
@@ -74,12 +77,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodEndFullName);
 			typeVisitedMethodReference = dependencyMonitorType.Methods.Single(x => x.FullName == TypeMethodFullName);
 
-			var testAssemblies = tests.Select(x => x.AssemblyPath).Distinct().ToList();
+			testAssemblies = tests.Select(x => x.AssemblyPath).Distinct().ToList();
 			var parsingResult = await assembliesAdapter.Parse(toInstrument.AbsoluteSolutionPath, token);
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 			msTestTestcases = tests;
 			granularityLevel = toInstrument.GranularityLevel;
+			testNamesToExecutionIds = tests.Select(x => new Tuple<string, int>(x.Id, tests.IndexOf(x))).ToList();
 
 			/* TODO Granularity Level File
 			 * 
@@ -88,8 +92,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				InitClassFilesMapping(token);
 			}*/
 
-			loggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token, testAssemblies), "Instrumenting Program Assemblies");
-			loggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token, testAssemblies), "Instrumenting Test Assemblies");
+			loggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token), "Instrumenting Program Assemblies");
+			loggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token), "Instrumenting Test Assemblies");
 		}
 
 		#region File Level
@@ -168,6 +172,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		public CoverageData GetCoverageData()
 		{
+			RecoverOldAssemblies();
+
 			var coverageData = new HashSet<Tuple<string, string>>();
 
 			foreach (var file in Directory.GetFiles(DependenciesFolder))
@@ -181,7 +187,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 							var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
 							var dependencies = serializer.Deserialize<HashSet<string>>(jsonReader);
 
-							var testId = Path.GetFileNameWithoutExtension(file);
+							int testExecutionId = Convert.ToInt32(Path.GetFileNameWithoutExtension(file));
+							string testId = testNamesToExecutionIds.Single(x => x.Item2 == testExecutionId).Item1;
+
 
 							foreach (var dependency in dependencies)
 							{
@@ -197,9 +205,30 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return new CoverageData(coverageData);
 		}
 
+		private void RecoverOldAssemblies()
+		{
+			foreach (var assembly in assemblies)
+			{
+				if (File.Exists(assembly + "_old"))
+				{
+					if (File.Exists(assembly))
+					{
+						File.Delete(assembly);
+					}
+
+					File.Move(assembly + "_old", assembly);
+				}
+			}
+
+			foreach (var testAssembly in testAssemblies)
+			{
+				UpdateAssemblyCopies(testAssembly);
+			}
+		}
+
 		#region Instrumenting TestAssemblies
 
-		private void InstrumentTestAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
+		private void InstrumentTestAssemblies(CancellationToken cancellationToken)
 		{
 			var parallelOptions = new ParallelOptions
 			{
@@ -221,7 +250,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				return;
 			}
 
-			var moduleDefinition = ModuleDefinition.ReadModule(testAssembly);
+			var moduleDefinition = LoadModule(testAssembly);
 			if (AlreadInstrumented(moduleDefinition))
 			{
 				return;
@@ -259,7 +288,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		#region Instrumenting ProgramAssemblies
 
-		private void InstrumentProgramAssemblies(CancellationToken cancellationToken, List<string> testAssemblies)
+		private void InstrumentProgramAssemblies(CancellationToken cancellationToken)
 		{
 			var parallelOptions = new ParallelOptions
 			{
@@ -281,7 +310,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				return;
 			}
 
-			var moduleDefinition = ModuleDefinition.ReadModule(assembly);
+			var moduleDefinition = LoadModule(assembly);
 			if (AlreadInstrumented(moduleDefinition))
 			{
 				return;
@@ -303,6 +332,36 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		}
 
 		#endregion
+
+		private void AddSearchDirectory(string directory, DefaultAssemblyResolver resolver)
+		{
+			resolver.AddSearchDirectory(directory);
+			foreach (var subDirectory in Directory.EnumerateDirectories(directory))
+			{
+				AddSearchDirectory(subDirectory, resolver);
+			}
+		}
+
+		//TODO Additional References?
+		private ModuleDefinition LoadModule(string modulePath)
+		{
+			var resolver = new DefaultAssemblyResolver();
+
+			var moduleDirectory = Path.GetDirectoryName(modulePath);
+			//Current Directory and all sub directories
+			AddSearchDirectory(moduleDirectory, resolver);
+
+			if (moduleDirectory != null)
+			{
+				var libFolder = Path.Combine(moduleDirectory, @"..\..\Lib");
+				if (Directory.Exists(libFolder))
+				{
+					AddSearchDirectory(libFolder, resolver);
+				}
+			}
+
+			return ModuleDefinition.ReadModule(modulePath, new ReaderParameters { AssemblyResolver = resolver });
+		}
 
 		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)
 		{
@@ -360,7 +419,14 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					if (assemblyNames.Any(x => x.Equals(fileName, StringComparison.InvariantCultureIgnoreCase)))
 					{
 						var fullPath = assemblies.ElementAt(assemblyNames.IndexOf(fileName));
-						File.Copy(fullPath, file, true);
+						try
+						{
+							File.Copy(fullPath, file, true);
+						}
+						catch (Exception)
+						{
+							loggingHelper.WriteMessage($"Warning: Unable to overwrite file {file}");
+						}
 					}
 				}
 			}
@@ -510,9 +576,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private void InstrumentTestMethod(MethodDefinition testMethod)
 		{
-			var methodArgument = $"{testMethod.DeclaringType.FullName}.{testMethod.Name}";
+			var testId = $"{testMethod.DeclaringType.FullName}.{testMethod.Name}";
 
-			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, methodArgument);
+			var methodArgument = testNamesToExecutionIds.Single(x => x.Item1 == testId).Item2;
+
+			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, "" + methodArgument);
 			InsertCallToDependencyMonitorEnd(testMethod, testMethodEndReference);
 		}
 
