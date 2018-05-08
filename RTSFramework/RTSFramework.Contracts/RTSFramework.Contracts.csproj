@@ -77,8 +77,9 @@
     <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
+    <Compile Include="Utilities\IApplicationClosedHandler.cs" />
     <Compile Include="Utilities\ILoggingHelper.cs" />
-    <Compile Include="ISettingsProvider.cs" />
+    <Compile Include="Utilities\ISettingsProvider.cs" />
     <Compile Include="ITestExecutionResult.cs" />
     <Compile Include="ITestExecutor.cs" />
     <Compile Include="ITestInstrumentor.cs" />

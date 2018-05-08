@@ -47,14 +47,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly ILoggingHelper loggingHelper;
+		private readonly ISettingsProvider settingsProvider;
 
-		private Dictionary<string, string> classToFileNamesMapping = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> classToFileNamesMapping = new Dictionary<string, string>();
 
 		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
-			ILoggingHelper loggingHelper)
+			ILoggingHelper loggingHelper,
+			ISettingsProvider settingsProvider)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.loggingHelper = loggingHelper;
+			this.settingsProvider = settingsProvider;
 		}
 
 		private List<string> assemblies;
@@ -206,8 +209,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return new CoverageData(coverageData);
 		}
 
-		
-
 		#region Instrumenting TestAssemblies
 
 		private void InstrumentTestAssemblies(CancellationToken cancellationToken)
@@ -319,18 +320,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		#endregion
 
-		private void AddSearchDirectory(string directory, DefaultAssemblyResolver resolver)
-		{
-			resolver.AddSearchDirectory(directory);
-			foreach (var subDirectory in Directory.EnumerateDirectories(directory))
-			{
-				AddSearchDirectory(subDirectory, resolver);
-			}
-		}
-
 		#region Assemblies Handling
 
-		//TODO Additional References?
 		private ModuleDefinition LoadModule(string modulePath)
 		{
 			var resolver = new DefaultAssemblyResolver();
@@ -341,14 +332,32 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			if (moduleDirectory != null)
 			{
-				var libFolder = Path.Combine(moduleDirectory, @"..\..\Lib");
-				if (Directory.Exists(libFolder))
+				foreach (var reference in settingsProvider.AdditionalReferences)
 				{
-					AddSearchDirectory(libFolder, resolver);
+					string fullPath = reference;
+
+					if (!Path.IsPathRooted(reference))
+					{
+						fullPath = Path.Combine(moduleDirectory, reference);
+					}
+					
+					if (Directory.Exists(fullPath))
+					{
+						AddSearchDirectory(fullPath, resolver);
+					}
 				}
 			}
 
 			return ModuleDefinition.ReadModule(modulePath, new ReaderParameters { AssemblyResolver = resolver });
+		}
+
+		private void AddSearchDirectory(string directory, DefaultAssemblyResolver resolver)
+		{
+			resolver.AddSearchDirectory(directory);
+			foreach (var subDirectory in Directory.EnumerateDirectories(directory))
+			{
+				AddSearchDirectory(subDirectory, resolver);
+			}
 		}
 
 		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)

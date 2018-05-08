@@ -7,6 +7,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Core.Contracts;
 
@@ -20,16 +21,19 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		private readonly ITestExecutor<TTestCase, TDelta, TModel> executor;
 		private readonly ITestInstrumentor<TModel, TTestCase> instrumentor;
 		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider;
+		private readonly IApplicationClosedHandler applicationClosedHandler;
 
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 
 		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TDelta, TModel> executor,
 			ITestInstrumentor<TModel, TTestCase> instrumentor,
-			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider)
+			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider,
+			IApplicationClosedHandler applicationClosedHandler)
 		{
 			this.executor = executor;
 			this.instrumentor = instrumentor;
 			this.dataStructureProvider = dataStructureProvider;
+			this.applicationClosedHandler = applicationClosedHandler;
 		}
 
 		public async Task<ITestExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
@@ -37,6 +41,8 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		{
 			using (instrumentor)
 			{
+				applicationClosedHandler.AddApplicationClosedListener(instrumentor);
+
 				await instrumentor.InstrumentModelForTests(impactedForDelta.TargetModel, impactedTests, cancellationToken);
 
 				executor.TestResultAvailable += TestResultAvailable;
@@ -47,6 +53,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, cancellationToken);
 
+				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;
 			}
 		}

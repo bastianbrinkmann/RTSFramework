@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.GUI
 {
@@ -23,6 +24,8 @@ namespace RTSFramework.GUI
 			{
 				LogToFile = log;
 			}
+
+			AdditionalReferences = ConfigurationManager.AppSettings.Get("additionalReferences").Split(';');
 		}
 
 		public string Configuration { get; }
@@ -30,5 +33,6 @@ namespace RTSFramework.GUI
 		public string TestAssembliesFilter { get; }
 		public bool CleanupTestResultsDirectory { get; }
 		public bool LogToFile { get; }
+		public string[] AdditionalReferences { get; }
 	}
 }

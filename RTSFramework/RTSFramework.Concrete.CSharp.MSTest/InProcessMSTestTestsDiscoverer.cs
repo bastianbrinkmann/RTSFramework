@@ -9,6 +9,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {

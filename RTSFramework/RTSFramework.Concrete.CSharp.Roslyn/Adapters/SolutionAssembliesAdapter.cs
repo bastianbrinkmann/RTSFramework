@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 {

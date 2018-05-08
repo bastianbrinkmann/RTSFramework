@@ -22,5 +22,11 @@ namespace RTSFramework.GUI
 			splashScreen.Close(TimeSpan.FromMilliseconds(750));
 			mainWindow.Show();
 		}
+
+		protected override void OnExit(ExitEventArgs e)
+		{
+			UnityProvider.GetApplicationClosedHandler().ApplicationExiting();
+			base.OnExit(e);
+		}
 	}
 }
