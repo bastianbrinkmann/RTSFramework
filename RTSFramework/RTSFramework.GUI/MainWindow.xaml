@@ -101,9 +101,15 @@
 			<DataGrid.RowDetailsTemplate>
 				<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
 					<DataGrid IsReadOnly="True" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ChildResults}">
+						<DataGrid.ItemContainerStyle >
+							<Style TargetType="DataGridRow" >
+								<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+								<Setter Property="behaviors:HandleDoubleClickBehavior.Command" Value="{Binding ShowErrorMessageCommand}" />
+							</Style>
+						</DataGrid.ItemContainerStyle>
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="150" Header="Display Name" Binding="{Binding DisplayName}" />
-							<DataGridTemplateColumn Width="100" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}" SortMemberPath="TestOutcome" CanUserSort="True" />
+							<DataGridTextColumn Width="270" Header="Display Name" Binding="{Binding DisplayName}" />
+							<DataGridTemplateColumn Width="200" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}" SortMemberPath="TestOutcome" CanUserSort="True" />
 							<DataGridTextColumn Width="100" Header="StartTime" Binding="{Binding StartTime, Converter={converters:DateTimeWithTimeConverter}}" />
 							<DataGridTextColumn Width="100" Header="EndTime" Binding="{Binding EndTime, Converter={converters:DateTimeWithTimeConverter}}" />
 							<DataGridTextColumn Width="100" Header="Duration (in sec)" Binding="{Binding DurationInSeconds}" />
