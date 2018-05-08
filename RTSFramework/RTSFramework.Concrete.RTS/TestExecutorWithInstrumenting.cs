@@ -32,19 +32,23 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.dataStructureProvider = dataStructureProvider;
 		}
 
-		public async Task<ITestExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public async Task<ITestExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
+			CancellationToken cancellationToken)
 		{
-			await instrumentor.InstrumentModelForTests(impactedForDelta.TargetModel, impactedTests, cancellationToken);
+			using (instrumentor)
+			{
+				await instrumentor.InstrumentModelForTests(impactedForDelta.TargetModel, impactedTests, cancellationToken);
 
-			executor.TestResultAvailable += TestResultAvailable;
-			var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
-			executor.TestResultAvailable -= TestResultAvailable;
+				executor.TestResultAvailable += TestResultAvailable;
+				var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
+				executor.TestResultAvailable -= TestResultAvailable;
 
-			var coverage = instrumentor.GetCoverageData();
+				var coverage = instrumentor.GetCoverageData();
 
-			await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, cancellationToken);
+				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, cancellationToken);
 
-			return result;
+				return result;
+			}
 		}
 
 		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, IList<TTestCase> allTests, CancellationToken token)

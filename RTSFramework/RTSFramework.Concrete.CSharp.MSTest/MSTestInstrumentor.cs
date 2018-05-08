@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +65,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private const string DependencyMonitorClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
 		private static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
-		private static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
+
+		private static string TestMethodStartFullName =
+			"System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String,System.String)";
+
 		private static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
 		private List<Tuple<string, int>> testNamesToExecutionIds;
@@ -151,6 +155,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			return null;
 		}
+
 		private ModuleDefinition LoadModuleDefinitionWithSymbols(string assembly)
 		{
 			try
@@ -172,8 +177,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		public CoverageData GetCoverageData()
 		{
-			RecoverOldAssemblies();
-
 			var coverageData = new HashSet<Tuple<string, string>>();
 
 			foreach (var file in Directory.GetFiles(DependenciesFolder))
@@ -184,7 +187,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					{
 						using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
 						{
-							var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
+							var serializer = JsonSerializer.Create(new JsonSerializerSettings {Formatting = Formatting.Indented});
 							var dependencies = serializer.Deserialize<HashSet<string>>(jsonReader);
 
 							int testExecutionId = Convert.ToInt32(Path.GetFileNameWithoutExtension(file));
@@ -198,33 +201,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 						}
 					}
 				}
-
-				File.Delete(file);
 			}
 
 			return new CoverageData(coverageData);
 		}
 
-		private void RecoverOldAssemblies()
-		{
-			foreach (var assembly in assemblies)
-			{
-				if (File.Exists(assembly + "_old"))
-				{
-					if (File.Exists(assembly))
-					{
-						File.Delete(assembly);
-					}
-
-					File.Move(assembly + "_old", assembly);
-				}
-			}
-
-			foreach (var testAssembly in testAssemblies)
-			{
-				UpdateAssemblyCopies(testAssembly);
-			}
-		}
+		
 
 		#region Instrumenting TestAssemblies
 
@@ -250,38 +232,40 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				return;
 			}
 
-			var moduleDefinition = LoadModule(testAssembly);
-			if (AlreadInstrumented(moduleDefinition))
+			using (var moduleDefinition = LoadModule(testAssembly))
 			{
-				return;
-			}
-
-			foreach (var type in moduleDefinition.GetTypes())
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-				if (type.Name == MonoModuleTyp)
+				if (AlreadInstrumented(moduleDefinition))
 				{
-					continue;
+					return;
 				}
 
-				InstrumentType(type);
-
-				if (type.HasMethods)
+				foreach (var type in moduleDefinition.GetTypes())
 				{
-					foreach (var method in type.Methods)
+					cancellationToken.ThrowIfCancellationRequested();
+					if (type.Name == MonoModuleTyp)
 					{
-						cancellationToken.ThrowIfCancellationRequested();
-						var id = $"{type.FullName}.{method.Name}";
-						if (msTestTestcases.Any(x => x.Id == id))
+						continue;
+					}
+
+					InstrumentType(type);
+
+					if (type.HasMethods)
+					{
+						foreach (var method in type.Methods)
 						{
-							InstrumentTestMethod(method);
+							cancellationToken.ThrowIfCancellationRequested();
+							var id = $"{type.FullName}.{method.Name}";
+							if (msTestTestcases.Any(x => x.Id == id))
+							{
+								InstrumentTestMethod(method);
+							}
 						}
 					}
 				}
-			}
 
-			UpdateModule(moduleDefinition);
-			UpdateAssemblyCopies(testAssembly);
+				UpdateModule(moduleDefinition);
+				UpdateAssemblyCopies(testAssembly);
+			}
 		}
 
 		#endregion
@@ -310,25 +294,27 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				return;
 			}
 
-			var moduleDefinition = LoadModule(assembly);
-			if (AlreadInstrumented(moduleDefinition))
+			using (var moduleDefinition = LoadModule(assembly))
 			{
-				return;
-			}
-
-			foreach (var type in moduleDefinition.GetTypes())
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-
-				if (type.Name == MonoModuleTyp)
+				if (AlreadInstrumented(moduleDefinition))
 				{
-					continue;
+					return;
 				}
 
-				InstrumentType(type);
-			}
+				foreach (var type in moduleDefinition.GetTypes())
+				{
+					cancellationToken.ThrowIfCancellationRequested();
 
-			UpdateModule(moduleDefinition);
+					if (type.Name == MonoModuleTyp)
+					{
+						continue;
+					}
+
+					InstrumentType(type);
+				}
+
+				UpdateModule(moduleDefinition);
+			}
 		}
 
 		#endregion
@@ -341,6 +327,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				AddSearchDirectory(subDirectory, resolver);
 			}
 		}
+
+		#region Assemblies Handling
 
 		//TODO Additional References?
 		private ModuleDefinition LoadModule(string modulePath)
@@ -373,7 +361,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return false;
 		}
 
-		#region Assemblies Handling
 		private void UpdateModule(ModuleDefinition moduleDefinition)
 		{
 			var fileName = moduleDefinition.FileName;
@@ -429,6 +416,26 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 						}
 					}
 				}
+			}
+		}
+		private void RecoverOldAssemblies()
+		{
+			foreach (var assembly in assemblies)
+			{
+				if (File.Exists(assembly + "_old"))
+				{
+					if (File.Exists(assembly))
+					{
+						File.Delete(assembly);
+					}
+
+					File.Move(assembly + "_old", assembly);
+				}
+			}
+
+			foreach (var testAssembly in testAssemblies)
+			{
+				UpdateAssemblyCopies(testAssembly);
 			}
 		}
 
@@ -568,8 +575,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private bool IsStaticFieldAccess(Instruction instruction)
 		{
 			return instruction.OpCode == OpCodes.Ldsfld ||
-				   instruction.OpCode == OpCodes.Ldsflda ||
-				   instruction.OpCode == OpCodes.Stsfld;
+			       instruction.OpCode == OpCodes.Ldsflda ||
+			       instruction.OpCode == OpCodes.Stsfld;
 		}
 
 		#endregion
@@ -578,33 +585,36 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		{
 			var testId = $"{testMethod.DeclaringType.FullName}.{testMethod.Name}";
 
-			var methodArgument = testNamesToExecutionIds.Single(x => x.Item1 == testId).Item2;
+			string methodArgument = testNamesToExecutionIds.Single(x => x.Item1 == testId).Item2.ToString();
 
-			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, "" + methodArgument);
+			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, methodArgument, testMethod.DeclaringType.FullName);
 			InsertCallToDependencyMonitorEnd(testMethod, testMethodEndReference);
 		}
 
 		#region Instrumenting Instructions
 
-		private void InsertCallToDependencyMonitorBeginning(MethodDefinition methodToInstrument, MethodReference dependencyMonitorMethodToCall, string methodArgument)
+		private void InsertCallToDependencyMonitorBeginning(MethodDefinition methodToInstrument, MethodReference dependencyMonitorMethodToCall,
+			params string[] methodArguments)
 		{
 			if (methodToInstrument.HasBody && methodToInstrument.Body.Instructions.Any())
 			{
 				Instruction firstInstruction = methodToInstrument.Body.Instructions.First();
-				InsertCallToDependencyMonitor(methodToInstrument, firstInstruction, dependencyMonitorMethodToCall, methodArgument);
+				InsertCallToDependencyMonitor(methodToInstrument, firstInstruction, dependencyMonitorMethodToCall, methodArguments);
 			}
 		}
 
-		private void InsertCallToDependencyMonitorEnd(MethodDefinition methodToInstrument, MethodReference dependencyMonitorMethodToCall)
+		private void InsertCallToDependencyMonitorEnd(MethodDefinition methodToInstrument, MethodReference dependencyMonitorMethodToCall,
+			params string[] methodArguments)
 		{
 			if (methodToInstrument.HasBody && methodToInstrument.Body.Instructions.Any())
 			{
 				Instruction lastInstruction = methodToInstrument.Body.Instructions.Last();
-				InsertCallToDependencyMonitor(methodToInstrument, lastInstruction, dependencyMonitorMethodToCall);
+				InsertCallToDependencyMonitor(methodToInstrument, lastInstruction, dependencyMonitorMethodToCall, methodArguments);
 			}
 		}
 
-		private void InsertCallToDependencyMonitor(MethodDefinition methodToInstrument, Instruction insertCallBefore, MethodReference dependencyMonitorMethodToCall, string methodArgument = null)
+		private void InsertCallToDependencyMonitor(MethodDefinition methodToInstrument, Instruction insertCallBefore,
+			MethodReference dependencyMonitorMethodToCall, params string[] methodArguments)
 		{
 			MethodReference methodToCall = dependencyMonitorMethodToCall;
 			if (methodToInstrument.Module.FileName != dependencyMonitorMethodToCall.Module.FileName)
@@ -616,7 +626,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			Instruction callInstruction = il.Create(OpCodes.Call, methodToCall);
 			il.InsertBefore(insertCallBefore, callInstruction);
 
-			if (methodArgument != null)
+			foreach (var methodArgument in methodArguments)
 			{
 				Instruction ldStrInstruction = il.Create(OpCodes.Ldstr, methodArgument);
 				il.InsertBefore(callInstruction, ldStrInstruction);
@@ -625,5 +635,15 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		#endregion
 
+		public void Dispose()
+		{
+			//Cleanup Dependencies Folder
+			foreach (var file in Directory.GetFiles(DependenciesFolder))
+			{
+				File.Delete(file);
+			}
+
+			RecoverOldAssemblies();
+		}
 	}
 }

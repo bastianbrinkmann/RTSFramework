@@ -50,18 +50,15 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 			}
 		}
 
-		public static void TestMethodStart(string testMethod)
+		public static void TestMethodStart(string testMethodIdentifier, string testClass)
 		{
-			currentTestMethodName = testMethod;
+			currentTestMethodName = testMethodIdentifier;
 			dependencies = new HashSet<string>();
 
-			if (testMethod != null)
+			if (testMethodIdentifier != null)
 			{
-				int dotIndex = testMethod.LastIndexOf('.');
-
 				//TODO Granularity Level File
-				string className = testMethod.Substring(0, dotIndex);
-				dependencies.Add(className);
+				dependencies.Add(testClass);
 			}
 		}
 
