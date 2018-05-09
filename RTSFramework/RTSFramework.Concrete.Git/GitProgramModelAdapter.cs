@@ -8,6 +8,13 @@ namespace RTSFramework.Concrete.Git
 {
     public class GitProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, GitProgramModel>
     {
+	    private readonly GitCommitsProvider gitCommitsProvider;
+
+	    public GitProgramModelAdapter(GitCommitsProvider gitCommitsProvider)
+	    {
+		    this.gitCommitsProvider = gitCommitsProvider;
+	    }
+
 	    public GitProgramModel Parse(GitVersionIdentification artefact)
 	    {
 		    string gitProgramModelId = null;
@@ -23,7 +30,7 @@ namespace RTSFramework.Concrete.Git
 					gitProgramModelId = $"Uncommitted_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
 					break;
 				case GitVersionReferenceType.SpecificCommit:
-					gitProgramModelId = $"GitRepo_{new DirectoryInfo(artefact.RepositoryPath).Name}_{artefact.Commit.ShaId}";
+					gitProgramModelId = gitCommitsProvider.GetCommitIdentifier(artefact.RepositoryPath, artefact.Commit.ShaId);
 					break;
 			}
 			return new GitProgramModel

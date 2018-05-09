@@ -50,7 +50,7 @@ namespace RTSFramework.ViewModels
 		private GranularityLevel granularityLevel;
 		private bool isGranularityLevelChangable;
 		private string solutionFilePath;
-		private string rootPath;
+		private string repositoryPath;
 		private bool isRunning;
 		private ICommand cancelRunCommand;
 		private ObservableCollection<TestResultListViewItemViewModel> testResults;
@@ -65,6 +65,9 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<CommitViewModel> toCommitModels;
 		private bool isFromCommitChangeable;
 		private bool isToCommitChangeable;
+		private ProgramModelType programModelType;
+		private bool isRepositoryPathChangable;
+		private ObservableCollection<DiscoveryType> discoveryTypes;
 
 		#endregion
 
@@ -84,6 +87,7 @@ namespace RTSFramework.ViewModels
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
 
+			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
 			FromCommitModels = new ObservableCollection<CommitViewModel>();
 			ToCommitModels = new ObservableCollection<CommitViewModel>();
@@ -93,13 +97,14 @@ namespace RTSFramework.ViewModels
 			PropertyChanged += OnPropertyChanged;
 
 			//TODO: Defaults - Load from config
+			ProgramModelType = ProgramModelType.GitModel;
 			DiscoveryType = DiscoveryType.GitDiscovery;
 			ProcessingType = ProcessingType.MSTestExecution;
 			RTSApproachType = RTSApproachType.ClassSRTS;
 			GranularityLevel = GranularityLevel.Class;
 			IsGranularityLevelChangable = false;
 			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
-			RootPath = @"C:\Git\TIATestProject\";
+			RepositoryPath = @"C:\Git\TIATestProject\";
 		}
 
 		private void SpecifyIntendedChanges()
@@ -112,16 +117,16 @@ namespace RTSFramework.ViewModels
 		private void SelectRepository()
 		{
 			string selectedDirectory;
-			if (dialogService.SelectDirectory(RootPath, out selectedDirectory))
+			if (dialogService.SelectDirectory(RepositoryPath, out selectedDirectory))
 			{
-				RootPath = selectedDirectory;
+				RepositoryPath = selectedDirectory;
 			}
 		}
 
 		private void SelectSolutionFile()
 		{
 			string selectedFile;
-			if (dialogService.SelectFile(RootPath, "Solution Files (*.sln)|*.sln", out selectedFile))
+			if (dialogService.SelectFile(RepositoryPath, "Solution Files (*.sln)|*.sln", out selectedFile))
 			{
 				SolutionFilePath = selectedFile;
 			}
@@ -135,7 +140,7 @@ namespace RTSFramework.ViewModels
 		private void RefreshCommitsSelection()
 		{
 			FromCommitModels.Clear();
-			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RootPath).Select(ConvertCommit));
+			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).Select(ConvertCommit));
 			FromCommit = FromCommitModels.FirstOrDefault();
 			IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
 			IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
@@ -151,6 +156,22 @@ namespace RTSFramework.ViewModels
 			};
 		}
 
+		private void RefreshDiscoveryTypes()
+		{
+			if (ProgramModelType == ProgramModelType.GitModel)
+			{
+				DiscoveryTypes.Clear();
+				DiscoveryTypes.Add(DiscoveryType.GitDiscovery);
+				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
+			}
+			else if (ProgramModelType == ProgramModelType.TFS2010Model)
+			{
+				DiscoveryTypes.Clear();
+				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
+			}
+			DiscoveryType = DiscoveryTypes.FirstOrDefault();
+		}
+
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
 		{
 			switch (propertyChangedEventArgs.PropertyName)
@@ -164,6 +185,10 @@ namespace RTSFramework.ViewModels
 					}
 					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;*/
 					break;
+				case nameof(ProgramModelType):
+					IsRepositoryPathChangable = ProgramModelType == ProgramModelType.GitModel;
+					RefreshDiscoveryTypes();
+					break;
 				case nameof(DiscoveryType):
 					IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
 					IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
@@ -172,7 +197,7 @@ namespace RTSFramework.ViewModels
 				case nameof(RunStatus):
 					IsRunning = RunStatus == RunStatus.Running;
 					break;
-				case nameof(RootPath):
+				case nameof(RepositoryPath):
 					RefreshCommitsSelection();
 					break;
 				case nameof(FromCommit):
@@ -183,13 +208,33 @@ namespace RTSFramework.ViewModels
 						DisplayName = "Uncommitted Changes",
 						Identifier = UncommittedChangesIdentifier
 					});
-					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RootPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
+					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
 					ToCommit = ToCommitModels.SingleOrDefault(x => x.Identifier == toCommitId) ?? ToCommitModels.FirstOrDefault();
 					break;
 			}
 		}
 
 		#region Properties
+
+		public ObservableCollection<DiscoveryType> DiscoveryTypes
+		{
+			get { return discoveryTypes; }
+			set
+			{
+				discoveryTypes = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool IsRepositoryPathChangable
+		{
+			get { return isRepositoryPathChangable; }
+			set
+			{
+				isRepositoryPathChangable = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public bool IsToCommitChangeable
 		{
@@ -331,12 +376,12 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public string RootPath
+		public string RepositoryPath
 		{
-			get { return rootPath; }
+			get { return repositoryPath; }
 			set
 			{
-				rootPath = value;
+				repositoryPath = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -411,6 +456,16 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
+		public ProgramModelType ProgramModelType
+		{
+			get { return programModelType; }
+			set
+			{
+				programModelType = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		#endregion
 
 		private async void ExecuteRunFixModel()
@@ -450,6 +505,17 @@ namespace RTSFramework.ViewModels
 
 		private async Task ExecuteUserIntendedChangesRun()
 		{
+			string versionId = $"Intended_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
+			switch (ProgramModelType)
+			{
+				case ProgramModelType.GitModel:
+					versionId = gitCommitsProvider.GetCommitIdentifier(RepositoryPath, gitCommitsProvider.GetLatestCommitSha(RepositoryPath));
+					break;
+				case ProgramModelType.TFS2010Model:
+					versionId = "Test";
+					break;
+			}
+
 			var intendedChangesArtefact = new IntendedChangesArtefact
 			{
 				IntendedChanges = intendedChangesProvider.IntendedChanges,
@@ -457,7 +523,7 @@ namespace RTSFramework.ViewModels
 				{
 					GranularityLevel = GranularityLevel,
 					AbsoluteSolutionPath = SolutionFilePath,
-					VersionId = $"Intended_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}"
+					VersionId = versionId
 				}
 			};
 
@@ -529,7 +595,7 @@ namespace RTSFramework.ViewModels
 			{
 				ReferenceType = GitVersionReferenceType.SpecificCommit,
 				Commit = new GitCommit { ShaId = FromCommit.Identifier },
-				RepositoryPath = RootPath,
+				RepositoryPath = RepositoryPath,
 				AbsoluteSolutionPath = SolutionFilePath,
 				GranularityLevel = GranularityLevel
 			};
@@ -539,7 +605,7 @@ namespace RTSFramework.ViewModels
 				newGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.CurrentChanges,
-					RepositoryPath = RootPath,
+					RepositoryPath = RepositoryPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};
@@ -550,7 +616,7 @@ namespace RTSFramework.ViewModels
 				{
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
 					Commit = new GitCommit { ShaId = ToCommit.Identifier },
-					RepositoryPath = RootPath,
+					RepositoryPath = RepositoryPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};

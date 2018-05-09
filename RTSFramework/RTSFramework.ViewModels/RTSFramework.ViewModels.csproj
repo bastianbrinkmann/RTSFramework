@@ -95,6 +95,7 @@
     <Compile Include="IntendedChangesDialogViewModel.cs" />
     <Compile Include="RequireUIServices\IApplicationUiExecutor.cs" />
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
+    <Compile Include="RunConfigurations\ProgramModelType.cs" />
     <Compile Include="RunStatus.cs" />
     <Compile Include="Controller\StateBasedController.cs" />
     <Compile Include="MainWindowViewModel.cs" />

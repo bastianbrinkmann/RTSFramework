@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
@@ -22,6 +24,19 @@ namespace RTSFramework.Concrete.Git
 					Message = x.Message,
 					Committer = x.Committer.Name
 				}).ToList();
+			}
+		}
+
+		public string GetCommitIdentifier(string repositoryPath, string commitId)
+		{
+			return $"GitRepo_{new DirectoryInfo(repositoryPath).Name}_{commitId}";
+		}
+
+		public string GetLatestCommitSha(string repositoryPath)
+		{
+			using (var repo = new Repository(repositoryPath))
+			{
+				return repo.Head.Tip.Sha;
 			}
 		}
 	}
