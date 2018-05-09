@@ -4,7 +4,20 @@ namespace RTSFramework.ViewModels
 {
 	public class CommitViewModel
 	{
-		public string DisplayName => $"{WithMaxLength(Identifier, 5)}.. - {WithoutNewLine(WithMaxLength(Message, 50))}..\nby {Committer ?? ""}";
+		private string displayName;
+
+		public string DisplayName
+		{
+			get
+			{
+				if (displayName == null)
+				{
+					return $"{WithMaxLength(Identifier, 5)}.. - {WithoutNewLine(WithMaxLength(Message, 50))}..\nby {Committer ?? ""}";
+				}
+				return displayName;
+			}
+			set { displayName = value; }
+		}
 
 		private string WithoutNewLine(string value)
 		{

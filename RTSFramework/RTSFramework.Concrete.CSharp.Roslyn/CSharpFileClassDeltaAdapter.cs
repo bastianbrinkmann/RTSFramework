@@ -5,28 +5,16 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
-using RTSFramework.Contracts.DeltaDiscoverer;
+using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-	public class CSharpClassDeltaDiscoverer<TModel> : IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpClassElement>> where TModel : IProgramModel
+	public class CSharpFileClassDeltaAdapter<TModel> : IDeltaAdapter<StructuralDelta<TModel, CSharpFileElement>, StructuralDelta<TModel, CSharpClassElement>, TModel> 
+		where TModel : IProgramModel
 	{
-		private readonly IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer;
-
-		public CSharpClassDeltaDiscoverer(IOfflineDeltaDiscoverer<TModel, StructuralDelta<TModel, CSharpFileElement>> internalDiscoverer)
-		{
-			this.internalDiscoverer = internalDiscoverer;
-		}
-
-		public StructuralDelta<TModel, CSharpClassElement> Discover(TModel oldModel, TModel newModel)
-		{
-			var fileDelta = internalDiscoverer.Discover(oldModel, newModel);
-			return Convert(fileDelta);
-		}
-
-		private StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
+		public StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
 		{
 			var result = new StructuralDelta<TModel, CSharpClassElement>(delta.SourceModel, delta.TargetModel);
 
@@ -103,5 +91,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 		{
 			return node.Name.ToString();
 		}
+
+		
 	}
 }

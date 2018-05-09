@@ -18,10 +18,13 @@ using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.Reporting;
 using RTSFramework.Concrete.TFS2010;
 using RTSFramework.Concrete.TFS2010.Models;
+using RTSFramework.Concrete.User;
+using RTSFramework.Concrete.User.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
@@ -30,8 +33,11 @@ namespace RTSFramework.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
+		private const string UncommittedChangesIdentifier = "uncomittedChanges";
+
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
+		private readonly IIntendedChangesProvider intendedChangesProvider;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
@@ -44,9 +50,7 @@ namespace RTSFramework.ViewModels
 		private GranularityLevel granularityLevel;
 		private bool isGranularityLevelChangable;
 		private string solutionFilePath;
-		private string repositoryPath;
-		private bool isGitRepositoryPathChangable;
-		private ProgramModelType programModelType;
+		private string rootPath;
 		private bool isRunning;
 		private ICommand cancelRunCommand;
 		private ObservableCollection<TestResultListViewItemViewModel> testResults;
@@ -64,10 +68,14 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		public MainWindowViewModel(IDialogService dialogService, GitCommitsProvider gitCommitsProvider, IApplicationUiExecutor applicationUiExecutor)
+		public MainWindowViewModel(IDialogService dialogService, 
+			GitCommitsProvider gitCommitsProvider, 
+			IApplicationUiExecutor applicationUiExecutor,
+			IIntendedChangesProvider intendedChangesProvider)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
+			this.intendedChangesProvider = intendedChangesProvider;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -85,15 +93,13 @@ namespace RTSFramework.ViewModels
 			PropertyChanged += OnPropertyChanged;
 
 			//TODO: Defaults - Load from config
-			DiscoveryType = DiscoveryType.LocalDiscovery;
+			DiscoveryType = DiscoveryType.GitDiscovery;
 			ProcessingType = ProcessingType.MSTestExecution;
 			RTSApproachType = RTSApproachType.ClassSRTS;
 			GranularityLevel = GranularityLevel.Class;
 			IsGranularityLevelChangable = false;
 			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
-			ProgramModelType = ProgramModelType.GitProgramModel;
-			RepositoryPath = @"C:\Git\TIATestProject\";
-			IsGitRepositoryPathChangable = true;
+			RootPath = @"C:\Git\TIATestProject\";
 		}
 
 		private void SpecifyIntendedChanges()
@@ -106,16 +112,16 @@ namespace RTSFramework.ViewModels
 		private void SelectRepository()
 		{
 			string selectedDirectory;
-			if (dialogService.SelectDirectory(RepositoryPath, out selectedDirectory))
+			if (dialogService.SelectDirectory(RootPath, out selectedDirectory))
 			{
-				RepositoryPath = selectedDirectory;
+				RootPath = selectedDirectory;
 			}
 		}
 
 		private void SelectSolutionFile()
 		{
 			string selectedFile;
-			if (dialogService.SelectFile(RepositoryPath, "Solution Files (*.sln)|*.sln", out selectedFile))
+			if (dialogService.SelectFile(RootPath, "Solution Files (*.sln)|*.sln", out selectedFile))
 			{
 				SolutionFilePath = selectedFile;
 			}
@@ -129,9 +135,10 @@ namespace RTSFramework.ViewModels
 		private void RefreshCommitsSelection()
 		{
 			FromCommitModels.Clear();
-			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).Select(ConvertCommit));
-			FromCommit =FromCommitModels.FirstOrDefault();
-			IsFromCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && FromCommitModels.Any();
+			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RootPath).Select(ConvertCommit));
+			FromCommit = FromCommitModels.FirstOrDefault();
+			IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
+			IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
 		}
 
 		private CommitViewModel ConvertCommit(GitCommit gitCommit)
@@ -157,26 +164,27 @@ namespace RTSFramework.ViewModels
 					}
 					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;*/
 					break;
-				case nameof(ProgramModelType):
-					IsGitRepositoryPathChangable = ProgramModelType == ProgramModelType.GitProgramModel;
-					break;
 				case nameof(DiscoveryType):
 					IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
-					IsFromCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && FromCommitModels.Any();
-					IsToCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && ToCommitModels.Any();
+					IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
+					IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
 					break;
 				case nameof(RunStatus):
 					IsRunning = RunStatus == RunStatus.Running;
 					break;
-				case nameof(RepositoryPath):
+				case nameof(RootPath):
 					RefreshCommitsSelection();
 					break;
 				case nameof(FromCommit):
 					var toCommitId = ToCommit?.Identifier;
 					ToCommitModels.Clear();
-					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
+					ToCommitModels.Add(new CommitViewModel
+					{
+						DisplayName = "Uncommitted Changes",
+						Identifier = UncommittedChangesIdentifier
+					});
+					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RootPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
 					ToCommit = ToCommitModels.SingleOrDefault(x => x.Identifier == toCommitId) ?? ToCommitModels.FirstOrDefault();
-					IsToCommitChangeable = DiscoveryType == DiscoveryType.VersionCompare && ToCommitModels.Any();
 					break;
 			}
 		}
@@ -323,32 +331,12 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public ProgramModelType ProgramModelType
+		public string RootPath
 		{
-			get { return programModelType; }
+			get { return rootPath; }
 			set
 			{
-				programModelType = value;
-				RaisePropertyChanged();
-			}
-		}
-
-		public bool IsGitRepositoryPathChangable
-		{
-			get { return isGitRepositoryPathChangable; }
-			set
-			{
-				isGitRepositoryPathChangable = value;
-				RaisePropertyChanged();
-			}
-		}
-
-		public string RepositoryPath
-		{
-			get { return repositoryPath; }
-			set
-			{
-				repositoryPath = value;
+				rootPath = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -434,13 +422,13 @@ namespace RTSFramework.ViewModels
 
 			try
 			{
-				switch (ProgramModelType)
+				switch (DiscoveryType)
 				{
-					case ProgramModelType.GitProgramModel:
+					case DiscoveryType.GitDiscovery:
 						await ExecuteGitRun();
 						break;
-					case ProgramModelType.TFS2010ProgramModel:
-						await ExecuteTFS2010Run();
+					case DiscoveryType.UserIntendedChangesDiscovery:
+						await ExecuteUserIntendedChangesRun();
 						break;
 				}
 
@@ -458,49 +446,111 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
+		#region DeltaBasedController
+
+		private async Task ExecuteUserIntendedChangesRun()
+		{
+			var intendedChangesArtefact = new IntendedChangesArtefact
+			{
+				IntendedChanges = intendedChangesProvider.IntendedChanges,
+				LocalProgramModel = new LocalProgramModel
+				{
+					GranularityLevel = GranularityLevel,
+					AbsoluteSolutionPath = SolutionFilePath,
+					VersionId = $"Intended_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}"
+				}
+			};
+
+			await ExecuteDeltaBasedRunFixGranularityLevel<IntendedChangesArtefact, LocalProgramModel>(intendedChangesArtefact);
+		}
+
+		private async Task ExecuteDeltaBasedRunFixGranularityLevel<TDeltaArtefact, TModel>(TDeltaArtefact deltaArtefact)
+			where TModel : CSharpProgramModel
+		{
+			switch (GranularityLevel)
+			{
+				/* TODO Granularity Level File
+				 * 
+				 * case GranularityLevel.File:
+					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramArtefact, newProgramArtefact);
+					break;*/
+				case GranularityLevel.Class:
+					await ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(deltaArtefact);
+					break;
+			}
+		}
+
+		private async Task ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, TDelta>(TDeltaArtefact deltaArtefact)
+			where TModel : IProgramModel
+			where TDelta : IDelta<TModel>
+		{
+			switch (ProcessingType)
+			{
+				case ProcessingType.MSTestExecution:
+				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
+					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(deltaArtefact);
+					break;
+				case ProcessingType.CsvReporting:
+					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(deltaArtefact);
+					HandleCsvCreationResult(csvCreationResult);
+					break;
+				case ProcessingType.ListReporting:
+					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(deltaArtefact);
+					HandleListReportingResult(listReportingResult);
+					break;
+			}
+		}
+
+		private async Task<TResult> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TTestCase, TResult>(TDeltaArtefact deltaArtefact) where TTestCase : ITestCase
+			where TModel : IProgramModel
+			where TDelta : IDelta<TModel>
+			where TResult : ITestProcessingResult
+		{
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult>(RTSApproachType, ProcessingType);
+
+			deltaBasedController.ImpactedTest += HandleImpactedTest;
+			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
+
+			return
+				await Task.Run(
+					() => deltaBasedController.ExecuteImpactedTests(deltaArtefact, cancellationTokenSource.Token),
+					cancellationTokenSource.Token);
+		}
+
+		#endregion
+
+		#region StateBasedController
+
 		private async Task ExecuteGitRun()
 		{
-			GitVersionIdentification oldGitIdentification, newGitIdentification;
+			GitVersionIdentification newGitIdentification;
 
-			if (DiscoveryType == DiscoveryType.VersionCompare)
+			var oldGitIdentification = new GitVersionIdentification
 			{
-				oldGitIdentification = new GitVersionIdentification
+				ReferenceType = GitVersionReferenceType.SpecificCommit,
+				Commit = new GitCommit { ShaId = FromCommit.Identifier },
+				RepositoryPath = RootPath,
+				AbsoluteSolutionPath = SolutionFilePath,
+				GranularityLevel = GranularityLevel
+			};
+
+			if (ToCommit.Identifier == UncommittedChangesIdentifier)
+			{
+				newGitIdentification = new GitVersionIdentification
 				{
-					ReferenceType = GitVersionReferenceType.SpecificCommit,
-					Commit = new GitCommit { ShaId = FromCommit.Identifier },
-					RepositoryPath = RepositoryPath,
+					ReferenceType = GitVersionReferenceType.CurrentChanges,
+					RepositoryPath = RootPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};
 			}
 			else
-			{
-				oldGitIdentification = new GitVersionIdentification
-				{
-					ReferenceType = GitVersionReferenceType.LatestCommit,
-					RepositoryPath = RepositoryPath,
-					AbsoluteSolutionPath = SolutionFilePath,
-					GranularityLevel = GranularityLevel
-				};
-			}
-
-			if (DiscoveryType == DiscoveryType.VersionCompare && ToCommit != null)
 			{
 				newGitIdentification = new GitVersionIdentification
 				{
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
 					Commit = new GitCommit { ShaId = ToCommit.Identifier },
-					RepositoryPath = RepositoryPath,
-					AbsoluteSolutionPath = SolutionFilePath,
-					GranularityLevel = GranularityLevel
-				};
-			}
-			else
-			{
-				newGitIdentification = new GitVersionIdentification
-				{
-					ReferenceType = GitVersionReferenceType.CurrentChanges,
-					RepositoryPath = RepositoryPath,
+					RepositoryPath = RootPath,
 					AbsoluteSolutionPath = SolutionFilePath,
 					GranularityLevel = GranularityLevel
 				};
@@ -511,11 +561,6 @@ namespace RTSFramework.ViewModels
 
 		private async Task ExecuteTFS2010Run()
 		{
-			if (DiscoveryType == DiscoveryType.LocalDiscovery || DiscoveryType == DiscoveryType.VersionCompare)
-			{
-				throw new ArgumentException("Commit based changes combined with TFS 2010 are not supported yet!");
-			}
-
 			var oldTfsProgramArtefact = new TFS2010VersionIdentification
 			{
 				AbsoluteSolutionPath = SolutionFilePath,
@@ -560,24 +605,69 @@ namespace RTSFramework.ViewModels
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
-					bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?","CSV File Created");
-					if (openFile)
-					{
-						Process.Start(csvCreationResult.FilePath);
-					}
+					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
 					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
-					TestResults.Clear();
-					TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService)
-					{
-						FullyQualifiedName = x.Id,
-						FullClassName = x.FullClassName,
-						Name = x.Name,
-						Categories = string.Join(",", x.Categories)
-					}));
+					HandleListReportingResult(listReportingResult);
 					break;
 			}
+		}
+
+		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
+			where TModel : IProgramModel
+			where TDelta : IDelta<TModel>
+			where TResult : ITestProcessingResult
+		{
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>(RTSApproachType, ProcessingType);
+
+			stateBasedController.ImpactedTest += HandleImpactedTest;
+			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
+
+			return
+				await Task.Run(
+					() => stateBasedController.ExecuteImpactedTests(oldArtefact, newArtefact, cancellationTokenSource.Token),
+					cancellationTokenSource.Token);
+		}
+
+		#endregion
+
+		private void HandleListReportingResult<TTestCase>(TestListResult<TTestCase> listReportingResult) where TTestCase : ITestCase
+		{
+			TestResults.Clear();
+			TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService)
+			{
+				FullyQualifiedName = x.Id,
+				FullClassName = x.FullClassName,
+				Name = x.Name,
+				Categories = string.Join(",", x.Categories)
+			}));
+		}
+
+		private void HandleCsvCreationResult(FileProcessingResult csvCreationResult)
+		{
+			bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?", "CSV File Created");
+			if (openFile)
+			{
+				Process.Start(csvCreationResult.FilePath);
+			}
+		}
+
+		private void HandleTestExecutionResult<TTestCase>(object sender, TestCaseResultEventArgs<TTestCase> args) where TTestCase : ITestCase
+		{
+			applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
+		}
+
+		private void HandleImpactedTest<TTestCase>(object sender, ImpactedTestEventArgs<TTestCase> args) where TTestCase : ITestCase
+		{
+			applicationUiExecutor.ExecuteOnUi(() =>
+					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
+					{
+						FullyQualifiedName = args.TestCase.Id,
+						Name = args.TestCase.Name,
+						FullClassName = args.TestCase.FullClassName,
+						Categories = string.Join(",", args.TestCase.Categories)
+					}));
 		}
 
 		private void ProcessExecutionResult<TTestCase>(ITestCaseResult<TTestCase> executionResult) where TTestCase : ITestCase
@@ -608,40 +698,6 @@ namespace RTSFramework.ViewModels
 				currentTestViewModel.ErrorMessage = executionResult.ErrorMessage;
 				currentTestViewModel.StackTrace = executionResult.StackTrace;
 			}
-		}
-
-		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
-			where TModel : IProgramModel
-			where TDelta : IDelta<TModel>
-			where TResult : ITestProcessingResult
-		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>(DiscoveryType, RTSApproachType, ProcessingType);
-
-			stateBasedController.ImpactedTest += (sender, args) =>
-			{
-				applicationUiExecutor.ExecuteOnUi(() =>
-					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
-					{
-						FullyQualifiedName = args.TestCase.Id,
-						Name = args.TestCase.Name,
-						FullClassName =  args.TestCase.FullClassName,
-						Categories = string.Join(",", args.TestCase.Categories)
-					}));
-			};
-
-			var executor = stateBasedController.TestsProcessor as ITestsExecutor<TTestCase, TDelta, TModel>;
-			if (executor != null)
-			{
-				executor.TestResultAvailable += (sender, args) =>
-				{
-					applicationUiExecutor.ExecuteOnUi(() => ProcessExecutionResult(args.TestResult));
-				};
-			}
-
-			return
-				await Task.Run(
-					() => stateBasedController.ExecuteImpactedTests(oldArtefact, newArtefact, cancellationTokenSource.Token),
-					cancellationTokenSource.Token);
 		}
 	}
 }

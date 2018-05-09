@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
+    <Compile Include="Adapter\IDeltaAdapter.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="ITestsPrioritizer.cs" />

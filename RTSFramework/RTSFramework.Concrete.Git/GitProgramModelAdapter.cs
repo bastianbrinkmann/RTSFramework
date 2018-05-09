@@ -12,23 +12,20 @@ namespace RTSFramework.Concrete.Git
 	    {
 		    string gitProgramModelId = null;
 
-			using (Repository repo = new Repository(artefact.RepositoryPath))
-			{
-				switch (artefact.ReferenceType)
-				{
-					case GitVersionReferenceType.LatestCommit:
-						artefact.Commit.ShaId = repo.Head.Tip.Id.Sha;
-						gitProgramModelId = $"GitRepo_{new DirectoryInfo(artefact.RepositoryPath).Name}_{artefact.Commit.ShaId}";
-						break;
-					case GitVersionReferenceType.CurrentChanges:
-						gitProgramModelId = $"Uncommitted_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
-						break;
-					case GitVersionReferenceType.SpecificCommit:
-						gitProgramModelId = $"GitRepo_{new DirectoryInfo(artefact.RepositoryPath).Name}_{artefact.Commit.ShaId}";
-						break;
-				}
-			}
+		    if (!Repository.IsValid(artefact.RepositoryPath))
+		    {
+			    throw new ArgumentException($"There is no valid Git repository at '{artefact.RepositoryPath}'.");
+		    }
 
+			switch (artefact.ReferenceType)
+			{
+				case GitVersionReferenceType.CurrentChanges:
+					gitProgramModelId = $"Uncommitted_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
+					break;
+				case GitVersionReferenceType.SpecificCommit:
+					gitProgramModelId = $"GitRepo_{new DirectoryInfo(artefact.RepositoryPath).Name}_{artefact.Commit.ShaId}";
+					break;
+			}
 			return new GitProgramModel
 			{
 				VersionId = gitProgramModelId,

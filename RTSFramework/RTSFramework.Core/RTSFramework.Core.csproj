@@ -74,6 +74,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChainingDeltaAdapter.cs" />
+    <Compile Include="IdentityDeltaAdapter.cs" />
     <Compile Include="Models\FileElement.cs" />
     <Compile Include="NoOpPrioritizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
