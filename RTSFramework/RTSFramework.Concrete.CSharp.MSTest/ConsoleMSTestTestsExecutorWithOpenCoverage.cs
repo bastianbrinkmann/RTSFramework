@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.openCoverArtefactAdapter = openCoverArtefactAdapter;
 		}
 
-		public override async Task<ITestExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public override async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 			var result = new MSTestExectionWithCodeCoverageResult();
 

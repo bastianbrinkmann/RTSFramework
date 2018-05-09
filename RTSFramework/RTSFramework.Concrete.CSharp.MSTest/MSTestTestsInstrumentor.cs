@@ -33,7 +33,7 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MSTestInstrumentor<TModel> : ITestInstrumentor<TModel, MSTestTestcase> where TModel : CSharpProgramModel
+	public class MSTestTestsInstrumentor<TModel> : ITestsInstrumentor<TModel, MSTestTestcase> where TModel : CSharpProgramModel
 	{
 		private const string MonoModuleTyp = "<Module>";
 		private const string DependenciesFolder = @"TestResults\Dependencies";
@@ -51,7 +51,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private readonly Dictionary<string, string> classToFileNamesMapping = new Dictionary<string, string>();
 
-		public MSTestInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
+		public MSTestTestsInstrumentor(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
 			ILoggingHelper loggingHelper,
 			ISettingsProvider settingsProvider)
 		{

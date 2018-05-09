@@ -4,7 +4,7 @@ using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestExecutionResult<TTestCase> : ITestProcessingResult where TTestCase : ITestCase
+	public interface ITestsExecutionResult<TTestCase> : ITestProcessingResult where TTestCase : ITestCase
 	{
 		List<ITestCaseResult<TTestCase>> TestcasesResults { get; }
 	}

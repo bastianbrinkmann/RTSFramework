@@ -19,7 +19,7 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class ConsoleMSTestTestsExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
+    public class ConsoleMSTestTestsExecutor<TDelta, TModel> : ITestsExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
 	    private readonly ISettingsProvider settingsProvider;
@@ -33,7 +33,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
         protected IList<MSTestTestcase> CurrentlyExecutedTests;
 
-        public virtual async Task<ITestExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+        public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 	        var executionResult = new MSTestExectionResult();
 

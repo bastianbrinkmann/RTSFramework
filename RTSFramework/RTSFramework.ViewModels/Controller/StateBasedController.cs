@@ -25,11 +25,12 @@ namespace RTSFramework.ViewModels.Controller
 	{
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
-		public ITestProcessor<TTestCase, TResult, TDelta, TModel> TestProcessor { get; }
+		public ITestsProcessor<TTestCase, TResult, TDelta, TModel> TestsProcessor { get; }
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
+		private readonly ITestsPrioritizer<TTestCase> testsPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 
 		public StateBasedController(
@@ -37,14 +38,16 @@ namespace RTSFramework.ViewModels.Controller
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
 			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
 			ITestSelector<TModel, TDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult, TDelta, TModel> testProcessor,
+			ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor,
+			ITestsPrioritizer<TTestCase> testsPrioritizer,
 			ILoggingHelper loggingHelper)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
-			TestProcessor = testProcessor;
+			TestsProcessor = testsProcessor;
 			this.testsDiscoverer = testsDiscoverer;
 			this.testSelector = testSelector;
+			this.testsPrioritizer = testsPrioritizer;
 			this.loggingHelper = loggingHelper;
 		}
 
@@ -55,13 +58,13 @@ namespace RTSFramework.ViewModels.Controller
 			var oldModel = artefactAdapter.Parse(oldArtefact);
 			var newModel = artefactAdapter.Parse(newArtefact);
 
-			var delta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "DeltaDiscovery");
+			var delta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "Delta Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "TestsDiscovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Test Selector");
+			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Tests Selection");
 
 			foreach (var impactedTest in impactedTests)
 			{
@@ -70,7 +73,9 @@ namespace RTSFramework.ViewModels.Controller
 
 			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
-			var processingResult = await loggingHelper.ReportNeededTime(() => TestProcessor.ProcessTests(impactedTests, allTests, delta, token), "ProcessingOfImpactedTests");
+			var prioritizedTests = await loggingHelper.ReportNeededTime(() => testsPrioritizer.PrioritizeTests(impactedTests, token), "Tests Prioritization");
+
+			var processingResult = await loggingHelper.ReportNeededTime(() => TestsProcessor.ProcessTests(prioritizedTests, allTests, delta, token), "Tests Processing");
 
 			return processingResult;
 		}

@@ -13,20 +13,20 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class TestExecutorWithInstrumenting<TModel, TDelta, TTestCase> : ITestExecutor<TTestCase, TDelta, TModel>
+	public class TestsExecutorWithInstrumenting<TModel, TDelta, TTestCase> : ITestsExecutor<TTestCase, TDelta, TModel>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
 	{
-		private readonly ITestExecutor<TTestCase, TDelta, TModel> executor;
-		private readonly ITestInstrumentor<TModel, TTestCase> instrumentor;
+		private readonly ITestsExecutor<TTestCase, TDelta, TModel> executor;
+		private readonly ITestsInstrumentor<TModel, TTestCase> instrumentor;
 		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider;
 		private readonly IApplicationClosedHandler applicationClosedHandler;
 
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 
-		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TDelta, TModel> executor,
-			ITestInstrumentor<TModel, TTestCase> instrumentor,
+		public TestsExecutorWithInstrumenting(ITestsExecutor<TTestCase, TDelta, TModel> executor,
+			ITestsInstrumentor<TModel, TTestCase> instrumentor,
 			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider,
 			IApplicationClosedHandler applicationClosedHandler)
 		{
@@ -36,7 +36,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.applicationClosedHandler = applicationClosedHandler;
 		}
 
-		public async Task<ITestExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
+		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
 			CancellationToken cancellationToken)
 		{
 			using (instrumentor)

@@ -556,7 +556,7 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
+					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
 					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
@@ -629,7 +629,7 @@ namespace RTSFramework.ViewModels
 					}));
 			};
 
-			var executor = stateBasedController.TestProcessor as ITestExecutor<TTestCase, TDelta, TModel>;
+			var executor = stateBasedController.TestsProcessor as ITestsExecutor<TTestCase, TDelta, TModel>;
 			if (executor != null)
 			{
 				executor.TestResultAvailable += (sender, args) =>

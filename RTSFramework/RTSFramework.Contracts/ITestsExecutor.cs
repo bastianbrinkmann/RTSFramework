@@ -5,7 +5,7 @@ using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestExecutor<TTestCase, TDelta, TModel> : ITestProcessor<TTestCase, ITestExecutionResult<TTestCase>, TDelta, TModel>
+	public interface ITestsExecutor<TTestCase, TDelta, TModel> : ITestsProcessor<TTestCase, ITestsExecutionResult<TTestCase>, TDelta, TModel>
 		where TTestCase : ITestCase
 		where TDelta : IDelta<TModel>
 		where TModel : IProgramModel

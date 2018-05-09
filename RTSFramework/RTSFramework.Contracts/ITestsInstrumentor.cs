@@ -6,7 +6,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestInstrumentor<TModel, TTestCase> : IDisposable where TModel : IProgramModel where TTestCase : ITestCase
+	public interface ITestsInstrumentor<TModel, TTestCase> : IDisposable where TModel : IProgramModel where TTestCase : ITestCase
 	{
 		Task InstrumentModelForTests(TModel toInstrument, IList<TTestCase> tests, CancellationToken token);
 

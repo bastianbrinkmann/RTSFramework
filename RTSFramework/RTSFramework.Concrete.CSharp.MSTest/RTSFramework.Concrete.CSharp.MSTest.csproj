@@ -109,7 +109,7 @@
     <Compile Include="MonoMSTestTestsDiscoverer.cs" />
     <Compile Include="ConsoleMSTestTestsExecutor.cs" />
     <Compile Include="ConsoleMSTestTestsExecutorWithOpenCoverage.cs" />
-    <Compile Include="MSTestInstrumentor.cs" />
+    <Compile Include="MSTestTestsInstrumentor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Adapters\MSTestExecutionResultParameters.cs" />
     <Compile Include="Adapters\OpenCoverXmlCoverageAdapter.cs" />
