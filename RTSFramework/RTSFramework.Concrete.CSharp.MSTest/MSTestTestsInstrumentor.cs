@@ -218,11 +218,22 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				CancellationToken = cancellationToken,
 				MaxDegreeOfParallelism = Environment.ProcessorCount
 			};
-			Parallel.ForEach(testAssemblies, parallelOptions, testAssembly =>
+
+			foreach (var testAssembly in testAssemblies)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				InstrumentTestAssembly(testAssembly, parallelOptions.CancellationToken);
+			}
+			/*Parallel.ForEach(testAssemblies, parallelOptions, testAssembly =>
 			{
 				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 				InstrumentTestAssembly(testAssembly, parallelOptions.CancellationToken);
-			});
+			}); */
+
+			foreach (var testAssembly in testAssemblies)
+			{
+				UpdateAssemblyCopies(testAssembly);
+			}
 		}
 
 		private void InstrumentTestAssembly(string testAssembly, CancellationToken cancellationToken)
@@ -265,7 +276,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				}
 
 				UpdateModule(moduleDefinition);
-				UpdateAssemblyCopies(testAssembly);
 			}
 		}
 
@@ -280,11 +290,16 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				CancellationToken = cancellationToken,
 				MaxDegreeOfParallelism = Environment.ProcessorCount
 			};
-			Parallel.ForEach(assemblies.Except(testAssemblies), parallelOptions, assembly =>
+			foreach (var assembly in assemblies.Except(testAssemblies))
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				InstrumentProgramAssembly(assembly, parallelOptions.CancellationToken);
+			}
+			/*Parallel.ForEach(assemblies.Except(testAssemblies), parallelOptions, assembly =>
 			{
 				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 				InstrumentProgramAssembly(assembly, parallelOptions.CancellationToken);
-			});
+			});*/
 		}
 
 		private void InstrumentProgramAssembly(string assembly, CancellationToken cancellationToken)
