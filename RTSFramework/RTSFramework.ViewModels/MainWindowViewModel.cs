@@ -24,6 +24,8 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.Contracts.Utilities;
+using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.ViewModels.RequireUIServices;
@@ -37,7 +39,7 @@ namespace RTSFramework.ViewModels
 
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
-		private readonly IIntendedChangesProvider intendedChangesProvider;
+		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
@@ -68,17 +70,19 @@ namespace RTSFramework.ViewModels
 		private ProgramModelType programModelType;
 		private bool isRepositoryPathChangable;
 		private ObservableCollection<DiscoveryType> discoveryTypes;
+		private bool isTimeLimitChangeable;
+		private double timeLimit;
 
 		#endregion
 
 		public MainWindowViewModel(IDialogService dialogService, 
 			GitCommitsProvider gitCommitsProvider, 
 			IApplicationUiExecutor applicationUiExecutor,
-			IIntendedChangesProvider intendedChangesProvider)
+			IUserRunConfigurationProvider userRunConfigurationProvider)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
-			this.intendedChangesProvider = intendedChangesProvider;
+			this.userRunConfigurationProvider = userRunConfigurationProvider;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -176,6 +180,9 @@ namespace RTSFramework.ViewModels
 		{
 			switch (propertyChangedEventArgs.PropertyName)
 			{
+				case nameof(ProcessingType):
+					IsTimeLimitChangeable = ProcessingType == ProcessingType.MSTestExecutionLimitedTime;
+					break;
 				case nameof(RTSApproachType):
 					/*TODO Granularity Level File
 					 * 
@@ -211,10 +218,33 @@ namespace RTSFramework.ViewModels
 					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
 					ToCommit = ToCommitModels.SingleOrDefault(x => x.Identifier == toCommitId) ?? ToCommitModels.FirstOrDefault();
 					break;
+				case nameof(TimeLimit):
+					userRunConfigurationProvider.TimeLimit = TimeLimit;
+					break;
 			}
 		}
 
 		#region Properties
+
+		public double TimeLimit
+		{
+			get { return timeLimit; }
+			set
+			{
+				timeLimit = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool IsTimeLimitChangeable
+		{
+			get { return isTimeLimitChangeable; }
+			set
+			{
+				isTimeLimitChangeable = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public ObservableCollection<DiscoveryType> DiscoveryTypes
 		{
@@ -489,6 +519,11 @@ namespace RTSFramework.ViewModels
 
 				RunStatus = RunStatus.Completed;
 			}
+			catch (TerminationConditionReachedException e)
+			{
+				RunStatus = RunStatus.Completed;
+				dialogService.ShowInformation($"Execution stopped after {TimeLimit} seconds.");
+			}
 			catch (Exception e)
 			{
 				if (cancellationTokenSource.IsCancellationRequested)
@@ -518,7 +553,7 @@ namespace RTSFramework.ViewModels
 
 			var intendedChangesArtefact = new IntendedChangesArtefact
 			{
-				IntendedChanges = intendedChangesProvider.IntendedChanges,
+				IntendedChanges = userRunConfigurationProvider.IntendedChanges,
 				LocalProgramModel = new LocalProgramModel
 				{
 					GranularityLevel = GranularityLevel,
@@ -554,6 +589,7 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
+				case ProcessingType.MSTestExecutionLimitedTime:
 					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(deltaArtefact);
 					break;
 				case ProcessingType.CsvReporting:
@@ -667,6 +703,7 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
+				case ProcessingType.MSTestExecutionLimitedTime:
 					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
@@ -697,6 +734,8 @@ namespace RTSFramework.ViewModels
 		}
 
 		#endregion
+
+		#region HandlingResults
 
 		private void HandleListReportingResult<TTestCase>(TestListResult<TTestCase> listReportingResult) where TTestCase : ITestCase
 		{
@@ -765,5 +804,8 @@ namespace RTSFramework.ViewModels
 				currentTestViewModel.StackTrace = executionResult.StackTrace;
 			}
 		}
+
+		#endregion
+
 	}
 }

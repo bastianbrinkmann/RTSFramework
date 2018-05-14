@@ -41,10 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IIntendedChangesProvider.cs" />
     <Compile Include="IntendedChangesAdapter.cs" />
     <Compile Include="IntendedChangesArtefact.cs" />
-    <Compile Include="IntendedFileChangesProvider.cs" />
+    <Compile Include="UserRunConfigurationProvider.cs" />
     <Compile Include="Models\LocalProgramModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

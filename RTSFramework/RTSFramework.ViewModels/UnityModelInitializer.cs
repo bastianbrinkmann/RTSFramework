@@ -22,6 +22,7 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Dynamic;
@@ -89,7 +90,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitHelper(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<IIntendedChangesProvider, IntendedFileChangesProvider>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<IUserRunConfigurationProvider, UserRunConfigurationProvider>(new ContainerControlledLifetimeManager());
 			unityContainer.RegisterType<InProcessVsTestConnector>(new ContainerControlledLifetimeManager());
 		}
 
@@ -283,6 +284,8 @@ namespace RTSFramework.ViewModels
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
 			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, InProcessMSTestTestsExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
 			unityContainer.RegisterType<ITestsExecutor<MSTestTestcase, TDelta, TModel>, InProcessMSTestTestsExecutor<TDelta, TModel>>();
+
+			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, LimitedTimeTestsExecutor<MSTestTestcase, TDelta, TModel>>(ProcessingType.MSTestExecutionLimitedTime.ToString());
 
 			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, IdentifiedTestsListReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 

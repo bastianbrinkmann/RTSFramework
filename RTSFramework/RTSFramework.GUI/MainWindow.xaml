@@ -11,7 +11,7 @@
         xmlns:behaviors="clr-namespace:RTSFramework.GUI.Behaviors"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="629" Width="609" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
+        Title="RTS Framework" Height="600" Width="800" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
 	<Window.Resources>
 		<DataTemplate x:Key="TestOutcomePresenter" DataType="viewModels:TestResultListViewItemViewModel">
 			<Grid>
@@ -55,8 +55,8 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="115"/>
 				<ColumnDefinition Width="185*"/>
-				<ColumnDefinition Width="145.6"/>
-				<ColumnDefinition Width="152*"/>
+				<ColumnDefinition Width="150*"/>
+				<ColumnDefinition Width="150*"/>
 			</Grid.ColumnDefinitions>
 
 			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="0" Margin="0,1" Width="78"/>
@@ -82,6 +82,9 @@
 
 			<ComboBox x:Name="CbFromCommit" VerticalAlignment="Center" ItemsSource="{Binding FromCommitModels}" SelectedItem="{Binding FromCommit}" Height="22" Visibility="{Binding IsFromCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="2" Grid.Column="2" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
 			<ComboBox x:Name="CbToCommit" VerticalAlignment="Center" ItemsSource="{Binding ToCommitModels}" SelectedItem="{Binding ToCommit}" Height="22" Visibility="{Binding IsToCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="2" Grid.Column="3" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
+
+			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="5,0,30,0" Grid.Column="2"  Grid.Row="4" />
+			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="2" Grid.Row="4" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" />
 		</Grid>
 		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
 

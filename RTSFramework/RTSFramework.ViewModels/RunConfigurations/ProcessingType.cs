@@ -10,6 +10,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
         MSTestExecution,
 		[Description("MSTest + Create Correspondence")]
 		MSTestExecutionCreateCorrespondenceModel,
+		[Description("MSTest + Limited Time")]
+		MSTestExecutionLimitedTime,
 		[Description("CSV File")]
 		CsvReporting,
 		[Description("Only Identify")]

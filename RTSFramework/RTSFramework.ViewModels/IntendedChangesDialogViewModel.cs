@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
 using RTSFramework.Concrete.User;
+using RTSFramework.Contracts.Utilities;
 using RTSFramework.ViewModels.RequireUIServices;
 
 namespace RTSFramework.ViewModels
@@ -13,7 +14,7 @@ namespace RTSFramework.ViewModels
 	public class IntendedChangesDialogViewModel : BindableBase
 	{
 		private readonly IDialogService dialogService;
-		private readonly IIntendedChangesProvider intendedChangesProvider;
+		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
 
 		#region BackingFields
 
@@ -26,12 +27,12 @@ namespace RTSFramework.ViewModels
 
 		private const string FileExtension = "Class Files (*.cs)|*.cs";
 
-		public IntendedChangesDialogViewModel(IDialogService dialogService, IIntendedChangesProvider intendedChangesProvider)
+		public IntendedChangesDialogViewModel(IDialogService dialogService, IUserRunConfigurationProvider userRunConfigurationProvider)
 		{
 			this.dialogService = dialogService;
-			this.intendedChangesProvider = intendedChangesProvider;
+			this.userRunConfigurationProvider = userRunConfigurationProvider;
 
-			IntendedChanges = new ObservableCollection<string>(intendedChangesProvider.IntendedChanges);
+			IntendedChanges = new ObservableCollection<string>(userRunConfigurationProvider.IntendedChanges);
 			IntendedChanges.CollectionChanged += IntendedChangesOnCollectionChanged;
 
 			AddFileCommand = new DelegateCommand(AddFile);
@@ -42,7 +43,7 @@ namespace RTSFramework.ViewModels
 
 		private void IntendedChangesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
 		{
-			intendedChangesProvider.IntendedChanges = IntendedChanges.ToList();
+			userRunConfigurationProvider.IntendedChanges = IntendedChanges.ToList();
 		}
 
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)

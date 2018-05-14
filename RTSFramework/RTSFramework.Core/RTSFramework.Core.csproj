@@ -76,9 +76,12 @@
   <ItemGroup>
     <Compile Include="ChainingDeltaAdapter.cs" />
     <Compile Include="IdentityDeltaAdapter.cs" />
+    <Compile Include="LimitedTimeTestsExecutor.cs" />
     <Compile Include="Models\FileElement.cs" />
     <Compile Include="NoOpPrioritizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TerminationConditionReachedException.cs" />
+    <Compile Include="TestsExecutorWithTerminationCondition.cs" />
     <Compile Include="Utilities\LoggingHelper.cs" />
     <Compile Include="Utilities\ProcessExtensions.cs" />
     <Compile Include="Utilities\RelativePathHelper.cs" />
