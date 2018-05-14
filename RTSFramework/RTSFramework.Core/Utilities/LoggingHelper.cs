@@ -39,9 +39,12 @@ namespace RTSFramework.Core.Utilities
 
 			if (settingsProvider.LogToFile)
 			{
-				using (var writer = logFile.AppendText())
+				lock (logFile)
 				{
-					writer.WriteLine(message);
+					using (var writer = logFile.AppendText())
+					{
+						writer.WriteLine(message);
+					}
 				}
 			}
 		}

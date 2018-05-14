@@ -10,6 +10,7 @@ using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using Unity.Interception.Utilities;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
@@ -22,18 +23,21 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		private readonly ITestsInstrumentor<TModel, TTestCase> instrumentor;
 		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider;
 		private readonly IApplicationClosedHandler applicationClosedHandler;
+		private readonly ILoggingHelper loggingHelper;
 
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 
 		public TestsExecutorWithInstrumenting(ITestsExecutor<TTestCase, TDelta, TModel> executor,
 			ITestsInstrumentor<TModel, TTestCase> instrumentor,
 			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider,
-			IApplicationClosedHandler applicationClosedHandler)
+			IApplicationClosedHandler applicationClosedHandler,
+			ILoggingHelper loggingHelper)
 		{
 			this.executor = executor;
 			this.instrumentor = instrumentor;
 			this.dataStructureProvider = dataStructureProvider;
 			this.applicationClosedHandler = applicationClosedHandler;
+			this.loggingHelper = loggingHelper;
 		}
 
 		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
@@ -51,7 +55,15 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				var coverage = instrumentor.GetCoverageData();
 
-				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, cancellationToken);
+				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase).ToList();
+
+				var coveredTests = coverage.CoverageDataEntries.Select(x => x.Item1).Distinct().ToList();
+				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id));
+
+				testsWithoutCoverage.ForEach(x => loggingHelper.WriteMessage("Not covered: " + x.Id));
+				failedTests.ForEach(x => loggingHelper.WriteMessage("Failed Tests: " + x.Id));
+
+				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests.Except(failedTests).ToList(), cancellationToken);
 
 				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;
