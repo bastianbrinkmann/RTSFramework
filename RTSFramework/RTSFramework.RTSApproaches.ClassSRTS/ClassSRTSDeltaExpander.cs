@@ -38,7 +38,7 @@ namespace RTSFramework.RTSApproaches.Static
 		{
 			//Using the IRG for P' is possible as it is built using the intermediate language
 			//Therefore, the program at least compiles - preventing issues from for example deleted files
-			var graph = await irgBuilder.GetDataStructureForProgram(delta.TargetModel, cancellationToken);
+			var graph = await irgBuilder.GetDataStructureForProgram(delta.NewModel, cancellationToken);
 
 			return ExpandDelta(graph, testCases, delta, cancellationToken);
 		}

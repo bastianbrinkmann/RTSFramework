@@ -38,7 +38,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			return vsTestCases.Select(Convert).ToList();
+			return vsTestCases.Select(Convert).Where(x => !x.Ignored).ToList();
 		}
 
 		private MSTestTestcase Convert(TestCase vsTestCase)

@@ -66,7 +66,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 								testCase.Ignored = method.CustomAttributes.Any(x => x.AttributeType.Name == MSTestConstants.IgnoreAttributeName);
 
-								testCases.Add(testCase);
+								if (!testCase.Ignored)
+								{
+									testCases.Add(testCase);
+								}
 							}
 						}
 					}

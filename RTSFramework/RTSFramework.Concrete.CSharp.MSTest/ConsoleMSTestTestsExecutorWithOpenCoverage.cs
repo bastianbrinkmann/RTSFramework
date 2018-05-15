@@ -51,7 +51,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				var executionResultParams = new MSTestExecutionResultParameters { File = new FileInfo(Path.GetFullPath(@"results.xml")) };
 				executionResultParams.ExecutedTestcases.AddRange(CurrentlyExecutedTests);
 
-				openCoverArtefactAdapter.GranularityLevel = impactedForDelta.TargetModel.GranularityLevel;
+				openCoverArtefactAdapter.GranularityLevel = impactedForDelta.NewModel.GranularityLevel;
 				var coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
 				result.CoverageData = coverageData;
 			}

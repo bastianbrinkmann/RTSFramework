@@ -519,7 +519,7 @@ namespace RTSFramework.ViewModels
 
 				RunStatus = RunStatus.Completed;
 			}
-			catch (TerminationConditionReachedException e)
+			catch (TerminationConditionReachedException)
 			{
 				RunStatus = RunStatus.Completed;
 				dialogService.ShowInformation($"Execution stopped after {TimeLimit} seconds.");

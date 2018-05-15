@@ -26,7 +26,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
-			var correspondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.SourceModel, cancellationToken);
+			var correspondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.OldModel, cancellationToken);
 
 			IList<TTestCase> impactedTests = new List<TTestCase>();
 

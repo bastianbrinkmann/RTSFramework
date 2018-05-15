@@ -53,8 +53,8 @@ namespace RTSFramework.Concrete.Git
 			var status = repo.RetrieveStatus();
 			status.Added.Union(status.Untracked).ForEach(addedFile =>
 			{
-				var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, addedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, addedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
 
 				if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
 					delta.AddedElements.Add(new FileElement(relativePathToSolution, () => File.ReadAllText(fullPath)));
@@ -62,20 +62,20 @@ namespace RTSFramework.Concrete.Git
 
 			status.Modified.Union(status.Staged).ForEach(changedFile =>
 			{
-				var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
 
 				if (delta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-					delta.ChangedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.TargetModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
+					delta.ChangedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
 			});
 
 			status.Missing.Union(status.Removed).ForEach(changedFile =>
 			{
-				var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
 
 				if (delta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-					delta.DeletedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.TargetModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
+					delta.DeletedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
 			});
 		}
 
@@ -111,8 +111,8 @@ namespace RTSFramework.Concrete.Git
 						foreach (TreeEntry entry in commit.Tree)
 						{
 							var filePath = entry.Path;
-							var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, filePath);
-							var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+							var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, filePath);
+							var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
 
 							if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
 								delta.AddedElements.Add(new FileElement(relativePathToSolution, () => GetContent(repositoryPath, commit.Id.Sha, filePath)));
@@ -145,8 +145,8 @@ namespace RTSFramework.Concrete.Git
 			foreach (TreeEntryChanges change in treeChanges)
 			{
 				var filePath = change.Path;
-				var fullPath = Path.Combine(delta.TargetModel.GitVersionIdentification.RepositoryPath, filePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.TargetModel, fullPath);
+				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, filePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
 
 				switch (change.Status)
 				{

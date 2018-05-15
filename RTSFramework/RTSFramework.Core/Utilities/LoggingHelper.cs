@@ -23,7 +23,10 @@ namespace RTSFramework.Core.Utilities
 				return;
 			}
 
-			logFile = new FileInfo(Path.GetFullPath($"LogFiles\\logfile_{DateTime.Now:yy_MM_dd_hh_mm_ss}.txt"));
+			lock (logFile)
+			{
+				logFile = new FileInfo(Path.GetFullPath($"LogFiles\\logfile_{DateTime.Now:yy_MM_dd_hh_mm_ss}.txt"));
+			}
 
 			if (logFile.DirectoryName != null && !Directory.Exists(logFile.DirectoryName))
 			{

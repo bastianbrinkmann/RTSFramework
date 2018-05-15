@@ -6,8 +6,8 @@ namespace RTSFramework.Contracts.Models.Delta
     {
 	    public StructuralDelta(TModel source, TModel target)
 	    {
-		    SourceModel = source;
-		    TargetModel = target;
+		    OldModel = source;
+		    NewModel = target;
 	    }
 
         public List<TModelElement> AddedElements { get; } = new List<TModelElement>();
@@ -15,7 +15,7 @@ namespace RTSFramework.Contracts.Models.Delta
         public List<TModelElement> DeletedElements { get; } = new List<TModelElement>();
 
         public List<TModelElement> ChangedElements { get; } = new List<TModelElement>();
-        public TModel SourceModel { get; }
-        public TModel TargetModel { get;}
+        public TModel OldModel { get; }
+        public TModel NewModel { get;}
     }
 }

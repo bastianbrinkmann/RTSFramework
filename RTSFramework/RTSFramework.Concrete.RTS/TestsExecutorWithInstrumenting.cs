@@ -47,7 +47,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			{
 				applicationClosedHandler.AddApplicationClosedListener(instrumentor);
 
-				await instrumentor.InstrumentModelForTests(impactedForDelta.TargetModel, impactedTests, cancellationToken);
+				await instrumentor.InstrumentModelForTests(impactedForDelta.NewModel, impactedTests, cancellationToken);
 
 				executor.TestResultAvailable += TestResultAvailable;
 				var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
@@ -72,9 +72,9 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, IList<TTestCase> allTests, CancellationToken token)
 		{
-			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.SourceModel, token);
-			var newModel = oldModel.CloneModel(currentDelta.TargetModel.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.TargetModel));
+			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.OldModel, token);
+			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
+			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
 			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
 
 			await dataStructureProvider.PersistDataStructure(newModel);

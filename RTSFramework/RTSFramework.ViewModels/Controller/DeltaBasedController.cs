@@ -53,7 +53,7 @@ namespace RTSFramework.ViewModels.Controller
 			var delta = deltaArtefactAdapter.Parse(deltaArtefact);
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(delta.TargetModel, token), "Tests Discovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(delta.NewModel, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Tests Selection");

@@ -12,7 +12,7 @@ namespace RTSFramework.Concrete.CSharp.Core
 	{
 		public StructuralDelta<TModel, CSharpFileElement> Convert(StructuralDelta<TModel, FileElement> delta)
 		{
-			var result = new StructuralDelta<TModel, CSharpFileElement>(delta.SourceModel, delta.TargetModel);
+			var result = new StructuralDelta<TModel, CSharpFileElement>(delta.OldModel, delta.NewModel);
 
 			result.AddedElements.AddRange(delta.AddedElements.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));
 			result.ChangedElements.AddRange(delta.ChangedElements.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));
