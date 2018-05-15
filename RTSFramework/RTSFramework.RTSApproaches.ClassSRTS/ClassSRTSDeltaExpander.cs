@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Core.Models;
-using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.Core.DataStructures;
 
@@ -24,8 +22,9 @@ namespace RTSFramework.RTSApproaches.Static
 	/// A Generic Platform for Model-Based Regression Testing
 	/// by Zech et al.
 	/// </summary>
-	public class ClassSRTSDeltaExpander<TModel> : ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>
-		where TModel : CSharpProgramModel 
+	public class ClassSRTSDeltaExpander<TModel, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>
+		where TModel : CSharpProgramModel
+		where TTestCase : ITestCase
 	{
 		private readonly IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder;
 
@@ -34,7 +33,7 @@ namespace RTSFramework.RTSApproaches.Static
 			this.irgBuilder = irgBuilder;
 		}
 
-		public async Task<IList<MSTestTestcase>>  SelectTests(IList<MSTestTestcase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public async Task<IList<TTestCase>>  SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			//Using the IRG for P' is possible as it is built using the intermediate language
 			//Therefore, the program at least compiles - preventing issues from for example deleted files
@@ -49,9 +48,9 @@ namespace RTSFramework.RTSApproaches.Static
 		/// A Generic Platform for Model-Based Regression Testing
 		/// by Zech et al.
 		/// </summary>
-		private IList<MSTestTestcase> ExpandDelta(IntertypeRelationGraph graph, IList<MSTestTestcase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		private IList<TTestCase> ExpandDelta(IntertypeRelationGraph graph, IList<TTestCase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
-			IList<MSTestTestcase> impactedTests = new List<MSTestTestcase>();
+			IList<TTestCase> impactedTests = new List<TTestCase>();
 
 			var changedTypes = new List<string>();
 
@@ -69,9 +68,9 @@ namespace RTSFramework.RTSApproaches.Static
 			return impactedTests;
 		}
 
-		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<MSTestTestcase> allTests, IList<MSTestTestcase> impactedTests, CancellationToken cancellationToken)
+		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<TTestCase> allTests, IList<TTestCase> impactedTests, CancellationToken cancellationToken)
 		{
-			foreach (var test in allTests.Where(x => x.FullClassName == type))
+			foreach (var test in allTests.Where(x => x.AssociatedClass == type))
 			{
 				impactedTests.Add(test);
 			}

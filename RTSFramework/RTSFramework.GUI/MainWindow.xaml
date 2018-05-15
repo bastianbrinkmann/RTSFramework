@@ -86,7 +86,9 @@
 			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="5,0,30,0" Grid.Column="2"  Grid.Row="4" />
 			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="2" Grid.Row="4" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" />
 		</Grid>
-		<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="2" Grid.Column="0" />
+		<Grid Grid.Row="2" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
+			<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="0" Grid.Column="0" />
+		</Grid>
 
 		<DataGrid x:Name="DgTests" IsReadOnly="True" AutoGenerateColumns="False" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}"
 				  ScrollViewer.CanContentScroll="True" 
@@ -98,20 +100,23 @@
 
 			<DataGrid.ItemContainerStyle >
 				<Style TargetType="DataGridRow" >
+					<Setter Property="ContextMenu">
+						<Setter.Value>
+							<ContextMenu>
+								<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+								<MenuItem Header="Show Error Message" Command="{Binding ShowErrorMessageCommand}" />
+								<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+								<MenuItem Header="Responsible Changes" Command="{Binding ShowResponsibleChangesCommand}" />
+							</ContextMenu>
+						</Setter.Value>
+					</Setter>
 					<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
 					<Setter Property="behaviors:HandleDoubleClickBehavior.Command" Value="{Binding ShowErrorMessageCommand}" />
 				</Style>
 			</DataGrid.ItemContainerStyle>
-			<DataGrid.ContextMenu>
-				<ContextMenu >
-					<MenuItem Header="Show Error Message" Command="{Binding ShowErrorMessageCommand}" />
-					<MenuItem Header="Responsible Changes" Command="{Binding ShowResponsibleChangesCommand}" />
-				</ContextMenu>
-			</DataGrid.ContextMenu>
-
 			<DataGrid.RowDetailsTemplate>
 				<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">
-					<DataGrid IsReadOnly="True" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ChildResults}">
+					<DataGrid IsReadOnly="True" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding ChildResults}" SelectedItem="{Binding SelectedChild}">
 						<DataGrid.ItemContainerStyle >
 							<Style TargetType="DataGridRow" >
 								<!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->

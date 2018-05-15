@@ -100,15 +100,6 @@ namespace RTSFramework.ViewModels
 			SelectSolutionFileCommand = new DelegateCommand(SelectSolutionFile);
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
-			ShowResponsibleChangesCommand = new DelegateCommand(() =>
-			{
-				var responsibleChanges = currentController.GetResponsibleChangesProvider().GetResponsibleChangesForImpactedTest(SelectedTest.FullyQualifiedName);
-
-				dialogService.ShowInformation(string.Join(Environment.NewLine, responsibleChanges), "Potentially responsible changes");
-			}, () => currentController?.GetResponsibleChangesProvider() != null && SelectedTest != null);
-
-			ShowErrorMessageCommand = new DelegateCommand(() => SelectedTest.ShowErrorMessageCommand.Execute(null),
-				() => SelectedTest?.ErrorMessage != null);
 
 			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
@@ -239,27 +230,10 @@ namespace RTSFramework.ViewModels
 				case nameof(TimeLimit):
 					userRunConfigurationProvider.TimeLimit = TimeLimit;
 					break;
-				case nameof(SelectedTest):
-					ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
-					ShowErrorMessageCommand.RaiseCanExecuteChanged();
-					break;
 			}
 		}
 
 		#region Properties
-
-		public DelegateCommand ShowErrorMessageCommand
-		{
-			get
-			{
-				return showErrorMessageCommand;
-			}
-			set
-			{
-				showErrorMessageCommand  = value;
-				RaisePropertyChanged();
-			}
-		}
 
 		public TestResultListViewItemViewModel SelectedTest
 		{
@@ -271,18 +245,6 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public DelegateCommand ShowResponsibleChangesCommand
-		{
-			get
-			{
-				return showResponsibleChangesCommand;
-			}
-			set
-			{
-				showResponsibleChangesCommand = value;
-				RaisePropertyChanged();
-			}
-		}
 
 		public double TimeLimit
 		{
@@ -678,7 +640,6 @@ namespace RTSFramework.ViewModels
 
 			deltaBasedController.DeltaArtefact = deltaArtefact;
 			currentController = deltaBasedController;
-			ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
 
 			currentController.ImpactedTest += HandleImpactedTest;
 			currentController.TestResultAvailable += HandleTestExecutionResult;
@@ -796,7 +757,6 @@ namespace RTSFramework.ViewModels
 			stateBasedController.OldArtefact = oldArtefact;
 			stateBasedController.NewArtefact = newArtefact;
 			currentController = stateBasedController;
-			ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
 
 			currentController.ImpactedTest += HandleImpactedTest;
 			currentController.TestResultAvailable += HandleTestExecutionResult;
@@ -830,10 +790,10 @@ namespace RTSFramework.ViewModels
 		private void HandleListReportingResult<TTestCase>(TestListResult<TTestCase> listReportingResult) where TTestCase : ITestCase
 		{
 			TestResults.Clear();
-			TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService)
+			TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
 			{
 				FullyQualifiedName = x.Id,
-				FullClassName = x.FullClassName,
+				FullClassName = x.AssociatedClass,
 				Name = x.Name,
 				Categories = string.Join(",", x.Categories)
 			}));
@@ -856,11 +816,11 @@ namespace RTSFramework.ViewModels
 		private void HandleImpactedTest<TTestCase>(object sender, ImpactedTestEventArgs<TTestCase> args) where TTestCase : ITestCase
 		{
 			applicationUiExecutor.ExecuteOnUi(() =>
-					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
+					TestResults.Add(new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
 					{
 						FullyQualifiedName = args.TestCase.Id,
 						Name = args.TestCase.Name,
-						FullClassName = args.TestCase.FullClassName,
+						FullClassName = args.TestCase.AssociatedClass,
 						Categories = string.Join(",", args.TestCase.Categories)
 					}));
 		}
@@ -871,7 +831,7 @@ namespace RTSFramework.ViewModels
 
 			if (executionResult.TestCase.IsChildTestCase)
 			{
-				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService)
+				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
 				{
 					TestOutcome = executionResult.Outcome,
 					StartTime = executionResult.StartTime,

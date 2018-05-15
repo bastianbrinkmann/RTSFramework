@@ -10,7 +10,7 @@ namespace RTSFramework.Contracts.Models
 
 		string Name { get; }
 
-		string FullClassName { get; }
+		string AssociatedClass { get; }
 
 		bool IsChildTestCase { get; }
 	}

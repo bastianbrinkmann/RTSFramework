@@ -10,7 +10,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 
 		public string Name { get; set; }
 
-        public string FullClassName { get; set; }
+        public string AssociatedClass { get; set; }
 
         public bool Ignored { get; set; }
 

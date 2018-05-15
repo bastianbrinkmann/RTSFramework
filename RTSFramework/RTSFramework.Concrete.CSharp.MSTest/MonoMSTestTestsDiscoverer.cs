@@ -54,7 +54,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 									Name = method.Name,
 									AssemblyPath = modulePath,
 									Id = id,
-									FullClassName = type.FullName
+									AssociatedClass = type.FullName
 								};
 
 								var categoryAttributes =

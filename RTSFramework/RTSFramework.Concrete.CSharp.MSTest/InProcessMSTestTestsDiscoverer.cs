@@ -58,7 +58,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				Name = vsTestCase.DisplayName,
 				AssemblyPath = vsTestCase.Source,
 				Id = vsTestCase.FullyQualifiedName,
-				FullClassName = testClassName,
+				AssociatedClass = testClassName,
 				Ignored = !isEnabled,
 				VsTestTestCase = vsTestCase,
 				IsChildTestCase = isDataDriven

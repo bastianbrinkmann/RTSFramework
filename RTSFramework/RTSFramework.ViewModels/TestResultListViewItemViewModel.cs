@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using Prism.Commands;
@@ -7,6 +8,7 @@ using Prism.Mvvm;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.ViewModels.Controller;
 using RTSFramework.ViewModels.RequireUIServices;
 
 namespace RTSFramework.ViewModels
@@ -18,7 +20,7 @@ namespace RTSFramework.ViewModels
 		private DateTimeOffset startTime;
 		private DateTimeOffset endTime;
 		private double durationInSeconds;
-		private ICommand showErrorMessageCommand;
+		private DelegateCommand showErrorMessageCommand;
 		private string errorMessage;
 		private string stackTrace;
 		private string name;
@@ -29,18 +31,39 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<TestResultListViewItemViewModel> childResults;
 		private string displayName;
 		private int? executionId;
+		private DelegateCommand showResponsibleChangesCommand;
 
-		public TestResultListViewItemViewModel(IDialogService dialogService)
+		public TestResultListViewItemViewModel(IDialogService dialogService, IResponsibleChangesProvider responsibleChangesProvider)
 		{
 			ShowErrorMessageCommand = new DelegateCommand(() =>
 			{
 				if (ErrorMessage != null)
 				{
-					dialogService.ShowError($"Error Message: {ErrorMessage}\n\nStackTrace: {StackTrace}", "Test Run Error");
+					string message = $"Error Message: {ErrorMessage}\n\nStackTrace: {StackTrace}";
+					dialogService.ShowError(message, "Test Run Error");
 				}
-			});
+			}, () => ErrorMessage != null);
+
+			ShowResponsibleChangesCommand = new DelegateCommand(() =>
+			{
+				var responsibleChanges = responsibleChangesProvider.GetResponsibleChangesForImpactedTest(FullyQualifiedName);
+
+				dialogService.ShowInformation(string.Join(Environment.NewLine, responsibleChanges), "Potentially responsible changes");
+			}, () => responsibleChangesProvider != null);
 
 			ChildResults = new ObservableCollection<TestResultListViewItemViewModel>();
+
+			PropertyChanged += OnPropertyChanged;
+		}
+
+		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+		{
+			switch (propertyChangedEventArgs.PropertyName)
+			{
+				case nameof(ErrorMessage):
+					ShowErrorMessageCommand.RaiseCanExecuteChanged();
+					break;
+			}
 		}
 
 		public void AddChildResults(TestResultListViewItemViewModel childResult)
@@ -54,6 +77,19 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public DelegateCommand ShowResponsibleChangesCommand
+		{
+			get
+			{
+				return showResponsibleChangesCommand;
+			}
+			set
+			{
+				showResponsibleChangesCommand = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public int? ExecutionId
 		{
@@ -135,7 +171,7 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public ICommand ShowErrorMessageCommand
+		public DelegateCommand ShowErrorMessageCommand
 		{
 			get { return showErrorMessageCommand; }
 			set

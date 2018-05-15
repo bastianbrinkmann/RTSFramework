@@ -240,7 +240,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestSelectorsForCSharpModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSDeltaExpander<TModel>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSDeltaExpander<TModel, MSTestTestcase>>(RTSApproachType.ClassSRTS.ToString());
 
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement>(unityContainer);
