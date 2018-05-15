@@ -27,6 +27,7 @@ namespace RTSFramework.ViewModels
 		private bool areChildResultsShown;
 		private ObservableCollection<TestResultListViewItemViewModel> childResults;
 		private string displayName;
+		private int? executionId;
 
 		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
@@ -52,6 +53,16 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public int? ExecutionId
+		{
+			get { return executionId; }
+			set
+			{
+				executionId = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public ObservableCollection<TestResultListViewItemViewModel> ChildResults
 		{

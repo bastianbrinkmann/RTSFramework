@@ -130,6 +130,13 @@
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
 				</DataGridTemplateColumn>
+				<DataGridTextColumn Width="35" Header="No." Binding="{Binding ExecutionId}">
+					<DataGridTextColumn.ElementStyle>
+						<Style>
+							<Setter Property="TextBlock.TextAlignment" Value="Right" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 				<DataGridTextColumn Width="150" Header="Class Name" Binding="{Binding FullClassName}" />
 				<DataGridTextColumn Width="100" Header="Test Case Name" Binding="{Binding Name}" />
 				<DataGridTemplateColumn Width="100" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}"  SortMemberPath="TestOutcome" CanUserSort="True" />

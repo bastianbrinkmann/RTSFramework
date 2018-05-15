@@ -24,11 +24,12 @@ namespace RTSFramework.ViewModels.Controller
 		where TDelta : IDelta<TModel>
 		where TResult : ITestProcessingResult
 	{
+		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
+		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
+		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
+
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
-		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
-		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
-
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
 		private readonly ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor;
@@ -76,6 +77,8 @@ namespace RTSFramework.ViewModels.Controller
 			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
 			var prioritizedTests = await loggingHelper.ReportNeededTime(() => testsPrioritizer.PrioritizeTests(impactedTests, token), "Tests Prioritization");
+
+			TestsPrioritized?.Invoke(this, new TestsPrioritizedEventArgs<TTestCase>(prioritizedTests));
 
 			var executor = testsProcessor as ITestsExecutor<TTestCase, TDelta, TModel>;
 			if (executor != null)

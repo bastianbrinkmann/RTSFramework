@@ -22,8 +22,7 @@ namespace RTSFramework.Core.Utilities
 			{
 				return;
 			}
-
-			lock (logFile)
+			lock (logFileLock)
 			{
 				logFile = new FileInfo(Path.GetFullPath($"LogFiles\\logfile_{DateTime.Now:yy_MM_dd_hh_mm_ss}.txt"));
 			}
@@ -35,6 +34,7 @@ namespace RTSFramework.Core.Utilities
 		}
 
 		private FileInfo logFile;
+		private readonly object logFileLock = new object();
 
 		public void WriteMessage(string message)
 		{
@@ -42,7 +42,7 @@ namespace RTSFramework.Core.Utilities
 
 			if (settingsProvider.LogToFile)
 			{
-				lock (logFile)
+				lock (logFileLock)
 				{
 					using (var writer = logFile.AppendText())
 					{

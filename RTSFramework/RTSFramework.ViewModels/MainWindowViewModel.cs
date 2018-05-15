@@ -612,6 +612,7 @@ namespace RTSFramework.ViewModels
 
 			deltaBasedController.ImpactedTest += HandleImpactedTest;
 			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
+			deltaBasedController.TestsPrioritized += HandleTestsPrioritized;
 
 			return
 				await Task.Run(
@@ -726,6 +727,7 @@ namespace RTSFramework.ViewModels
 
 			stateBasedController.ImpactedTest += HandleImpactedTest;
 			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
+			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
 
 			return
 				await Task.Run(
@@ -736,6 +738,23 @@ namespace RTSFramework.ViewModels
 		#endregion
 
 		#region HandlingResults
+
+		private void HandleTestsPrioritized<TTestCase>(object sender, TestsPrioritizedEventArgs<TTestCase> eventArgs) where TTestCase : ITestCase
+		{
+			applicationUiExecutor.ExecuteOnUi(() =>
+			{
+				for(int i = 0; i < eventArgs.TestCases.Count; i++)
+				{
+					var testCase = eventArgs.TestCases[i];
+
+					var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == testCase.Id);
+					currentTestViewModel.ExecutionId = i;
+				}
+				var allTestsViewModels = TestResults.OrderBy(x => x.ExecutionId).ToList();
+				TestResults.Clear();
+				TestResults.AddRange(allTestsViewModels);
+			});
+		}
 
 		private void HandleListReportingResult<TTestCase>(TestListResult<TTestCase> listReportingResult) where TTestCase : ITestCase
 		{
