@@ -40,6 +40,7 @@ namespace RTSFramework.ViewModels
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
+		private readonly IUserSettingsProvider userSettingsProvider;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
@@ -78,11 +79,13 @@ namespace RTSFramework.ViewModels
 		public MainWindowViewModel(IDialogService dialogService, 
 			GitCommitsProvider gitCommitsProvider, 
 			IApplicationUiExecutor applicationUiExecutor,
-			IUserRunConfigurationProvider userRunConfigurationProvider)
+			IUserRunConfigurationProvider userRunConfigurationProvider,
+			IUserSettingsProvider userSettingsProvider)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
 			this.userRunConfigurationProvider = userRunConfigurationProvider;
+			this.userSettingsProvider = userSettingsProvider;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -100,15 +103,14 @@ namespace RTSFramework.ViewModels
 
 			PropertyChanged += OnPropertyChanged;
 
-			//TODO: Defaults - Load from config
-			ProgramModelType = ProgramModelType.GitModel;
-			DiscoveryType = DiscoveryType.GitDiscovery;
-			ProcessingType = ProcessingType.MSTestExecution;
-			RTSApproachType = RTSApproachType.ClassSRTS;
-			GranularityLevel = GranularityLevel.Class;
-			IsGranularityLevelChangable = false;
-			SolutionFilePath = @"C:\Git\TIATestProject\TIATestProject.sln";
-			RepositoryPath = @"C:\Git\TIATestProject\";
+			ProgramModelType = userSettingsProvider.ProgramModelType;
+			DiscoveryType = userSettingsProvider.DiscoveryType;
+			ProcessingType = userSettingsProvider.ProcessingType;
+			RTSApproachType = userSettingsProvider.RTSApproachType;
+			GranularityLevel = userSettingsProvider.GranularityLevel;
+			SolutionFilePath = userSettingsProvider.SolutionFilePath;
+			RepositoryPath = userSettingsProvider.RepositoryPath;
+			TimeLimit = userSettingsProvider.TimeLimit;
 		}
 
 		private void SpecifyIntendedChanges()
@@ -233,6 +235,7 @@ namespace RTSFramework.ViewModels
 			{
 				timeLimit = value;
 				RaisePropertyChanged();
+				userSettingsProvider.TimeLimit = value;
 			}
 		}
 
@@ -413,6 +416,7 @@ namespace RTSFramework.ViewModels
 			{
 				repositoryPath = value;
 				RaisePropertyChanged();
+				userSettingsProvider.RepositoryPath = value;
 			}
 		}
 
@@ -423,6 +427,7 @@ namespace RTSFramework.ViewModels
 			{
 				solutionFilePath = value;
 				RaisePropertyChanged();
+				userSettingsProvider.SolutionFilePath = value;
 			}
 		}
 
@@ -443,6 +448,7 @@ namespace RTSFramework.ViewModels
 			{
 				granularityLevel = value;
 				RaisePropertyChanged();
+				userSettingsProvider.GranularityLevel = value;
 			}
 		}
 
@@ -453,6 +459,7 @@ namespace RTSFramework.ViewModels
 			{
 				rtsApproachType = value;
 				RaisePropertyChanged();
+				userSettingsProvider.RTSApproachType = value;
 			}
 		}
 
@@ -463,6 +470,7 @@ namespace RTSFramework.ViewModels
 			{
 				discoveryType = value;
 				RaisePropertyChanged();
+				userSettingsProvider.DiscoveryType = value;
 			}
 		}
 
@@ -473,6 +481,7 @@ namespace RTSFramework.ViewModels
 			{
 				processingType = value;
 				RaisePropertyChanged();
+				userSettingsProvider.ProcessingType = value;
 			}
 		}
 
@@ -493,6 +502,7 @@ namespace RTSFramework.ViewModels
 			{
 				programModelType = value;
 				RaisePropertyChanged();
+				userSettingsProvider.ProgramModelType = value;
 			}
 		}
 

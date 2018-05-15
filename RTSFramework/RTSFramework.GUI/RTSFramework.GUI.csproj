@@ -87,6 +87,10 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.Workspaces.Common.2.7.0\lib\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Prism, Version=7.0.0.396, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
       <HintPath>..\packages\Prism.Core.7.0.0.396\lib\net45\Prism.dll</HintPath>
       <Private>True</Private>
@@ -275,6 +279,7 @@
     <Compile Include="RequireUIServices\ApplicationUiExecutor.cs" />
     <Compile Include="RequireUIServices\DialogService.cs" />
     <Compile Include="SettingsProvider.cs" />
+    <Compile Include="JsonUserSettingsProvider.cs" />
     <Compile Include="Utilities\ApplicationClosedHandler.cs" />
     <Compile Include="Utilities\EnumBindingSourceExtension.cs" />
     <Page Include="IntendedChangesDialog.xaml">

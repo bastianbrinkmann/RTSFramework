@@ -22,8 +22,15 @@ namespace RTSFramework.GUI.DependencyInjection
 			UnityGUIInitializer.InitializeGUIClasses(UnityContainer);
 
 			UnityContainer.RegisterType<IApplicationClosedHandler, ApplicationClosedHandler>(new ContainerControlledLifetimeManager());
+			UnityContainer.RegisterType<IUserSettingsProvider, JsonUserSettingsProvider>(new ContainerControlledLifetimeManager());
 			UnityContainer.RegisterType<ISettingsProvider, SettingsProvider>(new ContainerControlledLifetimeManager());
 			UnityContainer.RegisterType<ILoggingHelper, LoggingHelper>(new ContainerControlledLifetimeManager());
+
+			var applicationClosedHandler = UnityContainer.Resolve<IApplicationClosedHandler>();
+			var userSettingsProvider = UnityContainer.Resolve<IUserSettingsProvider>();
+			userSettingsProvider.LoadSettings();
+
+			applicationClosedHandler.AddApplicationClosedListener(userSettingsProvider);
 		}
 
 		public static MainWindow GetMainWindow()
