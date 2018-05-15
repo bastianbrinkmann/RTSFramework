@@ -120,5 +120,10 @@ namespace RTSFramework.RTSApproaches.Static
 				}
 			}
 		}
+
+		public IResponsibleChangesProvider GetResponsibleChangesProvider()
+		{
+			return null;
+		}
 	}
 }

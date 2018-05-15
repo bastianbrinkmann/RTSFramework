@@ -242,7 +242,6 @@ namespace RTSFramework.ViewModels
 		{
 			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, MSTestTestcase>, ClassSRTSDeltaExpander<TModel>>(RTSApproachType.ClassSRTS.ToString());
 
-
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement>(unityContainer);
 		}
@@ -250,7 +249,7 @@ namespace RTSFramework.ViewModels
 		private static void InitTestSelectorsForModelAndElementType<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel where TModelElement : IProgramModelElement
 		{
 			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, DynamicRTS<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>, RetestAllSelector<TModel, TModelElement, MSTestTestcase>>(RTSApproachType.RetestAll.ToString());
 
 			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, MSTestTestcase>>>(
 				new InjectionFactory(c =>

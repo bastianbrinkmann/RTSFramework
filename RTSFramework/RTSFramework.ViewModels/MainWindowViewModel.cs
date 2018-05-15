@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.ServiceModel.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -28,6 +29,7 @@ using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Dynamic;
+using RTSFramework.ViewModels.Controller;
 using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
 
@@ -36,6 +38,8 @@ namespace RTSFramework.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		private const string UncommittedChangesIdentifier = "uncomittedChanges";
+
+		private IController<MSTestTestcase> currentController;
 
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
@@ -73,6 +77,9 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<DiscoveryType> discoveryTypes;
 		private bool isTimeLimitChangeable;
 		private double timeLimit;
+		private DelegateCommand showResponsibleChangesCommand;
+		private TestResultListViewItemViewModel selectedTest;
+		private DelegateCommand showErrorMessageCommand;
 
 		#endregion
 
@@ -93,6 +100,15 @@ namespace RTSFramework.ViewModels
 			SelectSolutionFileCommand = new DelegateCommand(SelectSolutionFile);
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
+			ShowResponsibleChangesCommand = new DelegateCommand(() =>
+			{
+				var responsibleChanges = currentController.GetResponsibleChangesProvider().GetResponsibleChangesForImpactedTest(SelectedTest.FullyQualifiedName);
+
+				dialogService.ShowInformation(string.Join(Environment.NewLine, responsibleChanges), "Potentially responsible changes");
+			}, () => currentController?.GetResponsibleChangesProvider() != null && SelectedTest != null);
+
+			ShowErrorMessageCommand = new DelegateCommand(() => SelectedTest.ShowErrorMessageCommand.Execute(null),
+				() => SelectedTest?.ErrorMessage != null);
 
 			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
@@ -223,10 +239,50 @@ namespace RTSFramework.ViewModels
 				case nameof(TimeLimit):
 					userRunConfigurationProvider.TimeLimit = TimeLimit;
 					break;
+				case nameof(SelectedTest):
+					ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
+					ShowErrorMessageCommand.RaiseCanExecuteChanged();
+					break;
 			}
 		}
 
 		#region Properties
+
+		public DelegateCommand ShowErrorMessageCommand
+		{
+			get
+			{
+				return showErrorMessageCommand;
+			}
+			set
+			{
+				showErrorMessageCommand  = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public TestResultListViewItemViewModel SelectedTest
+		{
+			get { return selectedTest; }
+			set
+			{
+				selectedTest = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public DelegateCommand ShowResponsibleChangesCommand
+		{
+			get
+			{
+				return showResponsibleChangesCommand;
+			}
+			set
+			{
+				showResponsibleChangesCommand = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public double TimeLimit
 		{
@@ -600,34 +656,36 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(deltaArtefact);
+					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>>(deltaArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(deltaArtefact);
+					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, FileProcessingResult>(deltaArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(deltaArtefact);
+					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>>(deltaArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResult> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TTestCase, TResult>(TDeltaArtefact deltaArtefact) where TTestCase : ITestCase
+		private async Task<TResult> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TResult>(TDeltaArtefact deltaArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult>(RTSApproachType, ProcessingType);
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TResult>(RTSApproachType, ProcessingType);
 
-			deltaBasedController.ImpactedTest += HandleImpactedTest;
-			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
-			deltaBasedController.TestsPrioritized += HandleTestsPrioritized;
+			deltaBasedController.DeltaArtefact = deltaArtefact;
+			currentController = deltaBasedController;
+			ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
 
-			return
-				await Task.Run(
-					() => deltaBasedController.ExecuteImpactedTests(deltaArtefact, cancellationTokenSource.Token),
-					cancellationTokenSource.Token);
+			currentController.ImpactedTest += HandleImpactedTest;
+			currentController.TestResultAvailable += HandleTestExecutionResult;
+			currentController.TestsPrioritized += HandleTestsPrioritized;
+
+			await Task.Run(() => deltaBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
+			return deltaBasedController.Result;
 		}
 
 		#endregion
@@ -715,34 +773,37 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
+					await ExecuteRun<TArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, FileProcessingResult>(oldArtefact, newArtefact);
+					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, FileProcessingResult>(oldArtefact, newArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
+					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResult> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult>(TArtefact oldArtefact, TArtefact newArtefact) where TTestCase : ITestCase
+		private async Task<TResult>  ExecuteRun<TArtefact, TModel, TDelta, TResult>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult>(RTSApproachType, ProcessingType);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, MSTestTestcase, TResult>(RTSApproachType, ProcessingType);
 
-			stateBasedController.ImpactedTest += HandleImpactedTest;
-			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
-			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
+			stateBasedController.OldArtefact = oldArtefact;
+			stateBasedController.NewArtefact = newArtefact;
+			currentController = stateBasedController;
+			ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
 
-			return
-				await Task.Run(
-					() => stateBasedController.ExecuteImpactedTests(oldArtefact, newArtefact, cancellationTokenSource.Token),
-					cancellationTokenSource.Token);
+			currentController.ImpactedTest += HandleImpactedTest;
+			currentController.TestResultAvailable += HandleTestExecutionResult;
+			currentController.TestsPrioritized += HandleTestsPrioritized;
+
+			await Task.Run(() => stateBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
+			return stateBasedController.Result;
 		}
 
 		#endregion

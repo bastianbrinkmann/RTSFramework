@@ -11,7 +11,7 @@
         xmlns:behaviors="clr-namespace:RTSFramework.GUI.Behaviors"
         mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
-        Title="RTS Framework" Height="600" Width="800" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
+        Title="RTS Framework" Height="600" Width="835" Icon="Resources/testselection.ico" MinWidth="525" MinHeight="350" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
 	<Window.Resources>
 		<DataTemplate x:Key="TestOutcomePresenter" DataType="viewModels:TestResultListViewItemViewModel">
 			<Grid>
@@ -92,7 +92,9 @@
 				  ScrollViewer.CanContentScroll="True" 
 				  ScrollViewer.VerticalScrollBarVisibility="Auto"
 				  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-				  RowDetailsVisibilityMode="Collapsed">
+				  RowDetailsVisibilityMode="Collapsed"
+				  SelectionMode="Single"
+				  SelectedItem="{Binding SelectedTest}">
 
 			<DataGrid.ItemContainerStyle >
 				<Style TargetType="DataGridRow" >
@@ -100,6 +102,12 @@
 					<Setter Property="behaviors:HandleDoubleClickBehavior.Command" Value="{Binding ShowErrorMessageCommand}" />
 				</Style>
 			</DataGrid.ItemContainerStyle>
+			<DataGrid.ContextMenu>
+				<ContextMenu >
+					<MenuItem Header="Show Error Message" Command="{Binding ShowErrorMessageCommand}" />
+					<MenuItem Header="Responsible Changes" Command="{Binding ShowResponsibleChangesCommand}" />
+				</ContextMenu>
+			</DataGrid.ContextMenu>
 
 			<DataGrid.RowDetailsTemplate>
 				<DataTemplate DataType="viewModels:TestResultListViewItemViewModel">

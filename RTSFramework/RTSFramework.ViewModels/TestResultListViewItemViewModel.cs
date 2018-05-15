@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.ViewModels.RequireUIServices;

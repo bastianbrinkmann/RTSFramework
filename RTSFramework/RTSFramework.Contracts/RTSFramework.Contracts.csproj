@@ -78,6 +78,7 @@
     <Compile Include="Adapter\IDeltaAdapter.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
+    <Compile Include="IResponsibleChangesProvider.cs" />
     <Compile Include="ITestsPrioritizer.cs" />
     <Compile Include="Utilities\IApplicationClosedHandler.cs" />
     <Compile Include="Utilities\ILoggingHelper.cs" />

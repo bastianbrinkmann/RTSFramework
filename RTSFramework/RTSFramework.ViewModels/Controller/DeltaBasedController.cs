@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Contracts;
@@ -13,7 +14,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult>
+	public class DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult> : IController<TTestCase>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
@@ -46,11 +47,14 @@ namespace RTSFramework.ViewModels.Controller
 			this.loggingHelper = loggingHelper;
 		}
 
-		public async Task<TResult> ExecuteImpactedTests(TDeltaArtefact deltaArtefact, CancellationToken token)
+		public TDeltaArtefact DeltaArtefact { get; set; }
+		public TResult Result { get; set; }
+
+		public async Task ExecuteImpactedTests(CancellationToken token)
 		{
 			loggingHelper.InitLogFile();
 
-			var delta = deltaArtefactAdapter.Parse(deltaArtefact);
+			var delta = deltaArtefactAdapter.Parse(DeltaArtefact);
 			token.ThrowIfCancellationRequested();
 
 			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(delta.NewModel, token), "Tests Discovery");
@@ -80,7 +84,12 @@ namespace RTSFramework.ViewModels.Controller
 				executor.TestResultAvailable -= TestResultAvailable;
 			}
 
-			return processingResult;
+			Result = processingResult;
+		}
+
+		public IResponsibleChangesProvider GetResponsibleChangesProvider()
+		{
+			return testSelector.GetResponsibleChangesProvider();
 		}
 	}
 }
