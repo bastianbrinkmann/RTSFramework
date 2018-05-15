@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -40,7 +41,6 @@ namespace RTSFramework.ViewModels
 		private const string UncommittedChangesIdentifier = "uncomittedChanges";
 
 		private IController<MSTestTestcase> currentController;
-
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
@@ -77,9 +77,10 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<DiscoveryType> discoveryTypes;
 		private bool isTimeLimitChangeable;
 		private double timeLimit;
-		private DelegateCommand showResponsibleChangesCommand;
 		private TestResultListViewItemViewModel selectedTest;
-		private DelegateCommand showErrorMessageCommand;
+		private string testCaseNameFilter;
+		private string classNameFilter;
+		private string categoryFilter;
 
 		#endregion
 
@@ -118,6 +119,32 @@ namespace RTSFramework.ViewModels
 			SolutionFilePath = userSettingsProvider.SolutionFilePath;
 			RepositoryPath = userSettingsProvider.RepositoryPath;
 			TimeLimit = userSettingsProvider.TimeLimit;
+			ClassNameFilter = userSettingsProvider.ClassNameFilter;
+			TestCaseNameFilter = userSettingsProvider.TestCaseNameFilter;
+			CategoryFilter = userSettingsProvider.CategoryFilter;
+		}
+
+		private void ApplyFilter()
+		{
+			Func<ITestCase, bool> filterFunction = x => true;
+
+			if (TestCaseNameFilter != null)
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.Name.Contains(TestCaseNameFilter);
+			}
+			if (ClassNameFilter != null)
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.AssociatedClass.Contains(ClassNameFilter);
+			}
+			if (CategoryFilter != null)
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.Categories.Any(y => y.Contains(CategoryFilter));
+			}
+
+			userRunConfigurationProvider.FilterFunction = filterFunction;
 		}
 
 		private void SpecifyIntendedChanges()
@@ -230,10 +257,48 @@ namespace RTSFramework.ViewModels
 				case nameof(TimeLimit):
 					userRunConfigurationProvider.TimeLimit = TimeLimit;
 					break;
+				case nameof(TestCaseNameFilter):
+				case nameof(ClassNameFilter):
+				case nameof(CategoryFilter):
+					ApplyFilter();
+					break;
 			}
 		}
 
 		#region Properties
+
+		public string CategoryFilter
+		{
+			get { return categoryFilter; }
+			set
+			{
+				categoryFilter = value;
+				RaisePropertyChanged();
+				userSettingsProvider.CategoryFilter = value;
+			}
+		}
+
+		public string ClassNameFilter
+		{
+			get { return classNameFilter; }
+			set
+			{
+				classNameFilter = value;
+				RaisePropertyChanged();
+				userSettingsProvider.ClassNameFilter = value;
+			}
+		}
+
+		public string TestCaseNameFilter
+		{
+			get { return testCaseNameFilter; }
+			set
+			{
+				testCaseNameFilter = value;
+				RaisePropertyChanged();
+				userSettingsProvider.TestCaseNameFilter = value;
+			}
+		}
 
 		public TestResultListViewItemViewModel SelectedTest
 		{
@@ -244,7 +309,6 @@ namespace RTSFramework.ViewModels
 				RaisePropertyChanged();
 			}
 		}
-
 
 		public double TimeLimit
 		{

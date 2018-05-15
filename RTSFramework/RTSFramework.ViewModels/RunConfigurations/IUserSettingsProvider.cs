@@ -15,5 +15,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
 		string SolutionFilePath { get; set; }
 		string RepositoryPath { get; set; }
 		double TimeLimit { get; set; }
+		string TestCaseNameFilter { get; set; }
+		string ClassNameFilter { get; set; }
+		string CategoryFilter { get; set; }
 	}
 }

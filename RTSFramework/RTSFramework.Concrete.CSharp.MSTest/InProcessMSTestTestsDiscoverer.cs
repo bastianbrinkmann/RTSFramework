@@ -19,14 +19,17 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
+		private readonly IUserRunConfigurationProvider runConfigurationProvider;
 
 		public InProcessMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
-			ISettingsProvider settingsProvider)
+			ISettingsProvider settingsProvider,
+			IUserRunConfigurationProvider runConfigurationProvider)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;
+			this.runConfigurationProvider = runConfigurationProvider;
 		}
 
 		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
@@ -38,7 +41,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			return vsTestCases.Select(Convert).Where(x => !x.Ignored).ToList();
+			return vsTestCases.Select(Convert).Where(x => !x.Ignored && runConfigurationProvider.FilterFunction(x)).ToList();
 		}
 
 		private MSTestTestcase Convert(TestCase vsTestCase)

@@ -54,8 +54,10 @@ namespace RTSFramework.GUI
 		public GranularityLevel GranularityLevel { get; set; }
 		public string SolutionFilePath { get; set; }
 		public string RepositoryPath { get; set; }
-
 		public double TimeLimit { get; set; }
+		public string TestCaseNameFilter { get; set; }
+		public string ClassNameFilter { get; set; }
+		public string CategoryFilter { get; set; }
 
 		public void Dispose()
 		{

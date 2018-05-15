@@ -30,19 +30,19 @@
 	</Window.TaskbarItemInfo>
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="95"/>
+			<ColumnDefinition Width="115"/>
 			<ColumnDefinition Width="506*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="153"/>
-			<RowDefinition Height="21"/>
+			<RowDefinition Height="66"/>
 			<RowDefinition Height="278*"/>
 			<RowDefinition Height="25"/>
 			<RowDefinition/>
 		</Grid.RowDefinitions>
-		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding StartRunCommand}" Height="20" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
-		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="84" Command="{Binding CancelRunCommand}" Height="20" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
+		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="110" Command="{Binding StartRunCommand}" Height="20" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
+		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="110" Command="{Binding CancelRunCommand}" Height="20" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
 		<Grid Grid.Row="1" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" Margin="0,5,5,5" Grid.Column="0" Grid.ColumnSpan="2">
 			<Grid.RowDefinitions >
 				<RowDefinition Height="28"/>
@@ -54,9 +54,9 @@
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="115"/>
-				<ColumnDefinition Width="185*"/>
-				<ColumnDefinition Width="150*"/>
-				<ColumnDefinition Width="150*"/>
+				<ColumnDefinition Width="230*"/>
+				<ColumnDefinition Width="230*"/>
+				<ColumnDefinition Width="230*"/>
 			</Grid.ColumnDefinitions>
 
 			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="0" Margin="0,1" Width="78"/>
@@ -86,8 +86,25 @@
 			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="5,0,30,0" Grid.Column="2"  Grid.Row="4" />
 			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="2" Grid.Row="4" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" />
 		</Grid>
-		<Grid Grid.Row="2" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
-			<Label x:Name="LblResult" Content="Result:" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="26" Width="45" Grid.Row="0" Grid.Column="0" />
+		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="28"/>
+				<RowDefinition Height="28"/>
+			</Grid.RowDefinitions>
+			<Label x:Name="LblTestCaseName" Content="Test Case Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="0"/>
+			<Label x:Name="LblClassName" Content="Class Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="1"/>
+			<Label x:Name="LblCategory" Content="Category:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="2" Grid.Row="0"/>
+
+			<TextBox x:Name="TbTestCaseName" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding TestCaseNameFilter}" Grid.Row="0" Grid.Column="1"/>
+			<TextBox x:Name="TbClassName" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding ClassNameFilter}" Grid.Row="1" Grid.Column="1"/>
+			<TextBox x:Name="TbCategory" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding CategoryFilter}" Grid.Row="0" Grid.Column="3"/>
 		</Grid>
 
 		<DataGrid x:Name="DgTests" IsReadOnly="True" AutoGenerateColumns="False" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding TestResults}"

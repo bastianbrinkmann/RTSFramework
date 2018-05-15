@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts.Utilities
 {
@@ -7,5 +9,7 @@ namespace RTSFramework.Contracts.Utilities
 		IList<string> IntendedChanges { get; set; }
 
 		double TimeLimit { get; set; }
+
+		Func<ITestCase, bool> FilterFunction { get; set; }
 	}
 }
