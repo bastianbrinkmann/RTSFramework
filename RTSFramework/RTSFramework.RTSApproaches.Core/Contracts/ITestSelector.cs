@@ -14,7 +14,5 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 		where TTestCase : ITestCase
 	{
 		Task<IList<TTestCase>>  SelectTests(IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
-
-		IResponsibleChangesProvider GetResponsibleChangesProvider();
 	}
 }

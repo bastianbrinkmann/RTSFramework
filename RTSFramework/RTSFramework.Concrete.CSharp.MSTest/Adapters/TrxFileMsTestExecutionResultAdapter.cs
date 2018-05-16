@@ -113,7 +113,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
             }
         }
 
-        public void Unparse(MSTestExectionResult model, MSTestExecutionResultParameters artefact)
+        public MSTestExecutionResultParameters Unparse(MSTestExectionResult model, MSTestExecutionResultParameters artefact)
         {
             throw new NotImplementedException();
         }

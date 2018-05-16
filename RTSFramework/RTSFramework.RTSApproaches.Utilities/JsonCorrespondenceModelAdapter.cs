@@ -35,7 +35,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
             return null;
         }
 
-        public void Unparse(Models.CorrespondenceModel model, FileInfo artefact)
+        public FileInfo Unparse(Models.CorrespondenceModel model, FileInfo artefact)
         {
             using (FileStream stream = artefact.Open(FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -45,6 +45,8 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
                     serializer.Serialize(writer, model);
                 }
             }
+
+	        return artefact;
         }
     }
 }

@@ -41,9 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvFileArtefact.cs" />
     <Compile Include="FileProcessingResult.cs" />
-    <Compile Include="IdentifiedTestsListReporter.cs" />
-    <Compile Include="CsvTestsReporter.cs" />
+    <Compile Include="TestsReporter.cs" />
+    <Compile Include="TestsCsvFileAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestListResult.cs" />
   </ItemGroup>

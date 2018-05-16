@@ -6,6 +6,6 @@ namespace RTSFramework.Concrete.Reporting
 {
 	public class TestListResult<TTestCase> : ITestProcessingResult where TTestCase : ITestCase
 	{
-		public IEnumerable<TTestCase> IdentifiedTests { get; set; }
+		public IList<TTestCase> IdentifiedTests { get; set; }
 	}
 }

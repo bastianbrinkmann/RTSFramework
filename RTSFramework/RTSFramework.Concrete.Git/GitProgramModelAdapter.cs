@@ -42,7 +42,7 @@ namespace RTSFramework.Concrete.Git
 			};
 		}
 
-	    public void Unparse(GitProgramModel model, GitVersionIdentification artefact)
+	    public GitVersionIdentification Unparse(GitProgramModel model, GitVersionIdentification artefact)
 	    {
 		    throw new NotImplementedException();
 	    }

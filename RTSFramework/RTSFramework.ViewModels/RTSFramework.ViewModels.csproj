@@ -90,6 +90,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapter\TestsResultListViewItemViewModelsAdapter.cs" />
+    <Compile Include="Adapter\TestResultListViewItemViewModelAdapter.cs" />
     <Compile Include="CommitViewModel.cs" />
     <Compile Include="Controller\DeltaBasedController.cs" />
     <Compile Include="Controller\IController.cs" />
@@ -98,6 +100,7 @@
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
     <Compile Include="RunConfigurations\IUserSettingsProvider.cs" />
     <Compile Include="RunConfigurations\ProgramModelType.cs" />
+    <Compile Include="RunConfigurations\ResultArtefactType.cs" />
     <Compile Include="RunStatus.cs" />
     <Compile Include="Controller\StateBasedController.cs" />
     <Compile Include="MainWindowViewModel.cs" />

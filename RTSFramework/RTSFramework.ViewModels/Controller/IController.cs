@@ -16,7 +16,5 @@ namespace RTSFramework.ViewModels.Controller
 		event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		Task ExecuteImpactedTests(CancellationToken token);
-
-		IResponsibleChangesProvider GetResponsibleChangesProvider();
 	}
 }

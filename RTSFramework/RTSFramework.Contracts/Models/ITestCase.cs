@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RTSFramework.Contracts.Models
 {
@@ -13,5 +14,7 @@ namespace RTSFramework.Contracts.Models
 		string AssociatedClass { get; }
 
 		bool IsChildTestCase { get; }
+
+		Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
 	}
 }

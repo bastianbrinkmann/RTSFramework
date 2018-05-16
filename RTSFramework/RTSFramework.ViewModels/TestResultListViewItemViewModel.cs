@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace RTSFramework.ViewModels
 		private int? executionId;
 		private DelegateCommand showResponsibleChangesCommand;
 
-		public TestResultListViewItemViewModel(IDialogService dialogService, IResponsibleChangesProvider responsibleChangesProvider)
+		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
 			ShowErrorMessageCommand = new DelegateCommand(() =>
 			{
@@ -46,10 +47,10 @@ namespace RTSFramework.ViewModels
 
 			ShowResponsibleChangesCommand = new DelegateCommand(() =>
 			{
-				var responsibleChanges = responsibleChangesProvider.GetResponsibleChangesForImpactedTest(FullyQualifiedName);
+				var responsibleChanges = GetResponsibleChangesForLastImpact();
 
 				dialogService.ShowInformation(string.Join(Environment.NewLine, responsibleChanges), "Potentially responsible changes");
-			}, () => responsibleChangesProvider != null);
+			}, () => GetResponsibleChangesForLastImpact != null);
 
 			ChildResults = new ObservableCollection<TestResultListViewItemViewModel>();
 
@@ -77,6 +78,8 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
 
 		public DelegateCommand ShowResponsibleChangesCommand
 		{

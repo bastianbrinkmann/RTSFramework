@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChainingDeltaAdapter.cs" />
+    <Compile Include="EmptyArtefactAdapter.cs" />
     <Compile Include="IdentityDeltaAdapter.cs" />
     <Compile Include="LimitedTimeTestsExecutor.cs" />
     <Compile Include="Models\FileElement.cs" />

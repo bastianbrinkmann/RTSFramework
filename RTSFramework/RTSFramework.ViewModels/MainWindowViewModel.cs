@@ -40,7 +40,6 @@ namespace RTSFramework.ViewModels
 	{
 		private const string UncommittedChangesIdentifier = "uncomittedChanges";
 
-		private IController<MSTestTestcase> currentController;
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
@@ -682,32 +681,31 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>>(deltaArtefact);
+					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, object>(deltaArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, FileProcessingResult>(deltaArtefact);
+					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, CsvFileArtefact>(deltaArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>>(deltaArtefact);
+					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, IList<TestResultListViewItemViewModel>>(deltaArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResult> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TResult>(TDeltaArtefact deltaArtefact)
+		private async Task<TResultArtefact> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TResult, TResultArtefact>(TDeltaArtefact deltaArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TResult>(RTSApproachType, ProcessingType);
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
 			deltaBasedController.DeltaArtefact = deltaArtefact;
-			currentController = deltaBasedController;
 
-			currentController.ImpactedTest += HandleImpactedTest;
-			currentController.TestResultAvailable += HandleTestExecutionResult;
-			currentController.TestsPrioritized += HandleTestsPrioritized;
+			deltaBasedController.ImpactedTest += HandleImpactedTest;
+			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
+			deltaBasedController.TestsPrioritized += HandleTestsPrioritized;
 
 			await Task.Run(() => deltaBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
 			return deltaBasedController.Result;
@@ -798,33 +796,32 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteRun<TArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>>(oldArtefact, newArtefact);
+					await ExecuteRun<TArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, FileProcessingResult>(oldArtefact, newArtefact);
+					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, CsvFileArtefact>(oldArtefact, newArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>>(oldArtefact, newArtefact);
+					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResult>  ExecuteRun<TArtefact, TModel, TDelta, TResult>(TArtefact oldArtefact, TArtefact newArtefact)
+		private async Task<TResultArtefact>  ExecuteRun<TArtefact, TModel, TDelta, TResult, TResultArtefact>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, MSTestTestcase, TResult>(RTSApproachType, ProcessingType);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, MSTestTestcase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
 			stateBasedController.OldArtefact = oldArtefact;
 			stateBasedController.NewArtefact = newArtefact;
-			currentController = stateBasedController;
 
-			currentController.ImpactedTest += HandleImpactedTest;
-			currentController.TestResultAvailable += HandleTestExecutionResult;
-			currentController.TestsPrioritized += HandleTestsPrioritized;
+			stateBasedController.ImpactedTest += HandleImpactedTest;
+			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
+			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
 
 			await Task.Run(() => stateBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
 			return stateBasedController.Result;
@@ -851,24 +848,18 @@ namespace RTSFramework.ViewModels
 			});
 		}
 
-		private void HandleListReportingResult<TTestCase>(TestListResult<TTestCase> listReportingResult) where TTestCase : ITestCase
+		private void HandleListReportingResult(IList<TestResultListViewItemViewModel> viewModels)
 		{
 			TestResults.Clear();
-			TestResults.AddRange(listReportingResult.IdentifiedTests.Select(x => new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
-			{
-				FullyQualifiedName = x.Id,
-				FullClassName = x.AssociatedClass,
-				Name = x.Name,
-				Categories = string.Join(",", x.Categories)
-			}));
+			TestResults.AddRange(viewModels);
 		}
 
-		private void HandleCsvCreationResult(FileProcessingResult csvCreationResult)
+		private void HandleCsvCreationResult(CsvFileArtefact fileArtefact)
 		{
-			bool openFile = dialogService.ShowQuestion($"CSV file was created at '{csvCreationResult.FilePath}'.{Environment.NewLine} Do you want to open the file?", "CSV File Created");
+			bool openFile = dialogService.ShowQuestion($"CSV file was created at '{fileArtefact.CsvFilePath}'.{Environment.NewLine} Do you want to open the file?", "CSV File Created");
 			if (openFile)
 			{
-				Process.Start(csvCreationResult.FilePath);
+				Process.Start(fileArtefact.CsvFilePath);
 			}
 		}
 
@@ -880,12 +871,13 @@ namespace RTSFramework.ViewModels
 		private void HandleImpactedTest<TTestCase>(object sender, ImpactedTestEventArgs<TTestCase> args) where TTestCase : ITestCase
 		{
 			applicationUiExecutor.ExecuteOnUi(() =>
-					TestResults.Add(new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
+					TestResults.Add(new TestResultListViewItemViewModel(dialogService)
 					{
 						FullyQualifiedName = args.TestCase.Id,
 						Name = args.TestCase.Name,
 						FullClassName = args.TestCase.AssociatedClass,
-						Categories = string.Join(",", args.TestCase.Categories)
+						Categories = string.Join(",", args.TestCase.Categories),
+						GetResponsibleChangesForLastImpact = args.TestCase.GetResponsibleChangesForLastImpact
 					}));
 		}
 
@@ -895,7 +887,7 @@ namespace RTSFramework.ViewModels
 
 			if (executionResult.TestCase.IsChildTestCase)
 			{
-				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService, currentController.GetResponsibleChangesProvider())
+				currentTestViewModel.AddChildResults(new TestResultListViewItemViewModel(dialogService)
 				{
 					TestOutcome = executionResult.Outcome,
 					StartTime = executionResult.StartTime,

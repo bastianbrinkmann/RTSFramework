@@ -14,7 +14,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult> : IController<TTestCase>
+	public class DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact> : IController<TTestCase>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
@@ -30,6 +30,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
 		private readonly ITestsPrioritizer<TTestCase> testsPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
+		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public DeltaBasedController(
 			IArtefactAdapter<TDeltaArtefact, TDelta> deltaArtefactAdapter,
@@ -37,7 +38,8 @@ namespace RTSFramework.ViewModels.Controller
 			ITestSelector<TModel, TDelta, TTestCase> testSelector,
 			ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor,
 			ITestsPrioritizer<TTestCase> testsPrioritizer,
-			ILoggingHelper loggingHelper)
+			ILoggingHelper loggingHelper,
+			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
 		{
 			this.deltaArtefactAdapter = deltaArtefactAdapter;
 			this.testsProcessor = testsProcessor;
@@ -45,10 +47,11 @@ namespace RTSFramework.ViewModels.Controller
 			this.testSelector = testSelector;
 			this.testsPrioritizer = testsPrioritizer;
 			this.loggingHelper = loggingHelper;
+			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
 
 		public TDeltaArtefact DeltaArtefact { get; set; }
-		public TResult Result { get; set; }
+		public TResultArtefact Result { get; set; }
 
 		public async Task ExecuteImpactedTests(CancellationToken token)
 		{
@@ -84,12 +87,7 @@ namespace RTSFramework.ViewModels.Controller
 				executor.TestResultAvailable -= TestResultAvailable;
 			}
 
-			Result = processingResult;
-		}
-
-		public IResponsibleChangesProvider GetResponsibleChangesProvider()
-		{
-			return testSelector.GetResponsibleChangesProvider();
+			Result = resultArtefactAdapter.Unparse(processingResult, Result);
 		}
 	}
 }

@@ -13,7 +13,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 namespace RTSFramework.RTSApproaches.Dynamic
 {
 	public class DynamicRTS<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
-		where TTestCase : ITestCase
+		where TTestCase : class, ITestCase
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 	{
@@ -24,13 +24,10 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		private CorrespondenceModel.Models.CorrespondenceModel currentCorrespondenceModel;
-		private StructuralDelta<TModel, TModelElement> currentDelta;
-
-		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
+			CancellationToken cancellationToken)
 		{
-			currentCorrespondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.OldModel, cancellationToken);
-			currentDelta = delta;
+			var currentCorrespondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.OldModel, cancellationToken);
 
 			IList<TTestCase> impactedTests = new List<TTestCase>();
 
@@ -45,6 +42,18 @@ namespace RTSFramework.RTSApproaches.Dynamic
 						delta.DeletedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))))
 					{
 						impactedTests.Add(testcase);
+						testcase.GetResponsibleChangesForLastImpact = () =>
+						{
+							if (currentCorrespondenceModel.CorrespondenceModelLinks.ContainsKey(testcase.Id))
+							{
+								var linksOfTestcase = currentCorrespondenceModel.CorrespondenceModelLinks[testcase.Id];
+								return linksOfTestcase.Where(x => delta.AddedElements.Any(y => y.Id == x) ||
+																  delta.ChangedElements.Any(y => y.Id == x) ||
+																  delta.DeletedElements.Any(y => y.Id == x)).ToList();
+							}
+
+							return new List<string>(new[] { "New Test" });
+						};
 					}
 				}
 				else
@@ -55,37 +64,6 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			}
 
 			return impactedTests;
-		}
-
-		public IResponsibleChangesProvider GetResponsibleChangesProvider()
-		{
-			return new DynamicRTSResponsibleChangesProvider(currentDelta, currentCorrespondenceModel);
-		}
-
-		private class DynamicRTSResponsibleChangesProvider : IResponsibleChangesProvider
-		{
-			private readonly StructuralDelta<TModel, TModelElement> delta;
-			private readonly CorrespondenceModel.Models.CorrespondenceModel correspondenceModel;
-
-			public DynamicRTSResponsibleChangesProvider(StructuralDelta<TModel, TModelElement> delta,
-				CorrespondenceModel.Models.CorrespondenceModel correspondenceModel)
-			{
-				this.delta = delta;
-				this.correspondenceModel = correspondenceModel;
-			}
-
-			public IList<string> GetResponsibleChangesForImpactedTest(string testCaseId)
-			{
-				if (correspondenceModel.CorrespondenceModelLinks.ContainsKey(testCaseId))
-				{
-					var linksOfTestcase = correspondenceModel.CorrespondenceModelLinks[testCaseId];
-					return linksOfTestcase.Where(x => delta.AddedElements.Any(y => y.Id == x) ||
-													  delta.ChangedElements.Any(y => y.Id == x) ||
-													  delta.DeletedElements.Any(y => y.Id == x)).ToList();
-				}
-
-				return new List<string>(new []{"New Test"});
-			}
 		}
 	}
 }

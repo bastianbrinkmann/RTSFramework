@@ -48,7 +48,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 			return result;
 		}
 
-		public override Task Unparse(IList<CSharpAssembly> model, string artefact, CancellationToken token)
+		public override Task<string> Unparse(IList<CSharpAssembly> model, string artefact, CancellationToken token)
 		{
 			throw new NotImplementedException();
 		}

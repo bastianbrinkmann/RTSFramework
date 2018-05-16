@@ -15,7 +15,7 @@ namespace RTSFramework.Concrete.TFS2010
 		    };
 	    }
 
-	    public void Unparse(TFS2010ProgramModel model, TFS2010VersionIdentification artefact)
+	    public TFS2010VersionIdentification Unparse(TFS2010ProgramModel model, TFS2010VersionIdentification artefact)
 	    {
 		    throw new System.NotImplementedException();
 	    }

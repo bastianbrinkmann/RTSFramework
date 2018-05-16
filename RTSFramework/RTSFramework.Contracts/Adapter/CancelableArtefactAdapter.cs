@@ -7,15 +7,15 @@ namespace RTSFramework.Contracts.Adapter
 	{
 		public abstract Task<TModel> Parse(TArtefact artefact, CancellationToken cancellationToken);
 
-		public abstract  Task Unparse(TModel model, TArtefact artefact, CancellationToken cancellationToken);
+		public abstract Task<TArtefact> Unparse(TModel model, TArtefact artefact, CancellationToken cancellationToken);
 		public TModel Parse(TArtefact artefact)
 		{
 			return Parse(artefact, default(CancellationToken)).Result;
 		}
 
-		public void Unparse(TModel model, TArtefact artefact)
+		public TArtefact Unparse(TModel model, TArtefact artefact)
 		{
-			Unparse(model, artefact, default(CancellationToken));
+			return Unparse(model, artefact, default(CancellationToken)).Result;
 		}
 	}
 }

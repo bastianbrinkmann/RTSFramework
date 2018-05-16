@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.User
 			return deltaAdapter.Convert(delta);
 		}
 
-		public void Unparse(TDelta model, IntendedChangesArtefact artefact)
+		public IntendedChangesArtefact Unparse(TDelta model, IntendedChangesArtefact artefact)
 		{
 			throw new System.NotImplementedException();
 		}

@@ -119,7 +119,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 			return coverageEntries;
 		}
 
-		public void Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
+		public MSTestExecutionResultParameters Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
 		{
 			throw new NotImplementedException();
 		}

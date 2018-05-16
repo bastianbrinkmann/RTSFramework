@@ -18,7 +18,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult> : IController<TTestCase>
+	public class StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact> : IController<TTestCase>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
@@ -35,6 +35,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor;
 		private readonly ITestsPrioritizer<TTestCase> testsPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
+		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
@@ -43,7 +44,8 @@ namespace RTSFramework.ViewModels.Controller
 			ITestSelector<TModel, TDelta, TTestCase> testSelector,
 			ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor,
 			ITestsPrioritizer<TTestCase> testsPrioritizer,
-			ILoggingHelper loggingHelper)
+			ILoggingHelper loggingHelper,
+			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
@@ -52,11 +54,12 @@ namespace RTSFramework.ViewModels.Controller
 			this.testsProcessor = testsProcessor;
 			this.testsPrioritizer = testsPrioritizer;
 			this.loggingHelper = loggingHelper;
+			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
 
 		public TArtefact OldArtefact { get; set; }
 		public TArtefact NewArtefact { get; set; }
-		public TResult Result { get; set; }
+		public TResultArtefact Result { get; set; }
 
 		public async Task ExecuteImpactedTests(CancellationToken token)
 		{
@@ -95,12 +98,7 @@ namespace RTSFramework.ViewModels.Controller
 				executor.TestResultAvailable -= TestResultAvailable;
 			}
 
-			Result = processingResult;
-		}
-
-		public IResponsibleChangesProvider GetResponsibleChangesProvider()
-		{
-			return testSelector.GetResponsibleChangesProvider();
+			Result = resultArtefactAdapter.Unparse(processingResult, Result);
 		}
 	}
 }
