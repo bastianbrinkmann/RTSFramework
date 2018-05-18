@@ -58,10 +58,12 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase).ToList();
 
 				var coveredTests = coverage.CoverageDataEntries.Select(x => x.Item1).Distinct().ToList();
-				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id));
-
+				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id)).ToList();
+				
 				testsWithoutCoverage.ForEach(x => loggingHelper.WriteMessage("Not covered: " + x.Id));
 				failedTests.ForEach(x => loggingHelper.WriteMessage("Failed Tests: " + x.Id));
+
+				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x.Id));
 
 				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests.Except(failedTests).ToList(), cancellationToken);
 
