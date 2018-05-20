@@ -115,7 +115,7 @@ namespace RTSFramework.ViewModels
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 		{
-			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, ITestsExecutionResult<MSTestTestcase>>(unityContainer);
+			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
 			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, CsvFileArtefact>(unityContainer);
 			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, IList<TestResultListViewItemViewModel>>(unityContainer);
 		}
