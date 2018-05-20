@@ -41,7 +41,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 
         public void RemoveDeletedTests(IEnumerable<string> allTests)
         {
-            var deletedTests = CorrespondenceModelLinks.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key);
+            var deletedTests = CorrespondenceModelLinks.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key).ToList();
 
             foreach (var deletedTest in deletedTests)
             {

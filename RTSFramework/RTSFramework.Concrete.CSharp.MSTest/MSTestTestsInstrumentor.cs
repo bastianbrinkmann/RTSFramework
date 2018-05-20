@@ -38,10 +38,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private const string MonoModuleTyp = "<Module>";
 		private const string DependenciesFolder = @"TestResults\Dependencies";
 		private const string MonitorAssemblyName = "RTSFramework.Concrete.CSharp.DependencyMonitor";
+		private const string TestInitName = "RTSFramworkGeneratedTestInitMethod";
+		private const string TestCleanupName = "RTSFramworkGeneratedTestCleanupMethod";
 
 		private ModuleDefinition dependencyMonitorModule;
 		private TypeDefinition dependencyMonitorType;
 		private MethodReference testMethodStartedReference;
+		private MethodReference testMethodNameReference;
 		private MethodReference testMethodEndReference;
 		private MethodReference typeVisitedMethodReference;
 
@@ -67,12 +70,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private GranularityLevel granularityLevel;
 
 		private const string DependencyMonitorClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
-		private static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
+		private const string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
 
-		private static string TestMethodStartFullName =
-			"System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String,System.String)";
-
-		private static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
+		private const string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart()";
+		private const string TestMethodNameFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodName(System.String,System.String)";
+		private const string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
+		
 
 		private List<Tuple<string, int>> testNamesToExecutionIds;
 
@@ -81,6 +84,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
 			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitorClassFullName);
 			testMethodStartedReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodStartFullName);
+			testMethodNameReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodNameFullName);
 			testMethodEndReference = dependencyMonitorType.Methods.Single(x => x.FullName == TestMethodEndFullName);
 			typeVisitedMethodReference = dependencyMonitorType.Methods.Single(x => x.FullName == TypeMethodFullName);
 
@@ -251,6 +255,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 					return;
 				}
 
+				ModuleDefinition msTestModule = null;
+
 				foreach (var type in moduleDefinition.GetTypes())
 				{
 					cancellationToken.ThrowIfCancellationRequested();
@@ -263,13 +269,30 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 					if (type.HasMethods)
 					{
+						if (!type.Methods.Any(x => msTestTestcases.Any(y => y.Id == $"{type.FullName}.{x.Name}")))
+						{
+							continue;
+						}
+
+						if (msTestModule == null)
+						{
+							msTestModule = GetMsTestModule(moduleDefinition);
+						}
+
+						var testInitMethod = InsertMethodWithAttributeIfNotExists(type, TestInitName, msTestModule, MSTestConstants.MsTestTestInitializeAttributeFullName);
+						var testCleanupMethod = InsertMethodWithAttributeIfNotExists(type, TestCleanupName, msTestModule, MSTestConstants.MsTestTestCleanupAttributeFullName);
+
+						InsertCallToDependencyMonitorBeginning(testInitMethod, testMethodStartedReference);
+						InsertCallToDependencyMonitorEnd(testCleanupMethod, testMethodEndReference);
+
 						foreach (var method in type.Methods)
 						{
 							cancellationToken.ThrowIfCancellationRequested();
 							var id = $"{type.FullName}.{method.Name}";
 							if (msTestTestcases.Any(x => x.Id == id))
 							{
-								InstrumentTestMethod(method);
+								string methodArgument = testNamesToExecutionIds.Single(x => x.Item1 == id).Item2.ToString();
+								InsertCallToDependencyMonitorBeginning(method, testMethodNameReference, methodArgument, type.FullName);
 							}
 						}
 					}
@@ -277,6 +300,117 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 				UpdateModule(moduleDefinition);
 			}
+		}
+
+		private MethodDefinition InsertMethodWithAttributeIfNotExists(TypeDefinition type, string methodName, ModuleDefinition attributeModule, string attributeName)
+		{
+			if (type == null)
+			{
+				return null;
+			}
+
+			var existingMethod = type.Methods.SingleOrDefault(x => x.HasCustomAttributes && x.CustomAttributes.Any(y => y.AttributeType.FullName == attributeName));
+			if (existingMethod != null)
+			{
+				return existingMethod;
+			}
+
+			// create new method
+			MethodDefinition newMethod = new MethodDefinition(methodName, MethodAttributes.Public, type.Module.TypeSystem.Void);
+			// add new method to desired type
+			type.Methods.Add(newMethod);
+			ILProcessor il = newMethod.Body.GetILProcessor();
+			// insert return instruction that has to be at the end of the method
+			il.Body.Instructions.Insert(0, il.Create(OpCodes.Ret));
+
+			AddCustomAttribute(newMethod, attributeModule, attributeName);
+
+			return newMethod;
+		}
+
+		private ModuleDefinition GetMsTestModule(ModuleDefinition module)
+		{
+			return GetReferencedModule(module, MSTestConstants.MsTestAssemblyName, MSTestConstants.MsTestModuleName);
+		}
+
+		private ModuleDefinition GetReferencedModule(ModuleDefinition module, string assemblyName, string moduleName)
+		{
+			var assembly = GetReferencedAssembly(module, assemblyName);
+			return assembly?.Modules.FirstOrDefault(m => m.Name == moduleName);
+		}
+
+		private AssemblyDefinition GetReferencedAssembly(ModuleDefinition module, string assemblyName, HashSet<string> visited = null)
+		{
+			visited = visited ?? new HashSet<string>();
+			if (!visited.Add(module.FileName))
+			{
+				return null;
+			}
+
+			var referencedAssemblies = GetReferencedAssemblies(module);
+			if (referencedAssemblies == null)
+			{
+				return null;
+			}
+
+			var result = referencedAssemblies.FirstOrDefault(a => a.Name.Name == assemblyName);
+			if (result != null)
+			{
+				return result;
+			}
+
+			foreach (var refAsm in referencedAssemblies)
+			{
+				result = GetReferencedAssembly(refAsm.MainModule, assemblyName, visited);
+				if (result != null)
+				{
+					return result;
+				}
+			}
+
+			return null;
+		}
+
+		private IList<AssemblyDefinition> GetReferencedAssemblies(ModuleDefinition module)
+		{
+			// TODO: Clear up what the difference between ModuleDefinition.ModuleReferences and ModuleDefinition.AssemblyReferences is.
+			// TODO: Modify this method to accept assembly name and only resolve assembly(ies) that match the name.
+
+			if (module == null)
+			{
+				return null;
+			}
+
+			List<AssemblyDefinition> referencedAssemblies = new List<AssemblyDefinition>();
+			foreach (var assemblyNameReference in module.AssemblyReferences)
+			{
+				var assemblyResolver = new DefaultAssemblyResolver();
+				assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(module.FileName));
+				referencedAssemblies.Add(assemblyResolver.Resolve(assemblyNameReference));
+			}
+			return referencedAssemblies;
+		}
+
+		private void AddCustomAttribute(MethodDefinition method, ModuleDefinition attributeModule, string attributeName)
+		{
+			TypeDefinition attributeType = attributeModule.GetType(attributeName);
+
+			var constructor = GetDefaultConstructor(attributeType);
+			var constructorMethodRef = method.Module.ImportReference(constructor);
+			method.CustomAttributes.Add(new CustomAttribute(constructorMethodRef));
+		}
+
+		private MethodDefinition GetDefaultConstructor(TypeDefinition type)
+		{
+			IEnumerable<MethodDefinition> constructors = type.GetConstructors();
+			foreach (MethodDefinition constructor in constructors)
+			{
+				if (!constructor.HasCustomAttributes)
+				{
+					return constructor;
+				}
+			}
+			return null;
 		}
 
 		#endregion
@@ -375,6 +509,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			}
 		}
 
+		/// <summary>
+		/// Assume that an assembly is either instrumented completly or not at all
+		/// </summary>
+		/// <param name="moduleDefinition"></param>
+		/// <returns></returns>
 		private bool AlreadInstrumented(ModuleDefinition moduleDefinition)
 		{
 			if (moduleDefinition.HasAssemblyReferences)
@@ -604,16 +743,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		}
 
 		#endregion
-
-		private void InstrumentTestMethod(MethodDefinition testMethod)
-		{
-			var testId = $"{testMethod.DeclaringType.FullName}.{testMethod.Name}";
-
-			string methodArgument = testNamesToExecutionIds.Single(x => x.Item1 == testId).Item2.ToString();
-
-			InsertCallToDependencyMonitorBeginning(testMethod, testMethodStartedReference, methodArgument, testMethod.DeclaringType.FullName);
-			InsertCallToDependencyMonitorEnd(testMethod, testMethodEndReference);
-		}
 
 		#region Instrumenting Instructions
 

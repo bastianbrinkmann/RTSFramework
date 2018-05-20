@@ -27,5 +27,10 @@
 		internal const string PropertyTestCategory = "MSTestDiscoverer.TestCategory";
 		internal const string PropertyIsDataDriven = "MSTestDiscoverer.IsDataDriven";
 
+		internal const string MsTestAssemblyName = "Microsoft.VisualStudio.QualityTools.UnitTestFramework";
+		internal const string MsTestModuleName = "Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll";
+
+		internal const string MsTestTestInitializeAttributeFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.TestInitializeAttribute";
+		internal const string MsTestTestCleanupAttributeFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanupAttribute";
 	}
 }

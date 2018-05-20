@@ -22,15 +22,9 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 {
 	public static class DependencyMonitor
 	{
-		public const string ClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
-
 		private static string currentTestMethodName = string.Empty;
 
 		private static HashSet<string> dependencies;
-
-		public static string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
-		public static string TestMethodStartFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodStart(System.String)";
-		public static string TestMethodEndFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::TestMethodEnd()";
 
 		private const string DependenciesFolder = @"..\..\Dependencies\";
 
@@ -50,10 +44,14 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 			}
 		}
 
-		public static void TestMethodStart(string testMethodIdentifier, string testClass)
+		public static void TestMethodStart()
+		{
+			dependencies = new HashSet<string>();
+		}
+
+		public static void TestMethodName(string testMethodIdentifier, string testClass)
 		{
 			currentTestMethodName = testMethodIdentifier;
-			dependencies = new HashSet<string>();
 
 			if (testMethodIdentifier != null)
 			{
