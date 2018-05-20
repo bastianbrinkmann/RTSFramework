@@ -279,7 +279,6 @@
     <Compile Include="RequireUIServices\ApplicationUiExecutor.cs" />
     <Compile Include="RequireUIServices\DialogService.cs" />
     <Compile Include="SettingsProvider.cs" />
-    <Compile Include="JsonUserSettingsProvider.cs" />
     <Compile Include="Utilities\ApplicationClosedHandler.cs" />
     <Compile Include="Utilities\EnumBindingSourceExtension.cs" />
     <Page Include="IntendedChangesDialog.xaml">

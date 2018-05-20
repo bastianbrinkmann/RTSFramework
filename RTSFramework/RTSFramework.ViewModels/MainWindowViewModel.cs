@@ -43,7 +43,7 @@ namespace RTSFramework.ViewModels
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
-		private readonly IUserSettingsProvider userSettingsProvider;
+		private readonly UserSettings userSettings;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
 
@@ -88,12 +88,11 @@ namespace RTSFramework.ViewModels
 			GitCommitsProvider gitCommitsProvider, 
 			IApplicationUiExecutor applicationUiExecutor,
 			IUserRunConfigurationProvider userRunConfigurationProvider,
-			IUserSettingsProvider userSettingsProvider)
+			UserSettingsProvider userRunSettingsProvider)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
 			this.userRunConfigurationProvider = userRunConfigurationProvider;
-			this.userSettingsProvider = userSettingsProvider;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -111,17 +110,19 @@ namespace RTSFramework.ViewModels
 
 			PropertyChanged += OnPropertyChanged;
 
-			ProgramModelType = userSettingsProvider.ProgramModelType;
-			DiscoveryType = userSettingsProvider.DiscoveryType;
-			ProcessingType = userSettingsProvider.ProcessingType;
-			RTSApproachType = userSettingsProvider.RTSApproachType;
-			GranularityLevel = userSettingsProvider.GranularityLevel;
-			SolutionFilePath = userSettingsProvider.SolutionFilePath;
-			RepositoryPath = userSettingsProvider.RepositoryPath;
-			TimeLimit = userSettingsProvider.TimeLimit;
-			ClassNameFilter = userSettingsProvider.ClassNameFilter;
-			TestCaseNameFilter = userSettingsProvider.TestCaseNameFilter;
-			CategoryFilter = userSettingsProvider.CategoryFilter;
+			userSettings = userRunSettingsProvider.GetUserSettings();
+
+			ProgramModelType = userSettings.ProgramModelType;
+			DiscoveryType = userSettings.DiscoveryType;
+			ProcessingType = userSettings.ProcessingType;
+			RTSApproachType = userSettings.RTSApproachType;
+			GranularityLevel = userSettings.GranularityLevel;
+			SolutionFilePath = userSettings.SolutionFilePath;
+			RepositoryPath = userSettings.RepositoryPath;
+			TimeLimit = userSettings.TimeLimit;
+			ClassNameFilter = userSettings.ClassNameFilter;
+			TestCaseNameFilter = userSettings.TestCaseNameFilter;
+			CategoryFilter = userSettings.CategoryFilter;
 		}
 
 		private void ApplyFilter()
@@ -284,7 +285,7 @@ namespace RTSFramework.ViewModels
 			{
 				categoryFilter = value;
 				RaisePropertyChanged();
-				userSettingsProvider.CategoryFilter = value;
+				userSettings.CategoryFilter = value;
 			}
 		}
 
@@ -295,7 +296,7 @@ namespace RTSFramework.ViewModels
 			{
 				classNameFilter = value;
 				RaisePropertyChanged();
-				userSettingsProvider.ClassNameFilter = value;
+				userSettings.ClassNameFilter = value;
 			}
 		}
 
@@ -306,7 +307,7 @@ namespace RTSFramework.ViewModels
 			{
 				testCaseNameFilter = value;
 				RaisePropertyChanged();
-				userSettingsProvider.TestCaseNameFilter = value;
+				userSettings.TestCaseNameFilter = value;
 			}
 		}
 
@@ -327,7 +328,7 @@ namespace RTSFramework.ViewModels
 			{
 				timeLimit = value;
 				RaisePropertyChanged();
-				userSettingsProvider.TimeLimit = value;
+				userSettings.TimeLimit = value;
 			}
 		}
 
@@ -508,7 +509,7 @@ namespace RTSFramework.ViewModels
 			{
 				repositoryPath = value;
 				RaisePropertyChanged();
-				userSettingsProvider.RepositoryPath = value;
+				userSettings.RepositoryPath = value;
 			}
 		}
 
@@ -519,7 +520,7 @@ namespace RTSFramework.ViewModels
 			{
 				solutionFilePath = value;
 				RaisePropertyChanged();
-				userSettingsProvider.SolutionFilePath = value;
+				userSettings.SolutionFilePath = value;
 			}
 		}
 
@@ -540,7 +541,7 @@ namespace RTSFramework.ViewModels
 			{
 				granularityLevel = value;
 				RaisePropertyChanged();
-				userSettingsProvider.GranularityLevel = value;
+				userSettings.GranularityLevel = value;
 			}
 		}
 
@@ -551,7 +552,7 @@ namespace RTSFramework.ViewModels
 			{
 				rtsApproachType = value;
 				RaisePropertyChanged();
-				userSettingsProvider.RTSApproachType = value;
+				userSettings.RTSApproachType = value;
 			}
 		}
 
@@ -562,7 +563,7 @@ namespace RTSFramework.ViewModels
 			{
 				discoveryType = value;
 				RaisePropertyChanged();
-				userSettingsProvider.DiscoveryType = value;
+				userSettings.DiscoveryType = value;
 			}
 		}
 
@@ -573,7 +574,7 @@ namespace RTSFramework.ViewModels
 			{
 				processingType = value;
 				RaisePropertyChanged();
-				userSettingsProvider.ProcessingType = value;
+				userSettings.ProcessingType = value;
 			}
 		}
 
@@ -594,7 +595,7 @@ namespace RTSFramework.ViewModels
 			{
 				programModelType = value;
 				RaisePropertyChanged();
-				userSettingsProvider.ProgramModelType = value;
+				userSettings.ProgramModelType = value;
 			}
 		}
 
