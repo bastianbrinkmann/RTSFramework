@@ -30,6 +30,7 @@ namespace RTSFramework.ViewModels.RunConfigurations
 					settings = new UserSettings
 					{
 						ProgramModelType = ProgramModelType.GitModel,
+						TestType = TestType.MSTest,
 						DiscoveryType = DiscoveryType.GitDiscovery,
 						ProcessingType = ProcessingType.MSTestExecution,
 						RTSApproachType = RTSApproachType.DynamicRTS,
@@ -39,7 +40,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
 						TestCaseNameFilter = "",
 						ClassNameFilter = "",
 						CategoryFilter = "",
-						TimeLimit = 60
+						TimeLimit = 60,
+						CsvTestsFile = ""
 					};
 				}
 			}

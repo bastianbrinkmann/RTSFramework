@@ -11,5 +11,6 @@ namespace RTSFramework.Contracts.Utilities
 		double TimeLimit { get; set; }
 
 		Func<ITestCase, bool> FilterFunction { get; set; }
+		string CsvTestsFile { get; set; }
 	}
 }

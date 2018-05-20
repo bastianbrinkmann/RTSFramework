@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvTestsFileDiscoverer.cs" />
     <Compile Include="IntendedChangesAdapter.cs" />
     <Compile Include="IntendedChangesArtefact.cs" />
+    <Compile Include="Models\CsvFileTestcase.cs" />
     <Compile Include="UserRunConfigurationProvider.cs" />
     <Compile Include="Models\LocalProgramModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

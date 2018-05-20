@@ -3,6 +3,6 @@
 	public enum TestType
 	{
 		MSTest,
-		//CsvList
+		CsvList
 	}
 }

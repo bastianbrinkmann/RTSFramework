@@ -11,5 +11,6 @@ namespace RTSFramework.Concrete.User
 
 		public double TimeLimit { get; set; }
 		public Func<ITestCase, bool> FilterFunction { get; set; }
+		public string CsvTestsFile { get; set; }
 	}
 }

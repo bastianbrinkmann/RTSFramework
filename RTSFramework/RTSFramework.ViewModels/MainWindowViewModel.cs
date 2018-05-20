@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.ServiceModel.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,6 +82,10 @@ namespace RTSFramework.ViewModels
 		private string classNameFilter;
 		private string categoryFilter;
 		private TestType testType;
+		private ObservableCollection<ProcessingType> processingTypes;
+		private ICommand selectCsvTestsFileCommand;
+		private string csvTestsFile;
+		private bool isCsvTestsFileSelectable;
 
 		#endregion
 
@@ -99,9 +104,11 @@ namespace RTSFramework.ViewModels
 			CancelRunCommand = new DelegateCommand(CancelRun);
 			SelectSolutionFileCommand = new DelegateCommand(SelectSolutionFile);
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
+			SelectCsvTestsFileCommand = new DelegateCommand(SelectCsvTestsFile);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
 
 			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
+			ProcessingTypes = new ObservableCollection<ProcessingType>();
 			TestResults = new ObservableCollection<TestResultListViewItemViewModel>();
 			FromCommitModels = new ObservableCollection<CommitViewModel>();
 			ToCommitModels = new ObservableCollection<CommitViewModel>();
@@ -113,6 +120,7 @@ namespace RTSFramework.ViewModels
 			userSettings = userRunSettingsProvider.GetUserSettings();
 
 			ProgramModelType = userSettings.ProgramModelType;
+			TestType = userSettings.TestType;
 			DiscoveryType = userSettings.DiscoveryType;
 			ProcessingType = userSettings.ProcessingType;
 			RTSApproachType = userSettings.RTSApproachType;
@@ -123,23 +131,24 @@ namespace RTSFramework.ViewModels
 			ClassNameFilter = userSettings.ClassNameFilter;
 			TestCaseNameFilter = userSettings.TestCaseNameFilter;
 			CategoryFilter = userSettings.CategoryFilter;
+			CsvTestsFile = userSettings.CsvTestsFile;
 		}
 
 		private void ApplyFilter()
 		{
 			Func<ITestCase, bool> filterFunction = x => true;
 
-			if (TestCaseNameFilter != null)
+			if (!string.IsNullOrEmpty(TestCaseNameFilter))
 			{
 				var previousFunc = filterFunction;
 				filterFunction = x => previousFunc(x) && x.Name.Contains(TestCaseNameFilter);
 			}
-			if (ClassNameFilter != null)
+			if (!string.IsNullOrEmpty(ClassNameFilter))
 			{
 				var previousFunc = filterFunction;
 				filterFunction = x => previousFunc(x) && x.AssociatedClass.Contains(ClassNameFilter);
 			}
-			if (CategoryFilter != null)
+			if (!string.IsNullOrEmpty(CategoryFilter))
 			{
 				var previousFunc = filterFunction;
 				filterFunction = x => previousFunc(x) && x.Categories.Any(y => y.Contains(CategoryFilter));
@@ -170,6 +179,15 @@ namespace RTSFramework.ViewModels
 			if (dialogService.SelectFile(RepositoryPath, "Solution Files (*.sln)|*.sln", out selectedFile))
 			{
 				SolutionFilePath = selectedFile;
+			}
+		}
+
+		private void SelectCsvTestsFile()
+		{
+			string selectedFile;
+			if (dialogService.SelectFile(Environment.CurrentDirectory, "CSV Files (*.csv)|*.csv", out selectedFile))
+			{
+				CsvTestsFile = selectedFile;
 			}
 		}
 
@@ -211,6 +229,28 @@ namespace RTSFramework.ViewModels
 				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
 			}
 			DiscoveryType = DiscoveryTypes.FirstOrDefault();
+		}
+
+		private void RefreshProcessingTypes()
+		{
+			ProcessingTypes.Clear();
+
+			switch (TestType)
+			{
+				case TestType.MSTest:
+					ProcessingTypes.Add(ProcessingType.MSTestExecution);
+					ProcessingTypes.Add(ProcessingType.MSTestExecutionCreateCorrespondenceModel);
+					ProcessingTypes.Add(ProcessingType.MSTestExecutionLimitedTime);
+					ProcessingTypes.Add(ProcessingType.CsvReporting);
+					ProcessingTypes.Add(ProcessingType.ListReporting);
+					break;
+				case TestType.CsvList:
+					ProcessingTypes.Add(ProcessingType.CsvReporting);
+					ProcessingTypes.Add(ProcessingType.ListReporting);
+					break;
+			}
+
+			ProcessingType = ProcessingTypes.FirstOrDefault();
 		}
 
 		private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -263,10 +303,58 @@ namespace RTSFramework.ViewModels
 				case nameof(CategoryFilter):
 					ApplyFilter();
 					break;
+				case nameof(TestType):
+					RefreshProcessingTypes();
+					IsCsvTestsFileSelectable = TestType == TestType.CsvList;
+					break;
+				case nameof(CsvTestsFile):
+					userRunConfigurationProvider.CsvTestsFile = CsvTestsFile;
+					break;
 			}
 		}
 
 		#region Properties
+
+		public bool IsCsvTestsFileSelectable
+		{
+			get { return isCsvTestsFileSelectable; }
+			set
+			{
+				isCsvTestsFileSelectable = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public string CsvTestsFile
+		{
+			get { return csvTestsFile; }
+			set
+			{
+				csvTestsFile = value;
+				RaisePropertyChanged();
+				userSettings.CsvTestsFile = CsvTestsFile;
+			}
+		}
+
+		public ICommand SelectCsvTestsFileCommand
+		{
+			get { return selectCsvTestsFileCommand; }
+			set
+			{
+				selectCsvTestsFileCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public ObservableCollection<ProcessingType> ProcessingTypes
+		{
+			get { return processingTypes; }
+			set
+			{
+				processingTypes = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public TestType TestType
 		{
@@ -275,6 +363,7 @@ namespace RTSFramework.ViewModels
 			{
 				testType = value;
 				RaisePropertyChanged();
+				userSettings.TestType = value;
 			}
 		}
 
@@ -679,39 +768,56 @@ namespace RTSFramework.ViewModels
 					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramArtefact, newProgramArtefact);
 					break;*/
 				case GranularityLevel.Class:
-					await ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(deltaArtefact);
+					await ExecuteDeltaBasedRunFixTestType<TDeltaArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(deltaArtefact);
 					break;
 			}
 		}
 
-		private async Task ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, TDelta>(TDeltaArtefact deltaArtefact)
+		private async Task ExecuteDeltaBasedRunFixTestType<TDeltaArtefact, TModel, TDelta>(TDeltaArtefact deltaArtefact)
+			where TModel : CSharpProgramModel 
+			where TDelta : IDelta<TModel>
+		{
+			switch (TestType)
+			{
+				case TestType.MSTest:
+					await ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, TDelta, MSTestTestcase>(deltaArtefact);
+					break;
+				case TestType.CsvList:
+					await ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, TDelta, CsvFileTestcase>(deltaArtefact);
+					break;
+			}
+		}
+
+		private async Task ExecuteDeltaBasedRunFixProcessingType<TDeltaArtefact, TModel, TDelta, TTestCase>(TDeltaArtefact deltaArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
+			where TTestCase : ITestCase
 		{
 			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, object>(deltaArtefact);
+					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta,MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(deltaArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, CsvFileArtefact>(deltaArtefact);
+					var csvCreationResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(deltaArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, IList<TestResultListViewItemViewModel>>(deltaArtefact);
+					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(deltaArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResultArtefact> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TResult, TResultArtefact>(TDeltaArtefact deltaArtefact)
+		private async Task<TResultArtefact> ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>(TDeltaArtefact deltaArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
+			where TTestCase : ITestCase
 		{
-			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, MSTestTestcase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
 			deltaBasedController.DeltaArtefact = deltaArtefact;
 
@@ -794,39 +900,57 @@ namespace RTSFramework.ViewModels
 					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpFileElement>>(oldProgramArtefact, newProgramArtefact);
 					break;*/
 				case GranularityLevel.Class:
-					await ExecuteRunFixProcessingType<TArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramArtefact, newProgramArtefact);
+					await ExecuteRunFixTestType<TArtefact, TModel, StructuralDelta<TModel, CSharpClassElement>>(oldProgramArtefact, newProgramArtefact);
 					break;
 			}
 		}
 
-		private async Task ExecuteRunFixProcessingType<TArtefact, TModel, TDelta>(TArtefact oldArtefact, TArtefact newArtefact)
+		private async Task ExecuteRunFixTestType<TArtefact, TModel, TDelta>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)
+			where TModel : CSharpProgramModel
+			where TDelta : IDelta<TModel>
+		{
+			switch (TestType)
+			{
+				case TestType.MSTest:
+					await ExecuteRunFixProcessingType<TArtefact, TModel, TDelta, MSTestTestcase>(oldProgramArtefact, newProgramArtefact);
+					break;
+				case TestType.CsvList:
+					await ExecuteRunFixProcessingType<TArtefact, TModel, TDelta, CsvFileTestcase>(oldProgramArtefact, newProgramArtefact);
+					break;
+			}
+		}
+
+
+		private async Task ExecuteRunFixProcessingType<TArtefact, TModel, TDelta, TTestCase>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
+			where TTestCase : ITestCase
 		{
 			switch (ProcessingType)
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
 				case ProcessingType.MSTestExecutionLimitedTime:
-					await ExecuteRun<TArtefact, TModel, TDelta, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
+					await ExecuteRun<TArtefact, TModel, TDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, CsvFileArtefact>(oldArtefact, newArtefact);
+					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(oldArtefact, newArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, TestListResult<MSTestTestcase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
+					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 			}
 		}
 
-		private async Task<TResultArtefact>  ExecuteRun<TArtefact, TModel, TDelta, TResult, TResultArtefact>(TArtefact oldArtefact, TArtefact newArtefact)
+		private async Task<TResultArtefact> ExecuteRun<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
+			where TTestCase : ITestCase
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, MSTestTestcase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
 			stateBasedController.OldArtefact = oldArtefact;
 			stateBasedController.NewArtefact = newArtefact;
