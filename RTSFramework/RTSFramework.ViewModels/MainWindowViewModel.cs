@@ -80,6 +80,7 @@ namespace RTSFramework.ViewModels
 		private string testCaseNameFilter;
 		private string classNameFilter;
 		private string categoryFilter;
+		private TestType testType;
 
 		#endregion
 
@@ -265,6 +266,16 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public TestType TestType
+		{
+			get { return testType; }
+			set
+			{
+				testType = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public string CategoryFilter
 		{
@@ -707,7 +718,7 @@ namespace RTSFramework.ViewModels
 			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
 			deltaBasedController.TestsPrioritized += HandleTestsPrioritized;
 
-			await Task.Run(() => deltaBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
+			await Task.Run(() => deltaBasedController.ExecuteRTSRun(cancellationTokenSource.Token), cancellationTokenSource.Token);
 			return deltaBasedController.Result;
 		}
 
@@ -823,7 +834,7 @@ namespace RTSFramework.ViewModels
 			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
 			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
 
-			await Task.Run(() => stateBasedController.ExecuteImpactedTests(cancellationTokenSource.Token), cancellationTokenSource.Token);
+			await Task.Run(() => stateBasedController.ExecuteRTSRun(cancellationTokenSource.Token), cancellationTokenSource.Token);
 			return stateBasedController.Result;
 		}
 

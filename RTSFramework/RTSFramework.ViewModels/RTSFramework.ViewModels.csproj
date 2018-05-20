@@ -101,6 +101,7 @@
     <Compile Include="RunConfigurations\IUserSettingsProvider.cs" />
     <Compile Include="RunConfigurations\ProgramModelType.cs" />
     <Compile Include="RunConfigurations\ResultArtefactType.cs" />
+    <Compile Include="RunConfigurations\TestType.cs" />
     <Compile Include="RunStatus.cs" />
     <Compile Include="Controller\StateBasedController.cs" />
     <Compile Include="MainWindowViewModel.cs" />

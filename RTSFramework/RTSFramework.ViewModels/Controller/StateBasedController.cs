@@ -61,7 +61,7 @@ namespace RTSFramework.ViewModels.Controller
 		public TArtefact NewArtefact { get; set; }
 		public TResultArtefact Result { get; set; }
 
-		public async Task ExecuteImpactedTests(CancellationToken token)
+		public async Task ExecuteRTSRun(CancellationToken token)
 		{
 			loggingHelper.InitLogFile();
 
