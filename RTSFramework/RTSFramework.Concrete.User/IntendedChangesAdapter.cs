@@ -7,17 +7,9 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-	public class IntendedChangesAdapter<TDelta> : IArtefactAdapter<IntendedChangesArtefact, TDelta> 
-		where TDelta : IDelta<LocalProgramModel>
+	public class IntendedChangesAdapter : IArtefactAdapter<IntendedChangesArtefact, StructuralDelta<LocalProgramModel, FileElement>>
 	{
-		private readonly IDeltaAdapter<StructuralDelta<LocalProgramModel, FileElement>, TDelta, LocalProgramModel> deltaAdapter;
-
-		public IntendedChangesAdapter(IDeltaAdapter<StructuralDelta<LocalProgramModel, FileElement>, TDelta, LocalProgramModel> deltaAdapter)
-		{
-			this.deltaAdapter = deltaAdapter;
-		}
-
-		public TDelta Parse(IntendedChangesArtefact artefact)
+		public StructuralDelta<LocalProgramModel, FileElement> Parse(IntendedChangesArtefact artefact)
 		{
 			var delta = new StructuralDelta<LocalProgramModel, FileElement>(artefact.LocalProgramModel, artefact.LocalProgramModel);
 
@@ -27,10 +19,10 @@ namespace RTSFramework.Concrete.User
 				delta.ChangedElements.Add(new FileElement(relativePathToSolution, () => File.ReadAllText(intendedChange)));
 			}
 
-			return deltaAdapter.Convert(delta);
+			return delta;
 		}
 
-		public IntendedChangesArtefact Unparse(TDelta model, IntendedChangesArtefact artefact)
+		public IntendedChangesArtefact Unparse(StructuralDelta<LocalProgramModel, FileElement> model, IntendedChangesArtefact artefact)
 		{
 			throw new System.NotImplementedException();
 		}
