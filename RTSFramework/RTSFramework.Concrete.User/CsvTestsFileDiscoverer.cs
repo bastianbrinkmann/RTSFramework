@@ -19,7 +19,7 @@ namespace RTSFramework.Concrete.User
 			this.runConfigurationProvider = runConfigurationProvider;
 		}
 
-		public Task<IList<CsvFileTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
+		public Task<IList<CsvFileTestcase>> GetTestCasesForModel(TModel model, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var csvFile = runConfigurationProvider.CsvTestsFile;
 			if (!File.Exists(csvFile))
@@ -36,11 +36,16 @@ namespace RTSFramework.Concrete.User
 				string testName = line.Substring(0, line.IndexOf(';'));
 				string linkedClass = line.Substring(line.IndexOf(';') + 1);
 
-				tests.Add(new CsvFileTestcase
+				var testCase = new CsvFileTestcase
 				{
 					Id = testName,
 					AssociatedClass = linkedClass
-				});
+				};
+
+				if (filterFunction(testCase))
+				{
+					tests.Add(testCase);
+				}
 			}
 
 			return Task.FromResult(tests);

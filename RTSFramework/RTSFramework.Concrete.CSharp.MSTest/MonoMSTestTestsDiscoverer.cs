@@ -17,18 +17,16 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly ISettingsProvider settingsProvider;
-		private readonly IUserRunConfigurationProvider runConfigurationProvider;
 
 		public MonoMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter,
-			ISettingsProvider settingsProvider,
-			IUserRunConfigurationProvider runConfigurationProvider)
+			ISettingsProvider settingsProvider)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.settingsProvider = settingsProvider;
-			this.runConfigurationProvider = runConfigurationProvider;
+
 		}
 
-		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, CancellationToken token)
+		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var testCases = new List<MSTestTestcase>();
 
@@ -69,7 +67,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 								testCase.Ignored = method.CustomAttributes.Any(x => x.AttributeType.Name == MSTestConstants.IgnoreAttributeName);
 
-								if (!testCase.Ignored && runConfigurationProvider.FilterFunction(testCase))
+								if (!testCase.Ignored && filterFunction(testCase))
 								{
 									testCases.Add(testCase);
 								}

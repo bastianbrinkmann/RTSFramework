@@ -135,29 +135,6 @@ namespace RTSFramework.ViewModels
 			CsvTestsFile = userSettings.CsvTestsFile;
 		}
 
-		private void ApplyFilter()
-		{
-			Func<ITestCase, bool> filterFunction = x => true;
-
-			if (!string.IsNullOrEmpty(TestCaseNameFilter))
-			{
-				var previousFunc = filterFunction;
-				filterFunction = x => previousFunc(x) && x.Name.Contains(TestCaseNameFilter);
-			}
-			if (!string.IsNullOrEmpty(ClassNameFilter))
-			{
-				var previousFunc = filterFunction;
-				filterFunction = x => previousFunc(x) && x.AssociatedClass.Contains(ClassNameFilter);
-			}
-			if (!string.IsNullOrEmpty(CategoryFilter))
-			{
-				var previousFunc = filterFunction;
-				filterFunction = x => previousFunc(x) && x.Categories.Any(y => y.Contains(CategoryFilter));
-			}
-
-			userRunConfigurationProvider.FilterFunction = filterFunction;
-		}
-
 		private void SpecifyIntendedChanges()
 		{
 			var intendedChangesViewModel = dialogService.OpenDialogByViewModel<IntendedChangesDialogViewModel>();
@@ -298,11 +275,6 @@ namespace RTSFramework.ViewModels
 					break;
 				case nameof(TimeLimit):
 					userRunConfigurationProvider.TimeLimit = TimeLimit;
-					break;
-				case nameof(TestCaseNameFilter):
-				case nameof(ClassNameFilter):
-				case nameof(CategoryFilter):
-					ApplyFilter();
 					break;
 				case nameof(TestType):
 					RefreshProcessingTypes();
@@ -824,6 +796,8 @@ namespace RTSFramework.ViewModels
 		{
 			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
+			deltaBasedController.FilterFunction = GetFilterFunction<TTestCase>();
+
 			deltaBasedController.DeltaArtefact = deltaArtefact;
 
 			deltaBasedController.ImpactedTest += HandleImpactedTest;
@@ -959,6 +933,8 @@ namespace RTSFramework.ViewModels
 		{
 			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
 
+			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
+
 			stateBasedController.OldArtefact = oldArtefact;
 			stateBasedController.NewArtefact = newArtefact;
 
@@ -971,6 +947,30 @@ namespace RTSFramework.ViewModels
 		}
 
 		#endregion
+
+		private Func<TTestCase, bool> GetFilterFunction<TTestCase>()
+			where TTestCase : ITestCase
+		{
+			Func<TTestCase, bool> filterFunction = x => true;
+
+			if (!string.IsNullOrEmpty(TestCaseNameFilter))
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.Name.Contains(TestCaseNameFilter);
+			}
+			if (!string.IsNullOrEmpty(ClassNameFilter))
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.AssociatedClass.Contains(ClassNameFilter);
+			}
+			if (!string.IsNullOrEmpty(CategoryFilter))
+			{
+				var previousFunc = filterFunction;
+				filterFunction = x => previousFunc(x) && x.Categories.Any(y => y.Contains(CategoryFilter));
+			}
+
+			return filterFunction;
+		}
 
 		#region HandlingResults
 

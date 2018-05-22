@@ -10,7 +10,7 @@ namespace RTSFramework.Concrete.User
 		public IList<string> IntendedChanges { get; set; } = new List<string>();
 
 		public double TimeLimit { get; set; }
-		public Func<ITestCase, bool> FilterFunction { get; set; }
+
 		public string CsvTestsFile { get; set; }
 	}
 }

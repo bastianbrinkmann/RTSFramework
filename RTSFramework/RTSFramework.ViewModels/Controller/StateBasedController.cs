@@ -61,6 +61,7 @@ namespace RTSFramework.ViewModels.Controller
 			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
 
+		public Func<TTestCase, bool> FilterFunction { get; set; }
 		public TArtefact OldArtefact { get; set; }
 		public TArtefact NewArtefact { get; set; }
 		public TResultArtefact Result { get; set; }
@@ -75,7 +76,7 @@ namespace RTSFramework.ViewModels.Controller
 			var discoveredDelta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "Delta Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "Tests Discovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			var convertedDelta = deltaAdapter.Convert(discoveredDelta);
