@@ -61,7 +61,7 @@
     <Compile Include="Contracts\IDataStructureProvider.cs" />
     <Compile Include="DataStructures\IntertypeRelationGraph.cs" />
     <Compile Include="ImpactedTestEventArgs.cs" />
-    <Compile Include="Contracts\ITestSelector.cs" />
+    <Compile Include="Contracts\ITestsSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetestAllSelector.cs" />
     <Compile Include="TestsPrioritizedEventArgs.cs" />

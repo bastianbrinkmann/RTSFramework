@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using LibGit2Sharp;
 using RTSFramework.Concrete.Git.Models;
-using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Core.Models;
@@ -13,16 +12,9 @@ using Unity.Interception.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitFileDeltaDiscoverer<TDelta> : IOfflineDeltaDiscoverer<GitProgramModel, TDelta> where TDelta: IDelta<GitProgramModel>
+    public class GitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>
     {
-	    private readonly IDeltaAdapter<StructuralDelta<GitProgramModel, FileElement>, TDelta, GitProgramModel> deltaAdapter;
-
-	    public GitFileDeltaDiscoverer(IDeltaAdapter<StructuralDelta<GitProgramModel, FileElement>, TDelta, GitProgramModel> deltaAdapter)
-	    {
-		    this.deltaAdapter = deltaAdapter;
-	    }
-
-		public TDelta Discover(GitProgramModel oldModel, GitProgramModel newModel)
+		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
         {
             if (oldModel.GitVersionIdentification.RepositoryPath != newModel.GitVersionIdentification.RepositoryPath)
             {
@@ -43,7 +35,7 @@ namespace RTSFramework.Concrete.Git
                 }
             }
 
-            return deltaAdapter.Convert(delta);
+	        return delta;
         }
 
 	    private void AddCurrentChanges(StructuralDelta<GitProgramModel, FileElement> delta, Repository repo)
