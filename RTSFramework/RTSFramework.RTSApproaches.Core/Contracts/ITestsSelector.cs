@@ -8,7 +8,7 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.RTSApproaches.Core.Contracts
 {
-	public interface ITestSelector<TModel, TDelta, TTestCase>
+	public interface ITestsSelector<TModel, TDelta, TTestCase>
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase

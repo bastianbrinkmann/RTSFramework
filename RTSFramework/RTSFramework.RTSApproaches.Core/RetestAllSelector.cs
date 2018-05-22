@@ -10,7 +10,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Core
 {
-	public class RetestAllSelector<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
+	public class RetestAllSelector<TModel, TModelElement, TTestCase> : ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 		where TTestCase : class, ITestCase

@@ -141,11 +141,11 @@ namespace RTSFramework.ViewModels
 					new Func<RTSApproachType, ProcessingType, DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDelta, TTestCase>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestsSelector<TModel, TDelta, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TDelta, TModel>>>();
 
 							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testsSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testsProcessor", testProcessorFactory(processingType)));
 						})));
 		}
@@ -196,11 +196,11 @@ namespace RTSFramework.ViewModels
 					new Func<RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDelta, TTestCase>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestsSelector<TModel, TDelta, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TDelta, TModel>>>();
 
 							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testsSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testsProcessor", testProcessorFactory(processingType)));
 						})));
 		}
@@ -257,7 +257,7 @@ namespace RTSFramework.ViewModels
 			where TModel : CSharpProgramModel
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, ClassSRTSDeltaExpander<TModel, TTestCase>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, ClassSRTSDeltaExpander<TModel, TTestCase>>(RTSApproachType.ClassSRTS.ToString());
 
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement, TTestCase>(unityContainer);
@@ -268,12 +268,12 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicRTS<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicRTS<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
 
-			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(
 				new InjectionFactory(c =>
-				new Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name => c.Resolve<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name.ToString()))));
+				new Func<RTSApproachType, ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name => c.Resolve<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name.ToString()))));
 		}
 
 		#endregion

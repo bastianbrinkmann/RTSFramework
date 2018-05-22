@@ -31,7 +31,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer;
 		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
-		private readonly ITestSelector<TModel, TDelta, TTestCase> testSelector;
+		private readonly ITestsSelector<TModel, TDelta, TTestCase> testsSelector;
 		private readonly ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor;
 		private readonly ITestsPrioritizer<TTestCase> testsPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
@@ -41,7 +41,7 @@ namespace RTSFramework.ViewModels.Controller
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			IOfflineDeltaDiscoverer<TModel, TDelta> deltaDiscoverer,
 			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
-			ITestSelector<TModel, TDelta, TTestCase> testSelector,
+			ITestsSelector<TModel, TDelta, TTestCase> testsSelector,
 			ITestsProcessor<TTestCase, TResult, TDelta, TModel> testsProcessor,
 			ITestsPrioritizer<TTestCase> testsPrioritizer,
 			ILoggingHelper loggingHelper,
@@ -50,7 +50,7 @@ namespace RTSFramework.ViewModels.Controller
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
 			this.testsDiscoverer = testsDiscoverer;
-			this.testSelector = testSelector;
+			this.testsSelector = testsSelector;
 			this.testsProcessor = testsProcessor;
 			this.testsPrioritizer = testsPrioritizer;
 			this.loggingHelper = loggingHelper;
@@ -74,7 +74,7 @@ namespace RTSFramework.ViewModels.Controller
 			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, delta, token), "Tests Selection");
+			var impactedTests = await loggingHelper.ReportNeededTime(() => testsSelector.SelectTests(allTests, delta, token), "Tests Selection");
 
 			foreach (var impactedTest in impactedTests)
 			{

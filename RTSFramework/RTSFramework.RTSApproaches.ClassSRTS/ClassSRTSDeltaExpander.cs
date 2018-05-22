@@ -22,7 +22,7 @@ namespace RTSFramework.RTSApproaches.Static
 	/// A Generic Platform for Model-Based Regression Testing
 	/// by Zech et al.
 	/// </summary>
-	public class ClassSRTSDeltaExpander<TModel, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>
+	public class ClassSRTSDeltaExpander<TModel, TTestCase> : ITestsSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>
 		where TModel : CSharpProgramModel
 		where TTestCase : ITestCase
 	{
