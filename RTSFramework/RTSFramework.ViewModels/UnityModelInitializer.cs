@@ -161,7 +161,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitStateBasedController(IUnityContainer unityContainer)
 		{
-			InitStateBasedControllerFactoryDelta<GitVersionIdentification, GitProgramModel>(unityContainer);
+			InitStateBasedControllerFactoryDelta<GitVersionIdentification, GitCSharpProgramModel>(unityContainer);
 			InitStateBasedControllerFactoryDelta<TFS2010VersionIdentification, TFS2010ProgramModel>(unityContainer);
 		}
 
@@ -220,7 +220,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscoverer(IUnityContainer unityContainer)
 		{
-			InitTestsDiscovererForModel<GitProgramModel>(unityContainer);
+			InitTestsDiscovererForModel<GitCSharpProgramModel>(unityContainer);
 			InitTestsDiscovererForModel<TFS2010ProgramModel>(unityContainer);
 			InitTestsDiscovererForModel<LocalProgramModel>(unityContainer);
 		}
@@ -237,7 +237,7 @@ namespace RTSFramework.ViewModels
 		#region DeltaDiscoverer
 		private static void InitDeltaDiscoverer(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>, GitFileDeltaDiscoverer>();
+			unityContainer.RegisterType<IOfflineDeltaDiscoverer<GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>, GitFileDeltaDiscoverer>();
 		}
 
 		#endregion
@@ -246,7 +246,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsSelectors(IUnityContainer unityContainer)
 		{
-			InitTestSelectorsForCSharpModel<GitProgramModel>(unityContainer);
+			InitTestSelectorsForCSharpModel<GitCSharpProgramModel>(unityContainer);
 			InitTestSelectorsForCSharpModel<TFS2010ProgramModel>(unityContainer);
 			InitTestSelectorsForCSharpModel<LocalProgramModel>(unityContainer);
 		}
@@ -288,7 +288,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsProcessors(IUnityContainer unityContainer)
 		{
-			InitTestsProcessors<GitProgramModel>(unityContainer);
+			InitTestsProcessors<GitCSharpProgramModel>(unityContainer);
 			InitTestsProcessors<TFS2010ProgramModel>(unityContainer);
 			InitTestsProcessors<LocalProgramModel>(unityContainer);
 		}
@@ -347,7 +347,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsInstrumentors(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<ITestsInstrumentor<GitProgramModel, MSTestTestcase>, MSTestTestsInstrumentor<GitProgramModel>>();
+			unityContainer.RegisterType<ITestsInstrumentor<GitCSharpProgramModel, MSTestTestcase>, MSTestTestsInstrumentor<GitCSharpProgramModel>>();
 			unityContainer.RegisterType<ITestsInstrumentor<TFS2010ProgramModel, MSTestTestcase>, MSTestTestsInstrumentor<TFS2010ProgramModel>>();
 			unityContainer.RegisterType<ITestsInstrumentor<LocalProgramModel, MSTestTestcase>, MSTestTestsInstrumentor<LocalProgramModel>>();
 		}
@@ -358,7 +358,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitDataStructureProvider(IUnityContainer unityContainer)
 		{
-			InitDataStructureProviderForModel<GitProgramModel>(unityContainer);
+			InitDataStructureProviderForModel<GitCSharpProgramModel>(unityContainer);
 			InitDataStructureProviderForModel<TFS2010ProgramModel>(unityContainer);
 			InitDataStructureProviderForModel<LocalProgramModel>(unityContainer);
 		}
@@ -383,7 +383,7 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>, OpenCoverXmlCoverageAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
-			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, GitProgramModel>, GitProgramModelAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, GitCSharpProgramModel>, GitCSharpProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<TFS2010VersionIdentification, TFS2010ProgramModel>, TFS2010ProgramModelAdapter>();
 
 			//MSTest
@@ -404,7 +404,7 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<CancelableArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
 
 			//Delta Adapters
-			InitDeltaAdaptersForModels<GitProgramModel>(unityContainer);
+			InitDeltaAdaptersForModels<GitCSharpProgramModel>(unityContainer);
 			InitDeltaAdaptersForModels<TFS2010ProgramModel>(unityContainer);
 			InitDeltaAdaptersForModels<LocalProgramModel>(unityContainer);
 		}

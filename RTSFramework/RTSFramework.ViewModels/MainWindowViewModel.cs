@@ -847,7 +847,7 @@ namespace RTSFramework.ViewModels
 				};
 			}
 
-			await ExecuteRunFixSelectionDelta<GitVersionIdentification, GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
+			await ExecuteRunFixSelectionDelta<GitVersionIdentification, GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
 		}
 
 		private async Task ExecuteTFS2010Run()
