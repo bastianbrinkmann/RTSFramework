@@ -78,12 +78,12 @@
     <Compile Include="Adapter\IDeltaAdapter.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
-    <Compile Include="ITestsPrioritizer.cs" />
+    <Compile Include="ITestPrioritizer.cs" />
     <Compile Include="Utilities\IApplicationClosedHandler.cs" />
     <Compile Include="Utilities\ILoggingHelper.cs" />
     <Compile Include="Utilities\ISettingsProvider.cs" />
     <Compile Include="ITestsExecutionResult.cs" />
-    <Compile Include="ITestsExecutor.cs" />
+    <Compile Include="ITestExecutor.cs" />
     <Compile Include="ITestsInstrumentor.cs" />
     <Compile Include="ITestProcessingResult.cs" />
     <Compile Include="Models\CoverageData.cs" />
@@ -98,8 +98,8 @@
     <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
     <Compile Include="Models\IProgramModel.cs" />
     <Compile Include="Models\ITestCase.cs" />
-    <Compile Include="ITestsDiscoverer.cs" />
-    <Compile Include="ITestsProcessor.cs" />
+    <Compile Include="ITestDiscoverer.cs" />
+    <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Utilities\IUserRunConfigurationProvider.cs" />

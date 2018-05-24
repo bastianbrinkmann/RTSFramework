@@ -9,18 +9,18 @@ using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Core
 {
-	public abstract class TestsExecutorWithTerminationCondition<TTestCase, TDelta, TModel> : ITestsExecutor<TTestCase, TDelta, TModel> 
+	public abstract class TestExecutorWithTerminationCondition<TTestCase, TDelta, TModel> : ITestExecutor<TTestCase, TDelta, TModel> 
 		where TTestCase : ITestCase 
 		where TDelta : IDelta<TModel> 
 		where TModel : IProgramModel
 	{
-		private readonly ITestsExecutor<TTestCase, TDelta, TModel> internalExecutor;
+		private readonly ITestExecutor<TTestCase, TDelta, TModel> internalExecutor;
 
 		/// <summary>
 		/// Checks every second whether the termination condition is reached and stops processing immediatly once the state is reached
 		/// </summary>
 		/// <param name="internalExecutor"></param>
-		public TestsExecutorWithTerminationCondition(ITestsExecutor<TTestCase, TDelta, TModel> internalExecutor)
+		public TestExecutorWithTerminationCondition(ITestExecutor<TTestCase, TDelta, TModel> internalExecutor)
 		{
 			this.internalExecutor = internalExecutor;
 		}

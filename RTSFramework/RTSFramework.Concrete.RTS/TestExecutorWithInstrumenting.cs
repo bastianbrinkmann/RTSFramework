@@ -14,12 +14,12 @@ using Unity.Interception.Utilities;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class TestsExecutorWithInstrumenting<TModel, TDelta, TTestCase> : ITestsExecutor<TTestCase, TDelta, TModel>
+	public class TestExecutorWithInstrumenting<TModel, TDelta, TTestCase> : ITestExecutor<TTestCase, TDelta, TModel>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDelta : IDelta<TModel>
 	{
-		private readonly ITestsExecutor<TTestCase, TDelta, TModel> executor;
+		private readonly ITestExecutor<TTestCase, TDelta, TModel> executor;
 		private readonly ITestsInstrumentor<TModel, TTestCase> instrumentor;
 		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider;
 		private readonly IApplicationClosedHandler applicationClosedHandler;
@@ -27,7 +27,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 
-		public TestsExecutorWithInstrumenting(ITestsExecutor<TTestCase, TDelta, TModel> executor,
+		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TDelta, TModel> executor,
 			ITestsInstrumentor<TModel, TTestCase> instrumentor,
 			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider,
 			IApplicationClosedHandler applicationClosedHandler,

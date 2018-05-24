@@ -9,14 +9,14 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Core
 {
-	public class LimitedTimeTestsExecutor<TTestCase, TDelta, TModel> : TestsExecutorWithTerminationCondition<TTestCase, TDelta, TModel>
+	public class LimitedTimeTestExecutor<TTestCase, TDelta, TModel> : TestExecutorWithTerminationCondition<TTestCase, TDelta, TModel>
 		where TTestCase : ITestCase
 		where TDelta : IDelta<TModel>
 		where TModel : IProgramModel
 	{
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
 
-		public LimitedTimeTestsExecutor(ITestsExecutor<TTestCase, TDelta, TModel> executor,
+		public LimitedTimeTestExecutor(ITestExecutor<TTestCase, TDelta, TModel> executor,
 			IUserRunConfigurationProvider userRunConfigurationProvider) : base(executor)
 		{
 			this.userRunConfigurationProvider = userRunConfigurationProvider;

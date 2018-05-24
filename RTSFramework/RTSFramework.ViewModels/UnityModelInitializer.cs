@@ -146,12 +146,12 @@ namespace RTSFramework.ViewModels
 					new Func<RTSApproachType, ProcessingType, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestsSelector<TModel, TSelectionDelta, TTestCase>>>();
-							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TSelectionDelta, TModel>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TSelectionDelta, TTestCase>>>();
+							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel>>>();
 
 							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("testsSelector", rtsApproachFactory(rtsApproachType)),
-								new ParameterOverride("testsProcessor", testProcessorFactory(processingType)));
+								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));
 		}
 
@@ -205,12 +205,12 @@ namespace RTSFramework.ViewModels
 					new Func<RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestsSelector<TModel, TDeltaSelection, TTestCase>>>();
-							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TDeltaSelection, TModel>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDeltaSelection, TTestCase>>>();
+							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDeltaSelection, TModel>>>();
 
 							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("testsSelector", rtsApproachFactory(rtsApproachType)),
-								new ParameterOverride("testsProcessor", testProcessorFactory(processingType)));
+								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
+								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));
 		}
 
@@ -227,9 +227,9 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			//unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestsDiscoverer<TModel>>();
-			unityContainer.RegisterType<ITestsDiscoverer<TModel, MSTestTestcase>, InProcessMSTestTestsDiscoverer<TModel>>();
-			unityContainer.RegisterType<ITestsDiscoverer<TModel, CsvFileTestcase>, CsvTestsFileDiscoverer<TModel>>();
+			//unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
+			unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, InProcessMSTestTestDiscoverer<TModel>>();
+			unityContainer.RegisterType<ITestDiscoverer<TModel, CsvFileTestcase>, CsvTestFileDiscoverer<TModel>>();
 		}
 
 		#endregion
@@ -263,7 +263,7 @@ namespace RTSFramework.ViewModels
 			where TModel : CSharpProgramModel
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, ClassSRTSDeltaExpander<TModel, TTestCase>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, ClassSRTSDeltaExpander<TModel, TTestCase>>(RTSApproachType.ClassSRTS.ToString());
 
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement, TTestCase>(unityContainer);
@@ -274,12 +274,12 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicRTS<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicRTS<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
 
-			unityContainer.RegisterType<Func<RTSApproachType, ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(
 				new InjectionFactory(c =>
-				new Func<RTSApproachType, ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name => c.Resolve<ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name.ToString()))));
+				new Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name => c.Resolve<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(name.ToString()))));
 		}
 
 		#endregion
@@ -302,19 +302,19 @@ namespace RTSFramework.ViewModels
 		private static void InitTestsProcessors<TDelta, TModel>(IUnityContainer unityContainer) where TDelta : IDelta<TModel> where TModel : IProgramModel
 		{
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
-			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, TestsExecutorWithInstrumenting<TModel, TDelta, MSTestTestcase>>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, TestExecutorWithInstrumenting<TModel, TDelta, MSTestTestcase>>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, InProcessMSTestTestsExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestsExecutor<MSTestTestcase, TDelta, TModel>, InProcessMSTestTestsExecutor<TDelta, TModel>>();
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, InProcessMSTestTestExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestExecutor<MSTestTestcase, TDelta, TModel>, InProcessMSTestTestExecutor<TDelta, TModel>>();
 
-			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, LimitedTimeTestsExecutor<MSTestTestcase, TDelta, TModel>>(ProcessingType.MSTestExecutionLimitedTime.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, LimitedTimeTestExecutor<MSTestTestcase, TDelta, TModel>>(ProcessingType.MSTestExecutionLimitedTime.ToString());
 
-			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestsReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
-			unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestsReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
 
-			unityContainer.RegisterType<ITestsProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestsReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
-			unityContainer.RegisterType<ITestsProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestsReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
 
 			InitTestProcessorsFactoryForTestType<ITestsExecutionResult<MSTestTestcase>, TDelta, TModel, MSTestTestcase>(unityContainer);
 			InitTestProcessorsFactoryForTestType<TestListResult<MSTestTestcase>, TDelta, TModel, MSTestTestcase>(unityContainer);
@@ -327,9 +327,9 @@ namespace RTSFramework.ViewModels
 			where TModel : IProgramModel
 			where TTestCase : ITestCase
 		{
-			unityContainer.RegisterType<Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TDelta, TModel>>>(
+			unityContainer.RegisterType<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDelta, TModel>>>(
 				new InjectionFactory(c =>
-				new Func<ProcessingType, ITestsProcessor<TTestCase, TResult, TDelta, TModel>>(name => c.Resolve<ITestsProcessor<TTestCase, TResult, TDelta, TModel>>(name.ToString()))));
+				new Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDelta, TModel>>(name => c.Resolve<ITestProcessor<TTestCase, TResult, TDelta, TModel>>(name.ToString()))));
 		}
 		#endregion
 
@@ -337,8 +337,8 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsPrioritizers(IUnityContainer unityContainer)
 		{
-			unityContainer.RegisterType<ITestsPrioritizer<MSTestTestcase>, NoOpPrioritizer<MSTestTestcase>>();
-			unityContainer.RegisterType<ITestsPrioritizer<CsvFileTestcase>, NoOpPrioritizer<CsvFileTestcase>>();
+			unityContainer.RegisterType<ITestPrioritizer<MSTestTestcase>, NoOpPrioritizer<MSTestTestcase>>();
+			unityContainer.RegisterType<ITestPrioritizer<CsvFileTestcase>, NoOpPrioritizer<CsvFileTestcase>>();
 		}
 
 		#endregion

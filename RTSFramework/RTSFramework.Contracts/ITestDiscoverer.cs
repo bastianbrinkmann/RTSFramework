@@ -6,7 +6,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestsDiscoverer<TModel, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel
+	public interface ITestDiscoverer<TModel, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel
 	{
         Task<IList<TTestCase>> GetTestCasesForModel(TModel model, Func<TTestCase, bool> filterFunction, CancellationToken token);
 	}

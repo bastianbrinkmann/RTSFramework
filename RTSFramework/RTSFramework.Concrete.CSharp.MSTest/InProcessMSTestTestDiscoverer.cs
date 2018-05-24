@@ -14,14 +14,14 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestsDiscoverer<TModel> : ITestsDiscoverer<TModel, MSTestTestcase>
+	public class InProcessMSTestTestDiscoverer<TModel> : ITestDiscoverer<TModel, MSTestTestcase>
 		where TModel : CSharpProgramModel
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
 
-		public InProcessMSTestTestsDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
+		public InProcessMSTestTestDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider)
 		{

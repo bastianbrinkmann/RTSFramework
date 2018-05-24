@@ -32,10 +32,10 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
 		private readonly IOfflineDeltaDiscoverer<TModel, TDiscoveryDelta> deltaDiscoverer;
 		private readonly IDeltaAdapter<TDiscoveryDelta, TSelectionDelta, TModel> deltaAdapter;
-		private readonly ITestsDiscoverer<TModel, TTestCase> testsDiscoverer;
-		private readonly ITestsSelector<TModel, TSelectionDelta, TTestCase> testsSelector;
-		private readonly ITestsProcessor<TTestCase, TResult, TSelectionDelta, TModel> testsProcessor;
-		private readonly ITestsPrioritizer<TTestCase> testsPrioritizer;
+		private readonly ITestDiscoverer<TModel, TTestCase> testDiscoverer;
+		private readonly ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector;
+		private readonly ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor;
+		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
@@ -43,20 +43,20 @@ namespace RTSFramework.ViewModels.Controller
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			IOfflineDeltaDiscoverer<TModel, TDiscoveryDelta> deltaDiscoverer,
 			IDeltaAdapter<TDiscoveryDelta, TSelectionDelta, TModel> deltaAdapter,
-			ITestsDiscoverer<TModel, TTestCase> testsDiscoverer,
-			ITestsSelector<TModel, TSelectionDelta, TTestCase> testsSelector,
-			ITestsProcessor<TTestCase, TResult, TSelectionDelta, TModel> testsProcessor,
-			ITestsPrioritizer<TTestCase> testsPrioritizer,
+			ITestDiscoverer<TModel, TTestCase> testDiscoverer,
+			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
+			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
+			ITestPrioritizer<TTestCase> testPrioritizer,
 			ILoggingHelper loggingHelper,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
 			this.deltaAdapter = deltaAdapter;
-			this.testsDiscoverer = testsDiscoverer;
-			this.testsSelector = testsSelector;
-			this.testsProcessor = testsProcessor;
-			this.testsPrioritizer = testsPrioritizer;
+			this.testDiscoverer = testDiscoverer;
+			this.testSelector = testSelector;
+			this.testProcessor = testProcessor;
+			this.testPrioritizer = testPrioritizer;
 			this.loggingHelper = loggingHelper;
 			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
@@ -76,12 +76,12 @@ namespace RTSFramework.ViewModels.Controller
 			var discoveredDelta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "Delta Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testsDiscoverer.GetTestCasesForModel(newModel, FilterFunction, token), "Tests Discovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTestCasesForModel(newModel, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			var convertedDelta = deltaAdapter.Convert(discoveredDelta);
 
-			var impactedTests = await loggingHelper.ReportNeededTime(() => testsSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
+			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
 
 			foreach (var impactedTest in impactedTests)
 			{
@@ -90,16 +90,16 @@ namespace RTSFramework.ViewModels.Controller
 
 			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
 
-			var prioritizedTests = await loggingHelper.ReportNeededTime(() => testsPrioritizer.PrioritizeTests(impactedTests, token), "Tests Prioritization");
+			var prioritizedTests = await loggingHelper.ReportNeededTime(() => testPrioritizer.PrioritizeTests(impactedTests, token), "Tests Prioritization");
 
 			TestsPrioritized?.Invoke(this, new TestsPrioritizedEventArgs<TTestCase>(prioritizedTests));
 
-			var executor = testsProcessor as ITestsExecutor<TTestCase, TSelectionDelta, TModel>;
+			var executor = testProcessor as ITestExecutor<TTestCase, TSelectionDelta, TModel>;
 			if (executor != null)
 			{
 				executor.TestResultAvailable += TestResultAvailable;
 			}
-			var processingResult = await loggingHelper.ReportNeededTime(() => testsProcessor.ProcessTests(prioritizedTests, allTests, convertedDelta, token), "Tests Processing");
+			var processingResult = await loggingHelper.ReportNeededTime(() => testProcessor.ProcessTests(prioritizedTests, allTests, convertedDelta, token), "Tests Processing");
 			if (executor != null)
 			{
 				executor.TestResultAvailable -= TestResultAvailable;

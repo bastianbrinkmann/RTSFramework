@@ -16,14 +16,14 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class ConsoleMSTestTestsExecutorWithOpenCoverage<TDelta, TModel> : ConsoleMSTestTestsExecutor<TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
+	public class ConsoleMSTestTestExecutorWithOpenCoverage<TDelta, TModel> : ConsoleMSTestTestExecutor<TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
 		private readonly OpenCoverXmlCoverageAdapter openCoverArtefactAdapter;
 
 		private const string OpenCoverExe = "OpenCover.Console.exe";
 		private const string OpenCoverPath = "OpenCover";
 
-		public ConsoleMSTestTestsExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
+		public ConsoleMSTestTestExecutorWithOpenCoverage(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
 													OpenCoverXmlCoverageAdapter openCoverArtefactAdapter,
 													ISettingsProvider settingsProvider) : base(resultArtefactAdapter, settingsProvider)
 		{

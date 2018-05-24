@@ -12,7 +12,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicRTS<TModel, TModelElement, TTestCase> : ITestsSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
+	public class DynamicRTS<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
 		where TTestCase : class, ITestCase
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement

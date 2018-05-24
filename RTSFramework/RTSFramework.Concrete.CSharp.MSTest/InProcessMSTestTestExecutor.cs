@@ -15,14 +15,14 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestsExecutor<TDelta, TModel> : ITestsExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
+	public class InProcessMSTestTestExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
 		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
 
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
 
-		public InProcessMSTestTestsExecutor(InProcessVsTestConnector vsTestConnector, ISettingsProvider settingsProvider)
+		public InProcessMSTestTestExecutor(InProcessVsTestConnector vsTestConnector, ISettingsProvider settingsProvider)
 		{
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;

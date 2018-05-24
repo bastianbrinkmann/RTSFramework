@@ -19,12 +19,12 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-    public class ConsoleMSTestTestsExecutor<TDelta, TModel> : ITestsExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
+    public class ConsoleMSTestTestExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
     {
         private readonly IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter;
 	    private readonly ISettingsProvider settingsProvider;
 
-	    public ConsoleMSTestTestsExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
+	    public ConsoleMSTestTestExecutor(IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult> resultArtefactAdapter,
 			ISettingsProvider settingsProvider)
 	    {
 		    this.resultArtefactAdapter = resultArtefactAdapter;

@@ -5,7 +5,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestsPrioritizer<TTestCase> where TTestCase : ITestCase
+	public interface ITestPrioritizer<TTestCase> where TTestCase : ITestCase
 	{
 		Task<IList<TTestCase>> PrioritizeTests(IList<TTestCase> testCases, CancellationToken token);
 	}

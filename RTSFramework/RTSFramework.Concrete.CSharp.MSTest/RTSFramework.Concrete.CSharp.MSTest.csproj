@@ -100,22 +100,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InProcessMSTestTestsExecutor.cs" />
+    <Compile Include="InProcessMSTestTestExecutor.cs" />
     <Compile Include="Models\MSTestExectionResult.cs" />
     <Compile Include="Models\MSTestExectionWithCodeCoverageResult.cs" />
     <Compile Include="Models\MSTestTestcase.cs" />
     <Compile Include="Models\MSTestTestResult.cs" />
     <Compile Include="MSTestConstants.cs" />
-    <Compile Include="MonoMSTestTestsDiscoverer.cs" />
-    <Compile Include="ConsoleMSTestTestsExecutor.cs" />
-    <Compile Include="ConsoleMSTestTestsExecutorWithOpenCoverage.cs" />
+    <Compile Include="MonoMSTestTestDiscoverer.cs" />
+    <Compile Include="ConsoleMSTestTestExecutor.cs" />
+    <Compile Include="ConsoleMSTestTestExecutorWithOpenCoverage.cs" />
     <Compile Include="MSTestTestsInstrumentor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Adapters\MSTestExecutionResultParameters.cs" />
     <Compile Include="Adapters\OpenCoverXmlCoverageAdapter.cs" />
     <Compile Include="Utilities\OrderedTestsHelper.cs" />
     <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
-    <Compile Include="InProcessMSTestTestsDiscoverer.cs" />
+    <Compile Include="InProcessMSTestTestDiscoverer.cs" />
     <Compile Include="VsTest\AsyncAutoResetEvent.cs" />
     <Compile Include="VsTest\DiscoveryEventHandler.cs" />
     <Compile Include="VsTest\InProcessVsTestConnector.cs" />

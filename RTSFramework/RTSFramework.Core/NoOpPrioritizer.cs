@@ -6,7 +6,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Core
 {
-	public class NoOpPrioritizer<TTestCase> : ITestsPrioritizer<TTestCase> where TTestCase : ITestCase
+	public class NoOpPrioritizer<TTestCase> : ITestPrioritizer<TTestCase> where TTestCase : ITestCase
 	{
 		public Task<IList<TTestCase>> PrioritizeTests(IList<TTestCase> testCases, CancellationToken token)
 		{
