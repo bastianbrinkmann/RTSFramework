@@ -76,10 +76,10 @@ namespace RTSFramework.ViewModels.Controller
 			var discoveredDelta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "Delta Discovery");
 			token.ThrowIfCancellationRequested();
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTestCasesForModel(newModel, FilterFunction, token), "Tests Discovery");
-			token.ThrowIfCancellationRequested();
-
 			var convertedDelta = deltaAdapter.Convert(discoveredDelta);
+
+			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(newModel, FilterFunction, token), "Tests Discovery");
+			token.ThrowIfCancellationRequested();
 
 			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
 			var impactedTests = testSelector.SelectedTests;

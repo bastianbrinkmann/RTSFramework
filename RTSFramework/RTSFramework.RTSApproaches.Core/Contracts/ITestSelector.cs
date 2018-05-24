@@ -13,10 +13,10 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
-		IList<TTestCase> SelectedTests { get; }
+		ISet<TTestCase> SelectedTests { get; }
 
 		Func<string, IList<string>> GetResponsibleChangesByTestId { get; }
 
-		Task SelectTests(IList<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
+		Task SelectTests(ISet<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
 	}
 }

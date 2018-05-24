@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private IList<MSTestTestcase> msTestTestcases;
 
-		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, IList<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, ISet<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 			msTestTestcases = impactedTests;
 

@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.settingsProvider = settingsProvider;
 		}
 
-		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<ISet<MSTestTestcase>> GetTests(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
@@ -39,7 +39,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			return vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)).ToList();
+			return new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
 		}
 
 		private MSTestTestcase Convert(TestCase vsTestCase)

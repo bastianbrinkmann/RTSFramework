@@ -26,9 +26,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		}
 
-		public async Task<IList<MSTestTestcase>> GetTestCasesForModel(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<ISet<MSTestTestcase>> GetTests(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
-			var testCases = new List<MSTestTestcase>();
+			var testCases = new HashSet<MSTestTestcase>();
 
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();

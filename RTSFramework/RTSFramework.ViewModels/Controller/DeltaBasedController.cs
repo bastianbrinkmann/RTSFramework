@@ -67,7 +67,7 @@ namespace RTSFramework.ViewModels.Controller
 
 			var convertedDelta = deltaAdapter.Convert(parsedDelta);
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTestCasesForModel(convertedDelta.NewModel, FilterFunction, token), "Tests Discovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta.NewModel, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");

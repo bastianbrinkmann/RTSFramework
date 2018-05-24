@@ -19,7 +19,7 @@ namespace RTSFramework.Concrete.User
 			this.runConfigurationProvider = runConfigurationProvider;
 		}
 
-		public Task<IList<CsvFileTestcase>> GetTestCasesForModel(TModel model, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
+		public Task<ISet<CsvFileTestcase>> GetTests(TModel model, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var csvFile = runConfigurationProvider.CsvTestsFile;
 			if (!File.Exists(csvFile))
@@ -27,7 +27,7 @@ namespace RTSFramework.Concrete.User
 				throw new ArgumentException($"The CSV file '{csvFile}' does not exist!");
 			}
 
-			IList<CsvFileTestcase> tests = new List<CsvFileTestcase>();
+			ISet<CsvFileTestcase> tests = new HashSet<CsvFileTestcase>();
 
 			foreach (string line in File.ReadAllLines(csvFile))
 			{

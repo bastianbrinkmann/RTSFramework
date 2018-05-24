@@ -40,7 +40,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.loggingHelper = loggingHelper;
 		}
 
-		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
+		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, ISet<TTestCase> allTests, TDelta impactedForDelta,
 			CancellationToken cancellationToken)
 		{
 			using (instrumentor)
@@ -72,7 +72,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			}
 		}
 
-		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, IList<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
+		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, ISet<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
 		{
 			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.OldModel, token);
 			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);

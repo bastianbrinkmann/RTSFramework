@@ -30,7 +30,7 @@ namespace RTSFramework.Core
 			return stopwatch.Elapsed.TotalSeconds > timeLimitInSeconds;
 		}
 
-		public override async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public override async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, ISet<TTestCase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 			timeLimitInSeconds = userRunConfigurationProvider.TimeLimit;
 

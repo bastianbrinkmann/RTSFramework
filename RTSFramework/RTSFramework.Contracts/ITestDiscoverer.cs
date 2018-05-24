@@ -8,6 +8,6 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestDiscoverer<TModel, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel
 	{
-        Task<IList<TTestCase>> GetTestCasesForModel(TModel model, Func<TTestCase, bool> filterFunction, CancellationToken token);
+        Task<ISet<TTestCase>> GetTests(TModel model, Func<TTestCase, bool> filterFunction, CancellationToken token);
 	}
 }

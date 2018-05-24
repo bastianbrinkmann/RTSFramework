@@ -29,7 +29,7 @@ namespace RTSFramework.Core
 
 		public abstract bool IsTerminationConditionFulfilled();
 
-		public virtual async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, IList<TTestCase> allTests, TDelta impactedForDelta,
+		public virtual async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, ISet<TTestCase> allTests, TDelta impactedForDelta,
 			CancellationToken cancellationToken)
 		{
 			var tokenSource = new CancellationTokenSource();

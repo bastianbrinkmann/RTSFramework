@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Contracts;
@@ -8,9 +9,10 @@ namespace RTSFramework.Core
 {
 	public class NoOpPrioritizer<TTestCase> : ITestPrioritizer<TTestCase> where TTestCase : ITestCase
 	{
-		public Task<IList<TTestCase>> PrioritizeTests(IList<TTestCase> testCases, CancellationToken token)
+		public Task<IList<TTestCase>> PrioritizeTests(ISet<TTestCase> testCases, CancellationToken token)
 		{
-			return Task.FromResult(testCases);
+			IList<TTestCase> prioritizedTests = testCases.ToList();
+			return Task.FromResult(prioritizedTests);
 		}
 	}
 }

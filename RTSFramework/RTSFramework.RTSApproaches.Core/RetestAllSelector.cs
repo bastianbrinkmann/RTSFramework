@@ -16,7 +16,7 @@ namespace RTSFramework.RTSApproaches.Core
 		where TTestCase : class, ITestCase
 	{
 
-		public Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
 			var allChangedElements = delta.AddedElements.Select(x => x.Id)
 				.Union(delta.ChangedElements.Select(x => x.Id))
@@ -29,7 +29,7 @@ namespace RTSFramework.RTSApproaches.Core
 			return Task.CompletedTask;
 		}
 
-		public IList<TTestCase> SelectedTests { get; private set; }
+		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 	}
 }

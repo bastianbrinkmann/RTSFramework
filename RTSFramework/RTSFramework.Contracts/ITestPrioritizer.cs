@@ -7,6 +7,6 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestPrioritizer<TTestCase> where TTestCase : ITestCase
 	{
-		Task<IList<TTestCase>> PrioritizeTests(IList<TTestCase> testCases, CancellationToken token);
+		Task<IList<TTestCase>> PrioritizeTests(ISet<TTestCase> testCases, CancellationToken token);
 	}
 }

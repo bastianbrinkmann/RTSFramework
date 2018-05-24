@@ -34,7 +34,7 @@ namespace RTSFramework.RTSApproaches.Static
 			this.irgBuilder = irgBuilder;
 		}
 
-		public async Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public async Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			//Using the IRG for P' is possible as it is built using the intermediate language
 			//Therefore, the program at least compiles - preventing issues from for example deleted files
@@ -49,9 +49,9 @@ namespace RTSFramework.RTSApproaches.Static
 		/// A Generic Platform for Model-Based Regression Testing
 		/// by Zech et al.
 		/// </summary>
-		private IList<TTestCase> ExpandDelta(IntertypeRelationGraph graph, IList<TTestCase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		private ISet<TTestCase> ExpandDelta(IntertypeRelationGraph graph, ISet<TTestCase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
-			IList<TTestCase> impactedTests = new List<TTestCase>();
+			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
 
 			var changedTypes = new List<string>();
 
@@ -69,7 +69,7 @@ namespace RTSFramework.RTSApproaches.Static
 			return impactedTests;
 		}
 
-		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, IList<TTestCase> allTests, IList<TTestCase> impactedTests, CancellationToken cancellationToken)
+		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, ISet<TTestCase> allTests, ISet<TTestCase> impactedTests, CancellationToken cancellationToken)
 		{
 			foreach (var test in allTests.Where(x => x.AssociatedClass == type))
 			{
@@ -121,7 +121,7 @@ namespace RTSFramework.RTSApproaches.Static
 			}
 		}
 
-		public IList<TTestCase> SelectedTests { get; private set; }
+		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId => null;
 	}
 }

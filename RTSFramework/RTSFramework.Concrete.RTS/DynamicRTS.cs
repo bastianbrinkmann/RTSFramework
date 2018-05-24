@@ -24,12 +24,12 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		public async Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
+		public async Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
 			CancellationToken cancellationToken)
 		{
 			var currentCorrespondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.OldModel, cancellationToken);
 
-			IList<TTestCase> impactedTests = new List<TTestCase>();
+			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
 
 			foreach (var testcase in testCases)
 			{
@@ -66,7 +66,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			SelectedTests = impactedTests;
 		}
 
-		public IList<TTestCase> SelectedTests { get; private set; }
+		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 	}
 }
