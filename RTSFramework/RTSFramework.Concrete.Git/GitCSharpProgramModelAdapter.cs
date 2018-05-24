@@ -6,7 +6,7 @@ using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitCSharpProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, GitProgramModel>
+    public class GitCSharpProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, GitCSharpProgramModel>
     {
 	    private readonly GitCommitsProvider gitCommitsProvider;
 
@@ -15,7 +15,7 @@ namespace RTSFramework.Concrete.Git
 		    this.gitCommitsProvider = gitCommitsProvider;
 	    }
 
-	    public GitProgramModel Parse(GitVersionIdentification artefact)
+	    public GitCSharpProgramModel Parse(GitVersionIdentification artefact)
 	    {
 		    string gitProgramModelId = null;
 
@@ -33,7 +33,7 @@ namespace RTSFramework.Concrete.Git
 					gitProgramModelId = gitCommitsProvider.GetCommitIdentifier(artefact.RepositoryPath, artefact.Commit.ShaId);
 					break;
 			}
-			return new GitProgramModel
+			return new GitCSharpProgramModel
 			{
 				VersionId = gitProgramModelId,
 				GranularityLevel = artefact.GranularityLevel,
@@ -42,7 +42,7 @@ namespace RTSFramework.Concrete.Git
 			};
 		}
 
-	    public GitVersionIdentification Unparse(GitProgramModel model, GitVersionIdentification artefact)
+	    public GitVersionIdentification Unparse(GitCSharpProgramModel model, GitVersionIdentification artefact)
 	    {
 		    throw new NotImplementedException();
 	    }
