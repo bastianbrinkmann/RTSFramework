@@ -24,7 +24,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		public async Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
+		public async Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
 			CancellationToken cancellationToken)
 		{
 			var currentCorrespondenceModel = await correspondenceModelProvider.GetDataStructureForProgram(delta.OldModel, cancellationToken);
@@ -42,18 +42,6 @@ namespace RTSFramework.RTSApproaches.Dynamic
 						delta.DeletedElements.Any(x => linkedElements.Any(y => x.Id.Equals(y, StringComparison.Ordinal))))
 					{
 						impactedTests.Add(testcase);
-						testcase.GetResponsibleChangesForLastImpact = () =>
-						{
-							if (currentCorrespondenceModel.CorrespondenceModelLinks.ContainsKey(testcase.Id))
-							{
-								var linksOfTestcase = currentCorrespondenceModel.CorrespondenceModelLinks[testcase.Id];
-								return linksOfTestcase.Where(x => delta.AddedElements.Any(y => y.Id == x) ||
-																  delta.ChangedElements.Any(y => y.Id == x) ||
-																  delta.DeletedElements.Any(y => y.Id == x)).ToList();
-							}
-
-							return new List<string>(new[] { "New Test" });
-						};
 					}
 				}
 				else
@@ -63,7 +51,22 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				}
 			}
 
-			return impactedTests;
+			GetResponsibleChangesByTestId = id =>
+			{
+				if (currentCorrespondenceModel.CorrespondenceModelLinks.ContainsKey(id))
+				{
+					var linksOfTestcase = currentCorrespondenceModel.CorrespondenceModelLinks[id];
+					return linksOfTestcase.Where(x => delta.AddedElements.Any(y => y.Id == x) ||
+													  delta.ChangedElements.Any(y => y.Id == x) ||
+													  delta.DeletedElements.Any(y => y.Id == x)).ToList();
+				}
+
+				return new List<string>(new[] { "New Test" });
+			};
+			SelectedTests = impactedTests;
 		}
+
+		public IList<TTestCase> SelectedTests { get; private set; }
+		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 	}
 }

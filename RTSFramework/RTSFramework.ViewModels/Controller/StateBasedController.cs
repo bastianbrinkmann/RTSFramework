@@ -61,10 +61,10 @@ namespace RTSFramework.ViewModels.Controller
 			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
 
-		public Func<TTestCase, bool> FilterFunction { get; set; }
-		public TArtefact OldArtefact { get; set; }
-		public TArtefact NewArtefact { get; set; }
-		public TResultArtefact Result { get; set; }
+		public Func<TTestCase, bool> FilterFunction { private get; set; }
+		public TArtefact OldArtefact { private get; set; }
+		public TArtefact NewArtefact { private get; set; }
+		public TResultArtefact Result { get; private set; }
 
 		public async Task ExecuteRTSRun(CancellationToken token)
 		{
@@ -81,11 +81,12 @@ namespace RTSFramework.ViewModels.Controller
 
 			var convertedDelta = deltaAdapter.Convert(discoveredDelta);
 
-			var impactedTests = await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
+			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
+			var impactedTests = testSelector.SelectedTests;
 
 			foreach (var impactedTest in impactedTests)
 			{
-				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest));
+				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest, testSelector.GetResponsibleChangesByTestId?.Invoke(impactedTest.Id)));
 			}
 
 			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");

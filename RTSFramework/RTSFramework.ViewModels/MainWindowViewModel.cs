@@ -1020,7 +1020,7 @@ namespace RTSFramework.ViewModels
 						Name = args.TestCase.Name,
 						FullClassName = args.TestCase.AssociatedClass,
 						Categories = string.Join(",", args.TestCase.Categories),
-						GetResponsibleChangesForLastImpact = args.TestCase.GetResponsibleChangesForLastImpact
+						ResponsibleChanges =  args.ResponsibleChanges
 					}));
 		}
 

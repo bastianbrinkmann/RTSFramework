@@ -16,18 +16,20 @@ namespace RTSFramework.RTSApproaches.Core
 		where TTestCase : class, ITestCase
 	{
 
-		public Task<IList<TTestCase>> SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
 			var allChangedElements = delta.AddedElements.Select(x => x.Id)
 				.Union(delta.ChangedElements.Select(x => x.Id))
 				.Union(delta.DeletedElements.Select(x => x.Id)).ToList();
 
-			foreach (var testCase in testCases)
-			{
-				testCase.GetResponsibleChangesForLastImpact = () => allChangedElements;
-			}
+			GetResponsibleChangesByTestId = x => allChangedElements;
 
-			return Task.FromResult(testCases);
+			SelectedTests = testCases;
+
+			return Task.CompletedTask;
 		}
+
+		public IList<TTestCase> SelectedTests { get; private set; }
+		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 	}
 }

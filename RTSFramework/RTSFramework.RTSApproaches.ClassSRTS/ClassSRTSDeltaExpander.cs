@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,13 +34,13 @@ namespace RTSFramework.RTSApproaches.Static
 			this.irgBuilder = irgBuilder;
 		}
 
-		public async Task<IList<TTestCase>>  SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public async Task SelectTests(IList<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			//Using the IRG for P' is possible as it is built using the intermediate language
 			//Therefore, the program at least compiles - preventing issues from for example deleted files
 			var graph = await irgBuilder.GetDataStructureForProgram(delta.NewModel, cancellationToken);
 
-			return ExpandDelta(graph, testCases, delta, cancellationToken);
+			SelectedTests = ExpandDelta(graph, testCases, delta, cancellationToken);
 		}
 
 		/// <summary>
@@ -119,5 +120,8 @@ namespace RTSFramework.RTSApproaches.Static
 				}
 			}
 		}
+
+		public IList<TTestCase> SelectedTests { get; private set; }
+		public Func<string, IList<string>> GetResponsibleChangesByTestId => null;
 	}
 }

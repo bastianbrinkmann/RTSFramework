@@ -47,10 +47,8 @@ namespace RTSFramework.ViewModels
 
 			ShowResponsibleChangesCommand = new DelegateCommand(() =>
 			{
-				var responsibleChanges = GetResponsibleChangesForLastImpact();
-
-				dialogService.ShowInformation(string.Join(Environment.NewLine, responsibleChanges), "Potentially responsible changes");
-			}, () => GetResponsibleChangesForLastImpact != null);
+				dialogService.ShowInformation(string.Join(Environment.NewLine, ResponsibleChanges), "Potentially responsible changes");
+			}, () => ResponsibleChanges != null);
 
 			ChildResults = new ObservableCollection<TestResultListViewItemViewModel>();
 
@@ -63,6 +61,9 @@ namespace RTSFramework.ViewModels
 			{
 				case nameof(ErrorMessage):
 					ShowErrorMessageCommand.RaiseCanExecuteChanged();
+					break;
+				case nameof(ResponsibleChanges):
+					ShowResponsibleChangesCommand.RaiseCanExecuteChanged();
 					break;
 			}
 		}
@@ -79,7 +80,7 @@ namespace RTSFramework.ViewModels
 
 		#region Properties
 
-		public Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
+		public IList<string> ResponsibleChanges { get; set; }
 
 		public DelegateCommand ShowResponsibleChangesCommand
 		{

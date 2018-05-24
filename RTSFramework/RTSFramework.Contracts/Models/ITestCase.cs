@@ -14,7 +14,5 @@ namespace RTSFramework.Contracts.Models
 		string AssociatedClass { get; }
 
 		bool IsChildTestCase { get; }
-
-		Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
 	}
 }
