@@ -3,7 +3,7 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.Git.Models
 {
-    public class GitProgramModel : CSharpProgramModel
+    public class GitCSharpProgramModel : CSharpProgramModel
     {
 		public GitVersionIdentification GitVersionIdentification { get; set; }
     }

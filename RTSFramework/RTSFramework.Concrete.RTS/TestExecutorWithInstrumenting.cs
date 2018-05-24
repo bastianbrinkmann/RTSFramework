@@ -55,29 +55,31 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				var coverage = instrumentor.GetCoverageData();
 
-				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase).ToList();
+				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase.Id).ToList();
 
 				var coveredTests = coverage.CoverageDataEntries.Select(x => x.Item1).Distinct().ToList();
-				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id)).ToList();
+				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id)).Select(x => x.Id).ToList();
 				
-				testsWithoutCoverage.ForEach(x => loggingHelper.WriteMessage("Not covered: " + x.Id));
-				failedTests.ForEach(x => loggingHelper.WriteMessage("Failed Tests: " + x.Id));
+				testsWithoutCoverage.ForEach(x => loggingHelper.WriteMessage("Not covered: " + x));
+				failedTests.ForEach(x => loggingHelper.WriteMessage("Failed Tests: " + x));
 
-				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x.Id));
+				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x));
 
-				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests.Except(failedTests).ToList(), cancellationToken);
+				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, failedTests, cancellationToken);
 
 				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;
 			}
 		}
 
-		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, IList<TTestCase> allTests, CancellationToken token)
+		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, IList<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
 		{
 			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.OldModel, token);
 			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
 			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
 			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
+
+			failedTests.ForEach(x => newModel.CorrespondenceModelLinks.Remove(x));
 
 			await dataStructureProvider.PersistDataStructure(newModel);
 		}

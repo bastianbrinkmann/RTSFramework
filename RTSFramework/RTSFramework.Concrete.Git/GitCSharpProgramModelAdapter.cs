@@ -6,11 +6,11 @@ using RTSFramework.Contracts.Adapter;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, GitProgramModel>
+    public class GitCSharpProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, GitProgramModel>
     {
 	    private readonly GitCommitsProvider gitCommitsProvider;
 
-	    public GitProgramModelAdapter(GitCommitsProvider gitCommitsProvider)
+	    public GitCSharpProgramModelAdapter(GitCommitsProvider gitCommitsProvider)
 	    {
 		    this.gitCommitsProvider = gitCommitsProvider;
 	    }

@@ -12,9 +12,9 @@ using Unity.Interception.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-    public class GitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitProgramModel, StructuralDelta<GitProgramModel, FileElement>>
+    public class GitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>
     {
-		public StructuralDelta<GitProgramModel, FileElement> Discover(GitProgramModel oldModel, GitProgramModel newModel)
+		public StructuralDelta<GitCSharpProgramModel, FileElement> Discover(GitCSharpProgramModel oldModel, GitCSharpProgramModel newModel)
         {
             if (oldModel.GitVersionIdentification.RepositoryPath != newModel.GitVersionIdentification.RepositoryPath)
             {
@@ -23,7 +23,7 @@ namespace RTSFramework.Concrete.Git
 
             var repositoryPath = oldModel.GitVersionIdentification.RepositoryPath;
 
-	        var delta = new StructuralDelta<GitProgramModel, FileElement>(oldModel, newModel);
+	        var delta = new StructuralDelta<GitCSharpProgramModel, FileElement>(oldModel, newModel);
 
             using (Repository repo = new Repository(repositoryPath))
             {
@@ -38,7 +38,7 @@ namespace RTSFramework.Concrete.Git
 	        return delta;
         }
 
-	    private void AddCurrentChanges(StructuralDelta<GitProgramModel, FileElement> delta, Repository repo)
+	    private void AddCurrentChanges(StructuralDelta<GitCSharpProgramModel, FileElement> delta, Repository repo)
 	    {
 		    var lastCommit = repo.Head.Tip;
 
@@ -71,7 +71,7 @@ namespace RTSFramework.Concrete.Git
 			});
 		}
 
-	    private void AddDeltaBetweenCommits(StructuralDelta<GitProgramModel, FileElement> delta, Repository repo, GitVersionIdentification oldVersion, GitVersionIdentification newVersion, string repositoryPath)
+	    private void AddDeltaBetweenCommits(StructuralDelta<GitCSharpProgramModel, FileElement> delta, Repository repo, GitVersionIdentification oldVersion, GitVersionIdentification newVersion, string repositoryPath)
 	    {
 		    bool collectDelta = newVersion.ReferenceType == GitVersionReferenceType.CurrentChanges;
 
@@ -132,7 +132,7 @@ namespace RTSFramework.Concrete.Git
 			}
 		}
 
-	    private void AddDeltaInTreeChanges(StructuralDelta<GitProgramModel, FileElement> delta, TreeChanges treeChanges, Commit previousCommit, string repositoryPath, Commit commit = null)
+	    private void AddDeltaInTreeChanges(StructuralDelta<GitCSharpProgramModel, FileElement> delta, TreeChanges treeChanges, Commit previousCommit, string repositoryPath, Commit commit = null)
 	    {
 			foreach (TreeEntryChanges change in treeChanges)
 			{
