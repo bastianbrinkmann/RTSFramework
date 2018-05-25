@@ -13,7 +13,6 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 	public class CorrespondenceModelManager<TModel> : IDataStructureProvider<Models.CorrespondenceModel, TModel> where TModel : IProgramModel
 	{
 		private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
-		private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
 		private const string CorrespondenceModelsStoragePlace = "CorrespondenceModels";
 
 		public CorrespondenceModelManager(IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter)
@@ -31,27 +30,14 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 				GranularityLevel = programModel.GranularityLevel
 			};
 
-			Models.CorrespondenceModel model = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == programModel.VersionId && x.GranularityLevel == programModel.GranularityLevel);
 
-			if (model == null)
-			{
-				model = correspondenceModelAdapter.Parse(artefact) ?? defaultModel;
-
-				correspondenceModels.Add(model);
-			}
+			var model = correspondenceModelAdapter.Parse(artefact) ?? defaultModel;
 
 			return Task.FromResult(model);
 		}
 
 		public Task PersistDataStructure(Models.CorrespondenceModel model)
 		{
-			var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
-
-			if (currentModel != null)
-			{
-				correspondenceModels.Remove(currentModel);
-			}
-
 			if (!Directory.Exists(CorrespondenceModelsStoragePlace))
 			{
 				Directory.CreateDirectory(CorrespondenceModelsStoragePlace);
@@ -59,14 +45,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 
 			var artefact = GetFile(model.ProgramVersionId, model.GranularityLevel);
 			correspondenceModelAdapter.Unparse(model, artefact);
-			correspondenceModels.Add(model);
 
 			return Task.CompletedTask;
 		}
 
 		private static FileInfo GetFile(string programVersionId, GranularityLevel granularityLevel)
 		{
-			return new FileInfo(Path.Combine(CorrespondenceModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}"));
+			return new FileInfo(Path.GetFullPath(Path.Combine(CorrespondenceModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}")));
 		}
 	}
 }
