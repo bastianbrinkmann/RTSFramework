@@ -221,7 +221,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			{
 				CancellationToken = cancellationToken,
 				MaxDegreeOfParallelism = Environment.ProcessorCount
-			};
+			}; 
 
 			foreach (var testAssembly in testAssemblies)
 			{
@@ -269,7 +269,8 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 					if (type.HasMethods)
 					{
-						if (!type.Methods.Any(x => msTestTestcases.Any(y => y.Id == $"{type.FullName}.{x.Name}")))
+						//Roslyn uses '+' for nested classes, Mono '/'
+						if (!type.Methods.Any(x => msTestTestcases.Any(y => y.Id == $"{type.FullName.Replace('/', '+')}.{x.Name}")))
 						{
 							continue;
 						}
