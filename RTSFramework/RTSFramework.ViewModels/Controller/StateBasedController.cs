@@ -30,20 +30,17 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
-		private readonly IOfflineDeltaDiscoverer<TModel, TDiscoveryDelta> deltaDiscoverer;
 		private readonly ModelLevelController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelLevelController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
-			IOfflineDeltaDiscoverer<TModel, TDiscoveryDelta> deltaDiscoverer,
 			ModelLevelController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelLevelController,
 			ILoggingHelper loggingHelper,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
 		{
 			this.artefactAdapter = artefactAdapter;
-			this.deltaDiscoverer = deltaDiscoverer;
 			this.modelLevelController = modelLevelController;
 			this.loggingHelper = loggingHelper;
 			this.resultArtefactAdapter = resultArtefactAdapter;
@@ -58,16 +55,13 @@ namespace RTSFramework.ViewModels.Controller
 			var oldModel = artefactAdapter.Parse(oldArtefact);
 			var newModel = artefactAdapter.Parse(newArtefact);
 
-			var discoveredDelta = loggingHelper.ReportNeededTime(() => deltaDiscoverer.Discover(oldModel, newModel), "Delta Discovery");
-			token.ThrowIfCancellationRequested();
-
 			modelLevelController.TestResultAvailable += TestResultAvailable;
 			modelLevelController.TestsPrioritized += TestsPrioritized;
 			modelLevelController.ImpactedTest += ImpactedTest;
 
 			modelLevelController.FilterFunction = FilterFunction;
 
-			var processingResult = await modelLevelController.ExecuteRTSRun(discoveredDelta, token);
+			var processingResult = await modelLevelController.ExecuteRTSRun(oldModel, newModel, token);
 
 			modelLevelController.TestResultAvailable -= TestResultAvailable;
 			modelLevelController.TestsPrioritized -= TestsPrioritized;

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
@@ -24,6 +25,7 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter;
+		private readonly IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer;
 		private readonly ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor;
 		private readonly ITestDiscoverer<TModel, TTestCase> testDiscoverer;
 		private readonly ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector;
@@ -32,6 +34,7 @@ namespace RTSFramework.ViewModels.Controller
 
 		public ModelLevelController(
 			IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter,
+			IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer,
 			ITestDiscoverer<TModel, TTestCase> testDiscoverer,
 			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
@@ -39,6 +42,7 @@ namespace RTSFramework.ViewModels.Controller
 			ILoggingHelper loggingHelper)
 		{
 			this.deltaAdapter = deltaAdapter;
+			this.deltaDiscoverer = deltaDiscoverer;
 			this.testProcessor = testProcessor;
 			this.testDiscoverer = testDiscoverer;
 			this.testSelector = testSelector;
@@ -47,6 +51,15 @@ namespace RTSFramework.ViewModels.Controller
 		}
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
+
+
+		public async Task<TResult> ExecuteRTSRun(TModel oldProgramModel, TModel newProgramModel, CancellationToken token)
+		{
+			var delta = deltaDiscoverer.Discover(oldProgramModel, newProgramModel);
+			token.ThrowIfCancellationRequested();
+
+			return await ExecuteRTSRun(delta, token);
+		}
 
 		public async Task<TResult> ExecuteRTSRun(TInputDelta delta, CancellationToken token)
 		{
