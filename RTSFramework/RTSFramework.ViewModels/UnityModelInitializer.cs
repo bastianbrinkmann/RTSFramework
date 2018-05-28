@@ -67,28 +67,26 @@ namespace RTSFramework.ViewModels
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact> GetStateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
+		internal static StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact> GetStateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TDiscoveryDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, StateBasedController<TArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>>();
 
 			return factory(rtsApproachType, processingType);
 		}
 
-		internal static DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact> GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
+		internal static DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact> GetDeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TParsedDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, DeltaBasedController<TDeltaArtefact, TModel, TDelta, TTestCase, TResult, TResultArtefact>>>();
 
 			return factory(rtsApproachType, processingType);
 		}

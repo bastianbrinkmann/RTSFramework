@@ -6,11 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
-using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel
 {
-	public class CorrespondenceModelManager<TModel> : IDataStructureProvider<Models.CorrespondenceModel, TModel> where TModel : IProgramModel
+	public class CorrespondenceModelManager<TModel> where TModel : IProgramModel
 	{
 		private readonly IArtefactAdapter<FileInfo, Models.CorrespondenceModel> correspondenceModelAdapter;
 		private readonly List<Models.CorrespondenceModel> correspondenceModels = new List<Models.CorrespondenceModel>();
@@ -21,7 +20,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			this.correspondenceModelAdapter = correspondenceModelAdapter;
 		}
 
-		public Task<Models.CorrespondenceModel> GetDataStructureForProgram(TModel programModel, CancellationToken cancellationToken)
+		public Task<Models.CorrespondenceModel> GetCorrespondenceModel(TModel programModel)
 		{
 			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
 
@@ -43,7 +42,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return Task.FromResult(model);
 		}
 
-		public Task PersistDataStructure(Models.CorrespondenceModel model)
+		public Task PersistCorrespondenceModel(Models.CorrespondenceModel model)
 		{
 			var currentModel = correspondenceModels.SingleOrDefault(x => x.ProgramVersionId == model.ProgramVersionId);
 

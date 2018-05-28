@@ -17,39 +17,18 @@ namespace RTSFramework.RTSApproaches.Static
 	/// https://dl.acm.org/citation.cfm?id=2950361
 	/// An extensive study of static regression test selection in modern software evolution
 	/// by Legunsen et al.
-	/// 
-	/// Called Delta Expansion as in:
-	/// https://link.springer.com/chapter/10.1007/978-3-642-34026-0_9
-	/// A Generic Platform for Model-Based Regression Testing
-	/// by Zech et al.
 	/// </summary>
-	public class ClassSRTSDeltaExpander<TModel, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>
+	public class ClassSRTSDeltaExpander<TModel, TTestCase> : IDeltaExpander<TModel, TTestCase, StructuralDelta<TModel, CSharpClassElement>, IntertypeRelationGraph>
 		where TModel : CSharpProgramModel
 		where TTestCase : ITestCase
 	{
-		private readonly IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder;
-
-		public ClassSRTSDeltaExpander(IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder)
-		{
-			this.irgBuilder = irgBuilder;
-		}
-
-		public async Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
-		{
-			//Using the IRG for P' is possible as it is built using the intermediate language
-			//Therefore, the program at least compiles - preventing issues from for example deleted files
-			var graph = await irgBuilder.GetDataStructureForProgram(delta.NewModel, cancellationToken);
-
-			SelectedTests = ExpandDelta(graph, testCases, delta, cancellationToken);
-		}
-
 		/// <summary>
 		/// Called Delta Expansion as in:
 		/// https://link.springer.com/chapter/10.1007/978-3-642-34026-0_9
 		/// A Generic Platform for Model-Based Regression Testing
 		/// by Zech et al.
 		/// </summary>
-		private ISet<TTestCase> ExpandDelta(IntertypeRelationGraph graph, ISet<TTestCase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public Task ExpandDelta(ISet<TTestCase> allTests, StructuralDelta<TModel, CSharpClassElement> delta, IntertypeRelationGraph graph, CancellationToken cancellationToken)
 		{
 			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
 
@@ -66,7 +45,8 @@ namespace RTSFramework.RTSApproaches.Static
 				ExtendAffectedTypesAndReportImpactedTests(type, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 			}
 
-			return impactedTests;
+			SelectedTests = impactedTests;
+			return Task.CompletedTask;
 		}
 
 		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, ISet<TTestCase> allTests, ISet<TTestCase> impactedTests, CancellationToken cancellationToken)
@@ -123,5 +103,6 @@ namespace RTSFramework.RTSApproaches.Static
 
 		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId => null;
+		
 	}
 }

@@ -6,6 +6,6 @@ namespace RTSFramework.Contracts.Adapter
     {
         TModel Parse(TArtefact artefact);
 
-		TArtefact Unparse(TModel model, TArtefact artefact);
+		TArtefact Unparse(TModel model, TArtefact artefact = default(TArtefact));
     }
 }

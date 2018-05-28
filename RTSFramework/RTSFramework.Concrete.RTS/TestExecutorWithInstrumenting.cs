@@ -72,47 +72,6 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			}
 		}
 
-		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, ISet<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
-		{
-			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.OldModel, token);
-			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
-			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
-
-			failedTests.ForEach(x => newModel.CorrespondenceModelLinks.Remove(x));
-
-			await dataStructureProvider.PersistDataStructure(newModel);
-		}
-
-		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
-		{
-			var links = coverageData.CoverageDataEntries.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
-
-			foreach (var coverageEntry in coverageData.CoverageDataEntries)
-			{
-				if (targetModel.GranularityLevel == GranularityLevel.Class)
-				{
-					if (!links[coverageEntry.Item1].Contains(coverageEntry.Item2))
-					{
-						links[coverageEntry.Item1].Add(coverageEntry.Item2);
-					}
-				}
-				/* TODO Granularity Level File
-				 * 
-				 * else if(targetModel.GranularityLevel == GranularityLevel.File)
-				{
-					if (!coverageEntry.Item2.EndsWith(".cs"))
-					{
-						continue;
-					}
-					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.Item2);
-					if (!links[coverageEntry.Item1].Contains(relativePath))
-					{
-						links[coverageEntry.Item1].Add(relativePath);
-					}
-				}*/
-			}
-			return links;
-		}
+		
 	}
 }
