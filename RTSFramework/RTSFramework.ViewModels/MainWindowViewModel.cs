@@ -798,14 +798,17 @@ namespace RTSFramework.ViewModels
 
 			deltaBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
-			deltaBasedController.DeltaArtefact = deltaArtefact;
-
 			deltaBasedController.ImpactedTest += HandleImpactedTest;
 			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
 			deltaBasedController.TestsPrioritized += HandleTestsPrioritized;
 
-			await Task.Run(() => deltaBasedController.ExecuteRTSRun(cancellationTokenSource.Token), cancellationTokenSource.Token);
-			return deltaBasedController.Result;
+			var result = await Task.Run(() => deltaBasedController.ExecuteRTSRun(deltaArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
+
+			deltaBasedController.ImpactedTest -= HandleImpactedTest;
+			deltaBasedController.TestResultAvailable -= HandleTestExecutionResult;
+			deltaBasedController.TestsPrioritized -= HandleTestsPrioritized;
+
+			return result;
 		}
 
 		#endregion
@@ -935,15 +938,17 @@ namespace RTSFramework.ViewModels
 
 			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
-			stateBasedController.OldArtefact = oldArtefact;
-			stateBasedController.NewArtefact = newArtefact;
-
 			stateBasedController.ImpactedTest += HandleImpactedTest;
 			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
 			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
 
-			await Task.Run(() => stateBasedController.ExecuteRTSRun(cancellationTokenSource.Token), cancellationTokenSource.Token);
-			return stateBasedController.Result;
+			var result = await Task.Run(() => stateBasedController.ExecuteRTSRun(oldArtefact, newArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
+
+			stateBasedController.ImpactedTest -= HandleImpactedTest;
+			stateBasedController.TestResultAvailable -= HandleTestExecutionResult;
+			stateBasedController.TestsPrioritized -= HandleTestsPrioritized;
+
+			return result;
 		}
 
 		#endregion

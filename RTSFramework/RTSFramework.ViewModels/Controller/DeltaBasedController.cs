@@ -14,7 +14,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact> : IController<TTestCase>
+	public class DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TParsedDelta : IDelta<TModel>
@@ -26,76 +26,44 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter;
-		private readonly IDeltaAdapter<TParsedDelta, TSelectionDelta, TModel> deltaAdapter;
-		private readonly ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor;
-		private readonly ITestDiscoverer<TModel, TTestCase> testDiscoverer;
-		private readonly ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector;
-		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
+		private readonly ModelLevelController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelLevelController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public DeltaBasedController(
 			IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter,
-			IDeltaAdapter<TParsedDelta, TSelectionDelta, TModel> deltaAdapter,
-			ITestDiscoverer<TModel, TTestCase> testDiscoverer,
-			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
-			ITestPrioritizer<TTestCase> testPrioritizer,
-			ILoggingHelper loggingHelper,
-			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
+			ModelLevelController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelLevelController,
+			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter,
+			ILoggingHelper loggingHelper)
 		{
 			this.deltaArtefactAdapter = deltaArtefactAdapter;
-			this.deltaAdapter = deltaAdapter;
-			this.testProcessor = testProcessor;
-			this.testDiscoverer = testDiscoverer;
-			this.testSelector = testSelector;
-			this.testPrioritizer = testPrioritizer;
-			this.loggingHelper = loggingHelper;
+			this.modelLevelController = modelLevelController;
 			this.resultArtefactAdapter = resultArtefactAdapter;
+			this.loggingHelper = loggingHelper;
 		}
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
-		public TDeltaArtefact DeltaArtefact { private get; set; }
-		public TResultArtefact Result { get; private set; }
 
-		public async Task ExecuteRTSRun(CancellationToken token)
+		public async Task<TResultArtefact> ExecuteRTSRun(TDeltaArtefact deltaArtefact, CancellationToken token)
 		{
 			loggingHelper.InitLogFile();
 
-			var parsedDelta = deltaArtefactAdapter.Parse(DeltaArtefact);
+			var parsedDelta = deltaArtefactAdapter.Parse(deltaArtefact);
 			token.ThrowIfCancellationRequested();
 
-			var convertedDelta = deltaAdapter.Convert(parsedDelta);
+			modelLevelController.TestResultAvailable += TestResultAvailable;
+			modelLevelController.TestsPrioritized += TestsPrioritized;
+			modelLevelController.ImpactedTest += ImpactedTest;
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta.NewModel, FilterFunction, token), "Tests Discovery");
-			token.ThrowIfCancellationRequested();
+			modelLevelController.FilterFunction = FilterFunction;
 
-			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
-			var impactedTests = testSelector.SelectedTests;
+			var processingResult = await modelLevelController.ExecuteRTSRun(parsedDelta, token);
 
-			foreach (var impactedTest in impactedTests)
-			{
-				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest, testSelector.GetResponsibleChangesByTestId?.Invoke(impactedTest.Id)));
-			}
+			modelLevelController.TestResultAvailable -= TestResultAvailable;
+			modelLevelController.TestsPrioritized -= TestsPrioritized;
+			modelLevelController.ImpactedTest -= ImpactedTest;
 
-			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");
-
-			var prioritizedTests = await loggingHelper.ReportNeededTime(() => testPrioritizer.PrioritizeTests(impactedTests, token), "Tests Prioritization");
-
-			TestsPrioritized?.Invoke(this, new TestsPrioritizedEventArgs<TTestCase>(prioritizedTests));
-
-			var executor = testProcessor as ITestExecutor<TTestCase, TSelectionDelta, TModel>;
-			if (executor != null)
-			{
-				executor.TestResultAvailable += TestResultAvailable;
-			}
-			var processingResult = await loggingHelper.ReportNeededTime(() => testProcessor.ProcessTests(prioritizedTests, allTests, convertedDelta, token), "Tests Processing");
-			if (executor != null)
-			{
-				executor.TestResultAvailable -= TestResultAvailable;
-			}
-
-			Result = resultArtefactAdapter.Unparse(processingResult, Result);
+			return resultArtefactAdapter.Unparse(processingResult);
 		}
 	}
 }
