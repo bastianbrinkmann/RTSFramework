@@ -149,10 +149,10 @@ namespace RTSFramework.ViewModels
 						{
 							var modelLevelControllerFactory =
 								unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-											ModelLevelController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult>>>();
+											ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult>>>();
 
 							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("modelLevelController", modelLevelControllerFactory(rtsApproachType, processingType)));
+								new ParameterOverride("modelBasedController", modelLevelControllerFactory(rtsApproachType, processingType)));
 						})));
 		}
 
@@ -208,16 +208,16 @@ namespace RTSFramework.ViewModels
 						{
 							var modelLevelControllerFactory =
 								unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-											ModelLevelController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>();
+											ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>();
 
 							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>(
-								new ParameterOverride("modelLevelController", modelLevelControllerFactory(rtsApproachType, processingType)));
+								new ParameterOverride("modelBasedController", modelLevelControllerFactory(rtsApproachType, processingType)));
 						})));
 		}
 
 		#endregion
 
-		#region ModelLevelController
+		#region ModelBasedController
 
 		private static void InitModelLevelController(IUnityContainer unityContainer)
 		{
@@ -260,15 +260,15 @@ namespace RTSFramework.ViewModels
 			where TTestCase : ITestCase
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, ModelLevelController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, ModelLevelController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+					new Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
 						(rtsApproachType, processingType) =>
 						{
 							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDeltaSelection, TTestCase>>>();
 							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDeltaSelection, TModel>>>();
 
-							return unityContainer.Resolve<ModelLevelController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+							return unityContainer.Resolve<ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
 								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));

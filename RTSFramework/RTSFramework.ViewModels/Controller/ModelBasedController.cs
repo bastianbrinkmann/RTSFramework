@@ -13,7 +13,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class ModelLevelController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult>
+	public class ModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TInputDelta : IDelta<TModel>
@@ -32,7 +32,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 
-		public ModelLevelController(
+		public ModelBasedController(
 			IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter,
 			IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer,
 			ITestDiscoverer<TModel, TTestCase> testDiscoverer,

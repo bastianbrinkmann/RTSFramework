@@ -30,18 +30,18 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
-		private readonly ModelLevelController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelLevelController;
+		private readonly ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
-			ModelLevelController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelLevelController,
+			ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController,
 			ILoggingHelper loggingHelper,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
 		{
 			this.artefactAdapter = artefactAdapter;
-			this.modelLevelController = modelLevelController;
+			this.modelBasedController = modelBasedController;
 			this.loggingHelper = loggingHelper;
 			this.resultArtefactAdapter = resultArtefactAdapter;
 		}
@@ -55,17 +55,17 @@ namespace RTSFramework.ViewModels.Controller
 			var oldModel = artefactAdapter.Parse(oldArtefact);
 			var newModel = artefactAdapter.Parse(newArtefact);
 
-			modelLevelController.TestResultAvailable += TestResultAvailable;
-			modelLevelController.TestsPrioritized += TestsPrioritized;
-			modelLevelController.ImpactedTest += ImpactedTest;
+			modelBasedController.TestResultAvailable += TestResultAvailable;
+			modelBasedController.TestsPrioritized += TestsPrioritized;
+			modelBasedController.ImpactedTest += ImpactedTest;
 
-			modelLevelController.FilterFunction = FilterFunction;
+			modelBasedController.FilterFunction = FilterFunction;
 
-			var processingResult = await modelLevelController.ExecuteRTSRun(oldModel, newModel, token);
+			var processingResult = await modelBasedController.ExecuteRTSRun(oldModel, newModel, token);
 
-			modelLevelController.TestResultAvailable -= TestResultAvailable;
-			modelLevelController.TestsPrioritized -= TestsPrioritized;
-			modelLevelController.ImpactedTest -= ImpactedTest;
+			modelBasedController.TestResultAvailable -= TestResultAvailable;
+			modelBasedController.TestsPrioritized -= TestsPrioritized;
+			modelBasedController.ImpactedTest -= ImpactedTest;
 
 			return resultArtefactAdapter.Unparse(processingResult);
 		}

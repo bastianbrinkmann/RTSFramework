@@ -26,18 +26,18 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter;
-		private readonly ModelLevelController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelLevelController;
+		private readonly ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 
 		public DeltaBasedController(
 			IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter,
-			ModelLevelController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelLevelController,
+			ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter,
 			ILoggingHelper loggingHelper)
 		{
 			this.deltaArtefactAdapter = deltaArtefactAdapter;
-			this.modelLevelController = modelLevelController;
+			this.modelBasedController = modelBasedController;
 			this.resultArtefactAdapter = resultArtefactAdapter;
 			this.loggingHelper = loggingHelper;
 		}
@@ -51,17 +51,17 @@ namespace RTSFramework.ViewModels.Controller
 			var parsedDelta = deltaArtefactAdapter.Parse(deltaArtefact);
 			token.ThrowIfCancellationRequested();
 
-			modelLevelController.TestResultAvailable += TestResultAvailable;
-			modelLevelController.TestsPrioritized += TestsPrioritized;
-			modelLevelController.ImpactedTest += ImpactedTest;
+			modelBasedController.TestResultAvailable += TestResultAvailable;
+			modelBasedController.TestsPrioritized += TestsPrioritized;
+			modelBasedController.ImpactedTest += ImpactedTest;
 
-			modelLevelController.FilterFunction = FilterFunction;
+			modelBasedController.FilterFunction = FilterFunction;
 
-			var processingResult = await modelLevelController.ExecuteRTSRun(parsedDelta, token);
+			var processingResult = await modelBasedController.ExecuteRTSRun(parsedDelta, token);
 
-			modelLevelController.TestResultAvailable -= TestResultAvailable;
-			modelLevelController.TestsPrioritized -= TestsPrioritized;
-			modelLevelController.ImpactedTest -= ImpactedTest;
+			modelBasedController.TestResultAvailable -= TestResultAvailable;
+			modelBasedController.TestsPrioritized -= TestsPrioritized;
+			modelBasedController.ImpactedTest -= ImpactedTest;
 
 			return resultArtefactAdapter.Unparse(processingResult);
 		}
