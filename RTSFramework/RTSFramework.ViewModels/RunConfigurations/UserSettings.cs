@@ -12,6 +12,7 @@ namespace RTSFramework.ViewModels.RunConfigurations
 		public GranularityLevel GranularityLevel { get; set; }
 		public string SolutionFilePath { get; set; }
 		public string RepositoryPath { get; set; }
+		public bool WithTimeLimit { get; set; }
 		public double TimeLimit { get; set; }
 		public string TestCaseNameFilter { get; set; }
 		public string ClassNameFilter { get; set; }

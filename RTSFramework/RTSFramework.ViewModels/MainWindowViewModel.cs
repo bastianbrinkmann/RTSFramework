@@ -76,7 +76,7 @@ namespace RTSFramework.ViewModels
 		private ProgramModelType programModelType;
 		private bool isRepositoryPathChangable;
 		private ObservableCollection<DiscoveryType> discoveryTypes;
-		private bool isTimeLimitChangeable;
+		private bool withTimeLimit;
 		private double timeLimit;
 		private TestResultListViewItemViewModel selectedTest;
 		private string testCaseNameFilter;
@@ -87,6 +87,8 @@ namespace RTSFramework.ViewModels
 		private ICommand selectCsvTestsFileCommand;
 		private string csvTestsFile;
 		private bool isCsvTestsFileSelectable;
+		private bool discoverNewTests;
+		private bool areTestsAvailable;
 
 		#endregion
 
@@ -129,10 +131,14 @@ namespace RTSFramework.ViewModels
 			SolutionFilePath = userSettings.SolutionFilePath;
 			RepositoryPath = userSettings.RepositoryPath;
 			TimeLimit = userSettings.TimeLimit;
+			WithTimeLimit = userSettings.WithTimeLimit;
 			ClassNameFilter = userSettings.ClassNameFilter;
 			TestCaseNameFilter = userSettings.TestCaseNameFilter;
 			CategoryFilter = userSettings.CategoryFilter;
 			CsvTestsFile = userSettings.CsvTestsFile;
+
+			DiscoverNewTests = true;
+			AreTestsAvailable = false;
 		}
 
 		private void SpecifyIntendedChanges()
@@ -218,7 +224,6 @@ namespace RTSFramework.ViewModels
 				case TestType.MSTest:
 					ProcessingTypes.Add(ProcessingType.MSTestExecution);
 					ProcessingTypes.Add(ProcessingType.MSTestExecutionCreateCorrespondenceModel);
-					ProcessingTypes.Add(ProcessingType.MSTestExecutionLimitedTime);
 					ProcessingTypes.Add(ProcessingType.ListReporting);
 					ProcessingTypes.Add(ProcessingType.CsvReporting);
 					break;
@@ -235,9 +240,6 @@ namespace RTSFramework.ViewModels
 		{
 			switch (propertyChangedEventArgs.PropertyName)
 			{
-				case nameof(ProcessingType):
-					IsTimeLimitChangeable = ProcessingType == ProcessingType.MSTestExecutionLimitedTime;
-					break;
 				case nameof(RTSApproachType):
 					/*TODO Granularity Level File
 					 * 
@@ -287,6 +289,27 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public bool AreTestsAvailable
+		{
+			get { return areTestsAvailable; }
+			set
+			{
+				areTestsAvailable = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool DiscoverNewTests
+		{
+			get { return discoverNewTests; }
+			set
+			{
+				discoverNewTests = value;
+				userRunConfigurationProvider.DiscoverNewTests = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public bool IsCsvTestsFileSelectable
 		{
@@ -394,12 +417,13 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public bool IsTimeLimitChangeable
+		public bool WithTimeLimit
 		{
-			get { return isTimeLimitChangeable; }
+			get { return withTimeLimit; }
 			set
 			{
-				isTimeLimitChangeable = value;
+				withTimeLimit = value;
+				userSettings.WithTimeLimit = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -667,6 +691,7 @@ namespace RTSFramework.ViewModels
 		{
 			RunStatus = RunStatus.Running;
 			TestResults.Clear();
+			AreTestsAvailable = true;
 
 			cancellationTokenSource = new CancellationTokenSource();
 
@@ -773,7 +798,6 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-				case ProcessingType.MSTestExecutionLimitedTime:
 					await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(deltaArtefact);
 					break;
 				case ProcessingType.CsvReporting:
@@ -794,7 +818,7 @@ namespace RTSFramework.ViewModels
 			where TResult : ITestProcessingResult
 			where TTestCase : ITestCase
 		{
-			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType, WithTimeLimit);
 
 			deltaBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
@@ -913,7 +937,6 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-				case ProcessingType.MSTestExecutionLimitedTime:
 					await ExecuteRun<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
@@ -934,7 +957,7 @@ namespace RTSFramework.ViewModels
 			where TResult : ITestProcessingResult
 			where TTestCase : ITestCase
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType, WithTimeLimit);
 
 			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
@@ -981,15 +1004,20 @@ namespace RTSFramework.ViewModels
 
 		private void HandleTestsPrioritized<TTestCase>(object sender, TestsPrioritizedEventArgs<TTestCase> eventArgs) where TTestCase : ITestCase
 		{
-			applicationUiExecutor.ExecuteOnUi(() =>
+			for (int i = 0; i < eventArgs.TestCases.Count; i++)
 			{
-				for (int i = 0; i < eventArgs.TestCases.Count; i++)
+				int testCaseId = i;
+				applicationUiExecutor.ExecuteOnUi(() =>
 				{
-					var testCase = eventArgs.TestCases[i];
+					var testCase = eventArgs.TestCases[testCaseId];
 
 					var currentTestViewModel = TestResults.Single(x => x.FullyQualifiedName == testCase.Id);
-					currentTestViewModel.ExecutionId = i;
-				}
+					currentTestViewModel.ExecutionId = testCaseId;
+				});
+			}
+
+			applicationUiExecutor.ExecuteOnUi(() =>
+			{
 				var allTestsViewModels = TestResults.OrderBy(x => x.ExecutionId).ToList();
 				TestResults.Clear();
 				TestResults.AddRange(allTestsViewModels);

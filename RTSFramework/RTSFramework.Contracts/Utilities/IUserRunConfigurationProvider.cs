@@ -9,5 +9,7 @@ namespace RTSFramework.Contracts.Utilities
 		IList<string> IntendedChanges { get; set; }
 		double TimeLimit { get; set; }
 		string CsvTestsFile { get; set; }
+
+		bool DiscoverNewTests { get; set; }
 	}
 }

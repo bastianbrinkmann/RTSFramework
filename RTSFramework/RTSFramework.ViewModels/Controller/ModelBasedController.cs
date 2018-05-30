@@ -61,7 +61,7 @@ namespace RTSFramework.ViewModels.Controller
 			return await ExecuteRTSRun(delta, token);
 		}
 
-		public async Task<TResult> ExecuteRTSRun(TInputDelta delta, CancellationToken token)
+		public virtual async Task<TResult> ExecuteRTSRun(TInputDelta delta, CancellationToken token)
 		{
 			var convertedDelta = deltaAdapter.Convert(delta);
 

@@ -12,5 +12,6 @@ namespace RTSFramework.Concrete.User
 		public double TimeLimit { get; set; }
 
 		public string CsvTestsFile { get; set; }
+		public bool DiscoverNewTests { get; set; }
 	}
 }

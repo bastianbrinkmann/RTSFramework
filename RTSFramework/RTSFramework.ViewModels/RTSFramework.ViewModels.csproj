@@ -99,6 +99,7 @@
     <Compile Include="Adapter\TestResultListViewItemViewModelAdapter.cs" />
     <Compile Include="CommitViewModel.cs" />
     <Compile Include="Controller\DeltaBasedController.cs" />
+    <Compile Include="Controller\LimitedTimeModelBasedController.cs" />
     <Compile Include="Controller\ModelBasedController.cs" />
     <Compile Include="IntendedChangesDialogViewModel.cs" />
     <Compile Include="RequireUIServices\IApplicationUiExecutor.cs" />

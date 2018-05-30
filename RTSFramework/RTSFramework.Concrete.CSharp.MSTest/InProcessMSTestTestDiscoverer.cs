@@ -20,18 +20,28 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
+		private readonly IUserRunConfigurationProvider runConfiguration;
 
 		public InProcessMSTestTestDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
-			ISettingsProvider settingsProvider)
+			ISettingsProvider settingsProvider,
+			IUserRunConfigurationProvider runConfiguration)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;
+			this.runConfiguration = runConfiguration;
 		}
+
+		private ISet<MSTestTestcase> discoveredTests;
 
 		public async Task<ISet<MSTestTestcase>> GetTests(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
+			if (!runConfiguration.DiscoverNewTests && discoveredTests != null)
+			{
+				return discoveredTests;
+			}
+
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
@@ -39,7 +49,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			return new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
+			discoveredTests = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
+
+			return discoveredTests;
 		}
 
 		private MSTestTestcase Convert(TestCase vsTestCase)

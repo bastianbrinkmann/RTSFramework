@@ -71,6 +71,7 @@
 			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="24" Grid.Column="1" Grid.Row="0" />
 			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Height="22" Grid.Row="1" Grid.Column="1" />
 			<ComboBox x:Name="CbTestType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:TestType}}}" SelectedItem="{Binding TestType}" Height="22" Grid.Row="2" Grid.Column="1" />
+			<CheckBox x:Name="CbDiscoverNewTests"  Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsEnabled="{Binding AreTestsAvailable}" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
 			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Center" ItemsSource="{Binding DiscoveryTypes}" SelectedItem="{Binding DiscoveryType}" Height="22" Grid.Row="3" Grid.Column="1" />
 			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Height="22" Grid.Row="4" Grid.Column="1" />
 			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Center" ItemsSource="{Binding ProcessingTypes}" SelectedItem="{Binding ProcessingType}" Height="22" Grid.Row="5" Grid.Column="1" />
@@ -91,8 +92,9 @@
 			<ComboBox x:Name="CbFromCommit" VerticalAlignment="Center" ItemsSource="{Binding FromCommitModels}" SelectedItem="{Binding FromCommit}" Height="22" Visibility="{Binding IsFromCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="2" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
 			<ComboBox x:Name="CbToCommit" VerticalAlignment="Center" ItemsSource="{Binding ToCommitModels}" SelectedItem="{Binding ToCommit}" Height="22" Visibility="{Binding IsToCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="3" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
 
-			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="5,0,30,0" Grid.Column="2"  Grid.Row="5" />
-			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="2" Grid.Row="5" Visibility="{Binding IsTimeLimitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" />
+			<CheckBox x:Name="CbWithTimeLimit"  Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding WithTimeLimit}">With time limit?</CheckBox>
+			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" IsEnabled="{Binding WithTimeLimit}" Margin="0,0,30,0" Grid.Column="3"  Grid.Row="0" />
+			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="3" Grid.Row="0" IsEnabled="{Binding WithTimeLimit}" />
 		</Grid>
 		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
 			<Grid.ColumnDefinitions>
