@@ -10,6 +10,7 @@ using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 using Unity.Interception.Utilities;
 
 namespace RTSFramework.RTSApproaches.Dynamic
@@ -21,7 +22,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 	{
 		private readonly ITestExecutor<TTestCase, TDelta, TModel> executor;
 		private readonly ITestsInstrumentor<TModel, TTestCase> instrumentor;
-		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider;
+		private readonly CorrespondenceModelManager<TModel> correspondenceModelManager;
 		private readonly IApplicationClosedHandler applicationClosedHandler;
 		private readonly ILoggingHelper loggingHelper;
 
@@ -29,13 +30,13 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TDelta, TModel> executor,
 			ITestsInstrumentor<TModel, TTestCase> instrumentor,
-			IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> dataStructureProvider,
+			CorrespondenceModelManager<TModel> correspondenceModelManager,
 			IApplicationClosedHandler applicationClosedHandler,
 			ILoggingHelper loggingHelper)
 		{
 			this.executor = executor;
 			this.instrumentor = instrumentor;
-			this.dataStructureProvider = dataStructureProvider;
+			this.correspondenceModelManager = correspondenceModelManager;
 			this.applicationClosedHandler = applicationClosedHandler;
 			this.loggingHelper = loggingHelper;
 		}
@@ -47,13 +48,13 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			{
 				applicationClosedHandler.AddApplicationClosedListener(instrumentor);
 
-				await instrumentor.InstrumentModelForTests(impactedForDelta.NewModel, impactedTests, cancellationToken);
+				await instrumentor.Instrument(impactedForDelta.NewModel, impactedTests, cancellationToken);
 
 				executor.TestResultAvailable += TestResultAvailable;
 				var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
 				executor.TestResultAvailable -= TestResultAvailable;
 
-				var coverage = instrumentor.GetCoverageData();
+				CoverageData coverage = instrumentor.GetCoverageData();
 
 				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase.Id).ToList();
 
@@ -65,54 +66,11 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x));
 
-				await UpdateCorrespondenceModel(coverage, impactedForDelta, allTests, failedTests, cancellationToken);
+				correspondenceModelManager.UpdateCorrespondenceModel(coverage, impactedForDelta, allTests.Select(x => x.Id), failedTests);
 
 				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;
 			}
-		}
-
-		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, ISet<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
-		{
-			var oldModel = await dataStructureProvider.GetDataStructure(currentDelta.OldModel, token);
-			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
-			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
-
-			failedTests.ForEach(x => newModel.CorrespondenceModelLinks.Remove(x));
-
-			await dataStructureProvider.PersistDataStructure(newModel);
-		}
-
-		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
-		{
-			var links = coverageData.CoverageDataEntries.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
-
-			foreach (var coverageEntry in coverageData.CoverageDataEntries)
-			{
-				if (targetModel.GranularityLevel == GranularityLevel.Class)
-				{
-					if (!links[coverageEntry.Item1].Contains(coverageEntry.Item2))
-					{
-						links[coverageEntry.Item1].Add(coverageEntry.Item2);
-					}
-				}
-				/* TODO Granularity Level File
-				 * 
-				 * else if(targetModel.GranularityLevel == GranularityLevel.File)
-				{
-					if (!coverageEntry.Item2.EndsWith(".cs"))
-					{
-						continue;
-					}
-					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.Item2);
-					if (!links[coverageEntry.Item1].Contains(relativePath))
-					{
-						links[coverageEntry.Item1].Add(relativePath);
-					}
-				}*/
-			}
-			return links;
 		}
 	}
 }

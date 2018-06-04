@@ -474,9 +474,7 @@ namespace RTSFramework.ViewModels
 		{
 			unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, MonoIntertypeRelationGraphBuilder<TModel>>();
 			//unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, RoslynCompiledIntertypeRelationGraphBuilder<TModel>>();
-			
-
-			unityContainer.RegisterType<IDataStructureProvider<CorrespondenceModel, TModel>, CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
 		}
 
 		#endregion

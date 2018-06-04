@@ -79,7 +79,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private List<Tuple<string, int>> testNamesToExecutionIds;
 
-		public async Task InstrumentModelForTests(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
+		public async Task Instrument(TModel toInstrument, IList<MSTestTestcase> tests, CancellationToken token)
 		{
 			dependencyMonitorModule = ModuleDefinition.ReadModule(Path.GetFullPath($"{MonitorAssemblyName}.dll"));
 			dependencyMonitorType = dependencyMonitorModule.Types.Single(x => x.FullName == DependencyMonitorClassFullName);

@@ -8,7 +8,7 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestsInstrumentor<TModel, TTestCase> : IDisposable where TModel : IProgramModel where TTestCase : ITestCase
 	{
-		Task InstrumentModelForTests(TModel toInstrument, IList<TTestCase> tests, CancellationToken token);
+		Task Instrument(TModel toInstrument, IList<TTestCase> tests, CancellationToken token);
 
 		CoverageData GetCoverageData();
 	}

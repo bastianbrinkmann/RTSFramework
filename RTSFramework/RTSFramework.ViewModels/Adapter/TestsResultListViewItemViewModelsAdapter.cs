@@ -25,7 +25,7 @@ namespace RTSFramework.ViewModels.Adapter
 		{
 			return model.IdentifiedTests.Select(x =>
 			{
-				var viewModel = singleItemAdapter.Unparse(x, default(TestResultListViewItemViewModel));
+				var viewModel = singleItemAdapter.Unparse(x);
 				viewModel.ExecutionId = model.IdentifiedTests.IndexOf(x);
 				return viewModel;
 			}).ToList();

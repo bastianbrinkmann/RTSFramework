@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Core.Utilities;
-using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
@@ -17,17 +15,17 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 	{
-		private readonly IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> correspondenceModelProvider;
+		private readonly CorrespondenceModelManager<TModel> correspondenceModelProvider;
 
-		public DynamicRTS(IDataStructureProvider<CorrespondenceModel.Models.CorrespondenceModel, TModel> correspondenceModelProvider)
+		public DynamicRTS(CorrespondenceModelManager<TModel> correspondenceModelProvider)
 		{
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		public async Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
+		public Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
 			CancellationToken cancellationToken)
 		{
-			var currentCorrespondenceModel = await correspondenceModelProvider.GetDataStructure(delta.OldModel, cancellationToken);
+			var currentCorrespondenceModel = correspondenceModelProvider.GetCorrespondenceModel(delta.OldModel);
 
 			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
 
@@ -64,6 +62,8 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				return new List<string>(new[] { "New Test" });
 			};
 			SelectedTests = impactedTests;
+
+			return Task.CompletedTask;
 		}
 
 		public ISet<TTestCase> SelectedTests { get; private set; }
