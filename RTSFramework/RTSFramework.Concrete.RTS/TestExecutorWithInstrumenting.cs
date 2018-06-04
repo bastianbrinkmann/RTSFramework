@@ -74,7 +74,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 		private async Task UpdateCorrespondenceModel(CoverageData coverageData, TDelta currentDelta, ISet<TTestCase> allTests, IList<string> failedTests, CancellationToken token)
 		{
-			var oldModel = await dataStructureProvider.GetDataStructureForProgram(currentDelta.OldModel, token);
+			var oldModel = await dataStructureProvider.GetDataStructure(currentDelta.OldModel, token);
 			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
 			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
 			newModel.RemoveDeletedTests(allTests.Select(x => x.Id));
