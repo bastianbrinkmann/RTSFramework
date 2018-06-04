@@ -27,7 +27,7 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 			this.settingsProvider = settingsProvider;
 		}
 
-		public async Task<IntertypeRelationGraph> GetDataStructureForProgram(TCSharpModel model, CancellationToken token)
+		public async Task<IntertypeRelationGraph> GetDataStructure(TCSharpModel model, CancellationToken token)
 		{
 			var graph = new IntertypeRelationGraph();
 			var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>

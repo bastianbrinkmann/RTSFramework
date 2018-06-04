@@ -20,7 +20,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			this.correspondenceModelAdapter = correspondenceModelAdapter;
 		}
 
-		public Task<Models.CorrespondenceModel> GetDataStructureForProgram(TModel programModel, CancellationToken cancellationToken)
+		public Task<Models.CorrespondenceModel> GetDataStructure(TModel programModel, CancellationToken cancellationToken)
 		{
 			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
 

@@ -6,7 +6,7 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 {
 	public interface IDataStructureProvider<TDataStructure, TModel> where TModel : IProgramModel
 	{
-		Task<TDataStructure> GetDataStructureForProgram(TModel model, CancellationToken cancellationToken);
+		Task<TDataStructure> GetDataStructure(TModel model, CancellationToken cancellationToken);
 		Task PersistDataStructure(TDataStructure dataStructure);
 	}
 }

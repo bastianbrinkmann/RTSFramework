@@ -10,29 +10,27 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class StaticTestSelector<TModel, TDelta, TTestCase> : ITestSelector<TModel, TDelta, TTestCase>
+	public class StaticTestSelector<TModel, TDelta, TTestCase, TDataStructure> : ITestSelector<TModel, TDelta, TTestCase>
 		where TModel : IProgramModel 
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
-		private readonly IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder;
-		private readonly IStaticRTS<TModel, TDelta, TTestCase, IntertypeRelationGraph> staticSelector;
+		private readonly IDataStructureProvider<TDataStructure, TModel> dataStructureProvider;
+		private readonly IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector;
 		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
-		public StaticTestSelector(IDataStructureProvider<IntertypeRelationGraph, TModel> irgBuilder,
-			IStaticRTS<TModel, TDelta, TTestCase, IntertypeRelationGraph> staticSelector)
+		public StaticTestSelector(IDataStructureProvider<TDataStructure, TModel> dataStructureProvider,
+			IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector)
 		{
-			this.irgBuilder = irgBuilder;
+			this.dataStructureProvider = dataStructureProvider;
 			this.staticSelector = staticSelector;
 		}
 
 		public async Task SelectTests(ISet<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
 		{
-			//Using the IRG for P' is possible as it is built using the intermediate language
-			//Therefore, the program at least compiles - preventing issues from for example deleted files
-			var graph = await irgBuilder.GetDataStructureForProgram(delta.NewModel, cancellationToken);
+			var dataStructure = await dataStructureProvider.GetDataStructure(delta.NewModel, cancellationToken);
 
-			SelectedTests = staticSelector.SelectTests(graph, testCases, delta, cancellationToken);
+			SelectedTests = staticSelector.SelectTests(dataStructure, testCases, delta, cancellationToken);
 			GetResponsibleChangesByTestId = staticSelector.GetResponsibleChangesByTestId;
 		}
 	}

@@ -370,7 +370,9 @@ namespace RTSFramework.ViewModels
 			where TModel : CSharpProgramModel
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, ClassSRTSDeltaExpander<TModel, TTestCase>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer
+				.RegisterType<IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>, ClassSRTS<TModel, TTestCase>>();
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, StaticTestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>>(RTSApproachType.ClassSRTS.ToString());
 
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement, TTestCase>(unityContainer);
