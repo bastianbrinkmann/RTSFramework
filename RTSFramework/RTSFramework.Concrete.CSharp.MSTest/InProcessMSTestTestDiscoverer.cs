@@ -10,12 +10,13 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestDiscoverer<TModel> : ITestDiscoverer<TModel, MSTestTestcase>
-		where TModel : CSharpProgramModel
+	public class InProcessMSTestTestDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, MSTestTestcase>
+		where TModel : CSharpProgramModel where TDelta : IDelta<TModel>
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
@@ -35,8 +36,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private ISet<MSTestTestcase> discoveredTests;
 
-		public async Task<ISet<MSTestTestcase>> GetTests(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<ISet<MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
+			var model = delta.NewModel;
+
 			if (!runConfiguration.DiscoverNewTests && discoveredTests != null)
 			{
 				return discoveredTests;

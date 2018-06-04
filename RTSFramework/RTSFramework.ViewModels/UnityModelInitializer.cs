@@ -327,9 +327,16 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
+			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
+			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
+		}
+
+		private static void InitTestsDiscovererForDelta<TModel, TDelta>(IUnityContainer unityContainer) where TModel : CSharpProgramModel where TDelta: IDelta<TModel>
+		{
 			//unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
-			unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, InProcessMSTestTestDiscoverer<TModel>>(new ContainerControlledLifetimeManager());
-			unityContainer.RegisterType<ITestDiscoverer<TModel, CsvFileTestcase>, CsvTestFileDiscoverer<TModel>>();
+			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, MSTestTestcase>, InProcessMSTestTestDiscoverer<TModel, TDelta>>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, CsvFileTestcase>, CsvTestFileDiscoverer<TModel, TDelta>>();
 		}
 
 		#endregion

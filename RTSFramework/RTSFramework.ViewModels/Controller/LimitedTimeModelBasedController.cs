@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Contracts;
@@ -22,8 +23,8 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly IUserRunConfigurationProvider runConfigurationProvider;
 
 		public LimitedTimeModelBasedController(IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter, 
-			IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer, 
-			ITestDiscoverer<TModel, TTestCase> testDiscoverer, 
+			Lazy<IOfflineDeltaDiscoverer<TModel, TInputDelta>> deltaDiscoverer, 
+			ITestDiscoverer<TModel, TSelectionDelta, TTestCase> testDiscoverer, 
 			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer, ILoggingHelper loggingHelper,

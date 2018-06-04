@@ -55,9 +55,12 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassSRTS.cs" />
     <Compile Include="ClassSRTSDeltaExpander.cs" />
     <Compile Include="MonoIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="IStaticRTS.cs" />
+    <Compile Include="StaticTestSelector.cs" />
     <Compile Include="TypeDefinitionExtension.cs" />
   </ItemGroup>
   <ItemGroup>

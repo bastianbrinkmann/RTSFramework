@@ -25,17 +25,17 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter;
-		private readonly IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer;
+		private readonly Lazy<IOfflineDeltaDiscoverer<TModel, TInputDelta>> deltaDiscoverer;
 		private readonly ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor;
-		private readonly ITestDiscoverer<TModel, TTestCase> testDiscoverer;
+		private readonly ITestDiscoverer<TModel, TSelectionDelta, TTestCase> testDiscoverer;
 		private readonly ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector;
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 
 		public ModelBasedController(
 			IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter,
-			IOfflineDeltaDiscoverer<TModel, TInputDelta> deltaDiscoverer,
-			ITestDiscoverer<TModel, TTestCase> testDiscoverer,
+			Lazy<IOfflineDeltaDiscoverer<TModel, TInputDelta>> deltaDiscoverer,
+			ITestDiscoverer<TModel, TSelectionDelta , TTestCase> testDiscoverer,
 			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer,
@@ -52,10 +52,9 @@ namespace RTSFramework.ViewModels.Controller
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
 
-
 		public async Task<TResult> ExecuteRTSRun(TModel oldProgramModel, TModel newProgramModel, CancellationToken token)
 		{
-			var delta = deltaDiscoverer.Discover(oldProgramModel, newProgramModel);
+			var delta = deltaDiscoverer.Value.Discover(oldProgramModel, newProgramModel);
 			token.ThrowIfCancellationRequested();
 
 			return await ExecuteRTSRun(delta, token);
@@ -65,7 +64,7 @@ namespace RTSFramework.ViewModels.Controller
 		{
 			var convertedDelta = deltaAdapter.Convert(delta);
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta.NewModel, FilterFunction, token), "Tests Discovery");
+			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");

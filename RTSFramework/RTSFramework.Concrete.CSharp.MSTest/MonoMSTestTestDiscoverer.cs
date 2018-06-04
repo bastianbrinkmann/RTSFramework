@@ -9,11 +9,12 @@ using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MonoMSTestTestDiscoverer<TModel> : ITestDiscoverer<TModel, MSTestTestcase> where TModel : CSharpProgramModel
+	public class MonoMSTestTestDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, MSTestTestcase> where TModel : CSharpProgramModel where TDelta : IDelta<TModel>
 	{
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly ISettingsProvider settingsProvider;
@@ -26,8 +27,10 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		}
 
-		public async Task<ISet<MSTestTestcase>> GetTests(TModel model, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<ISet<MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
+			var model = delta.NewModel;
+
 			var testCases = new HashSet<MSTestTestcase>();
 
 			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
