@@ -15,7 +15,9 @@
 
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace RTSFramework.Concrete.CSharp.DependencyMonitor
@@ -26,13 +28,22 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 		private static HashSet<string> dependencies;
 
-		private const string DependenciesFolder = @"..\..\Dependencies\";
+		private const string DependenciesFolder = @"TestResults\Dependencies";
+
+		private static string GetDependenciesFolder()
+		{
+			var assemblyFolder = Assembly.GetAssembly(typeof(DependencyMonitor)).Location;
+			var directory = Path.GetDirectoryName(assemblyFolder)?? "";
+			return Path.Combine(directory, DependenciesFolder);
+		}
 
 		static DependencyMonitor()
 		{
-			if (!Directory.Exists(DependenciesFolder))
+			var dependenciesFolder = GetDependenciesFolder();
+
+			if (!Directory.Exists(dependenciesFolder))
 			{
-				Directory.CreateDirectory(DependenciesFolder);
+				Directory.CreateDirectory(dependenciesFolder);
 			}
 		}
 
@@ -62,7 +73,9 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 		public static void TestMethodEnd()
 		{
-			using (var fileStream = File.Create(DependenciesFolder + currentTestMethodName + ".json"))
+			var dependenciesFolder = GetDependenciesFolder();
+
+			using (var fileStream = File.Create(Path.Combine(dependenciesFolder, currentTestMethodName + ".json")))
 			{
 				using (StreamWriter writer = new StreamWriter(fileStream))
 				{

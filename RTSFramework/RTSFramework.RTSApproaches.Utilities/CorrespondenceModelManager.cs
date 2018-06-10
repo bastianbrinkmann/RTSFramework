@@ -38,14 +38,54 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 		public void UpdateCorrespondenceModel<TDelta>(CoverageData coverageData, TDelta currentDelta, IEnumerable<string> allTests, IEnumerable<string> failedTests)
 			where TDelta : IDelta<TModel>
 		{
-			var oldModel = GetCorrespondenceModel(currentDelta.OldModel);
-			var newModel = oldModel.CloneModel(currentDelta.NewModel.VersionId);
-			newModel.UpdateByNewLinks(GetLinksByCoverageData(coverageData, currentDelta.NewModel));
-			newModel.RemoveDeletedTests(allTests);
+			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel);
+			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, currentDelta.NewModel.VersionId);
+			UpdateByNewLinks(newCorrespondenceModel, GetLinksByCoverageData(coverageData, currentDelta.NewModel));
+			RemoveDeletedTests(newCorrespondenceModel, allTests);
+			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
-			failedTests.ForEach(x => newModel.CorrespondenceModelLinks.Remove(x));
+			PersistCorrespondenceModel(newCorrespondenceModel);
+		}
 
-			PersistDataStructure(newModel);
+		private Models.CorrespondenceModel CloneModel(Models.CorrespondenceModel correspondenceModel, string newId)
+		{
+			var clone = new Dictionary<string, HashSet<string>>();
+			foreach (KeyValuePair<string, HashSet<string>> testcaseRelatedElements in correspondenceModel.CorrespondenceModelLinks)
+			{
+				clone.Add(testcaseRelatedElements.Key, new HashSet<string>(testcaseRelatedElements.Value));
+			}
+
+			return new Models.CorrespondenceModel { ProgramVersionId = newId, CorrespondenceModelLinks = clone, GranularityLevel = correspondenceModel.GranularityLevel };
+		}
+
+		private void UpdateByNewLinks(Models.CorrespondenceModel correspondenceModel, Dictionary<string, HashSet<string>> newLinks)
+		{
+			foreach (KeyValuePair<string, HashSet<string>> linksForTestcase in newLinks)
+			{
+				if (!correspondenceModel.CorrespondenceModelLinks.ContainsKey(linksForTestcase.Key))
+				{
+					correspondenceModel.CorrespondenceModelLinks.Add(linksForTestcase.Key, linksForTestcase.Value);
+				}
+				else
+				{
+					correspondenceModel.CorrespondenceModelLinks[linksForTestcase.Key] = linksForTestcase.Value;
+				}
+			}
+		}
+
+		private void RemoveFailedTests(Models.CorrespondenceModel correspondenceModel, IEnumerable<string> failedTests)
+		{
+			failedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
+		}
+
+		private void RemoveDeletedTests(Models.CorrespondenceModel correspondenceModel, IEnumerable<string> allTests)
+		{
+			var deletedTests = correspondenceModel.CorrespondenceModelLinks.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key).ToList();
+
+			foreach (var deletedTest in deletedTests)
+			{
+				correspondenceModel.CorrespondenceModelLinks.Remove(deletedTest);
+			}
 		}
 
 		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
@@ -79,7 +119,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return links;
 		}
 
-		public void PersistDataStructure(Models.CorrespondenceModel model)
+		private void PersistCorrespondenceModel(Models.CorrespondenceModel model)
 		{
 			if (!Directory.Exists(CorrespondenceModelsStoragePlace))
 			{

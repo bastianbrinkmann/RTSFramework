@@ -383,7 +383,7 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicRTS<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicTestSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
 			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
 
 			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(

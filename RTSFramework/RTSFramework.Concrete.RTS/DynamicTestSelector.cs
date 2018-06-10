@@ -10,14 +10,14 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicRTS<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
+	public class DynamicTestSelector<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
 		where TTestCase : class, ITestCase
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 	{
 		private readonly CorrespondenceModelManager<TModel> correspondenceModelProvider;
 
-		public DynamicRTS(CorrespondenceModelManager<TModel> correspondenceModelProvider)
+		public DynamicTestSelector(CorrespondenceModelManager<TModel> correspondenceModelProvider)
 		{
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
