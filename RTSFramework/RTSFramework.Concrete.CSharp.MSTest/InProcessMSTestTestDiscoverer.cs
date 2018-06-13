@@ -57,6 +57,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			return discoveredTests;
 		}
 
+		//TODO: Artefact adapter
 		private MSTestTestcase Convert(TestCase vsTestCase)
 		{
 			var testNameProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyTestClassName);

@@ -7,13 +7,15 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class LimitedTimeModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult> : ModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult>
+	public class LimitedTimeModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult> 
+		: ModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TInputDelta : IDelta<TModel>
@@ -28,8 +30,9 @@ namespace RTSFramework.ViewModels.Controller
 			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer, ILoggingHelper loggingHelper,
-			IUserRunConfigurationProvider runConfigurationProvider)
-			: base(deltaAdapter, deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper)
+			IUserRunConfigurationProvider runConfigurationProvider,
+			Lazy<IDependenciesVisualizer> dependenciesVisualizer)
+			: base(deltaAdapter, deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer)
 		{
 			this.runConfigurationProvider = runConfigurationProvider;
 		}

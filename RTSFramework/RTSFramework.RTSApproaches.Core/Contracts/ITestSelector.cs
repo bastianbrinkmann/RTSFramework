@@ -17,6 +17,8 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 
 		Func<string, IList<string>> GetResponsibleChangesByTestId { get; }
 
+		ICorrespondenceModel CorrespondenceModel { get; }
+
 		Task SelectTests(ISet<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
 	}
 }

@@ -5,15 +5,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.ServiceModel.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Msagl.Drawing;
 using Prism.Commands;
 using Prism.Mvvm;
 using RTSFramework.Concrete.CSharp.Core.Models;
-using RTSFramework.Concrete.CSharp.MSTest;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Concrete.Git;
@@ -31,7 +29,6 @@ using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Core;
-using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.ViewModels.Controller;
 using RTSFramework.ViewModels.RequireUIServices;
 using RTSFramework.ViewModels.RunConfigurations;
@@ -41,6 +38,8 @@ namespace RTSFramework.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		private const string UncommittedChangesIdentifier = "uncomittedChanges";
+
+		private IArtefactBasedController<Graph> lastUsedController;
 
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
@@ -89,6 +88,8 @@ namespace RTSFramework.ViewModels
 		private bool isCsvTestsFileSelectable;
 		private bool discoverNewTests;
 		private bool areTestsAvailable;
+		private DelegateCommand visualizeDependenciesCommand;
+		private bool dependenciesVisualizationAvailable;
 
 		#endregion
 
@@ -109,6 +110,7 @@ namespace RTSFramework.ViewModels
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
 			SelectCsvTestsFileCommand = new DelegateCommand(SelectCsvTestsFile);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
+			VisualizeDependenciesCommand = new DelegateCommand(VisualizeDependencies);
 
 			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
 			ProcessingTypes = new ObservableCollection<ProcessingType>();
@@ -139,6 +141,12 @@ namespace RTSFramework.ViewModels
 
 			DiscoverNewTests = true;
 			AreTestsAvailable = false;
+		}
+
+		private void VisualizeDependencies()
+		{
+			var graph = lastUsedController.GetDependenciesVisualization();
+			dialogService.ShowGraph(graph);
 		}
 
 		private void SpecifyIntendedChanges()
@@ -685,6 +693,26 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
+		public DelegateCommand VisualizeDependenciesCommand
+		{
+			get { return visualizeDependenciesCommand; }
+			set
+			{
+				visualizeDependenciesCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
+		public bool DependenciesVisualizationAvailable
+		{
+			get { return dependenciesVisualizationAvailable; }
+			set
+			{
+				dependenciesVisualizationAvailable = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		#endregion
 
 		private async void ExecuteRunFixModel()
@@ -818,9 +846,12 @@ namespace RTSFramework.ViewModels
 			where TResult : ITestProcessingResult
 			where TTestCase : ITestCase
 		{
-			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType, WithTimeLimit);
+			var deltaBasedController = UnityModelInitializer.GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>(RTSApproachType, ProcessingType, WithTimeLimit);
 
 			deltaBasedController.FilterFunction = GetFilterFunction<TTestCase>();
+
+			lastUsedController = deltaBasedController;
+			DependenciesVisualizationAvailable = true;
 
 			deltaBasedController.ImpactedTest += HandleImpactedTest;
 			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
@@ -957,7 +988,10 @@ namespace RTSFramework.ViewModels
 			where TResult : ITestProcessingResult
 			where TTestCase : ITestCase
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(RTSApproachType, ProcessingType, WithTimeLimit);
+			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>(RTSApproachType, ProcessingType, WithTimeLimit);
+
+			lastUsedController = stateBasedController;
+			DependenciesVisualizationAvailable = true;
 
 			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 

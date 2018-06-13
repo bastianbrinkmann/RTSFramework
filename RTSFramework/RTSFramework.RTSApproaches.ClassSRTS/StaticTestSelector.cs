@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -33,5 +34,7 @@ namespace RTSFramework.RTSApproaches.Static
 			SelectedTests = staticSelector.SelectTests(dataStructure, testCases, delta, cancellationToken);
 			GetResponsibleChangesByTestId = staticSelector.GetResponsibleChangesByTestId;
 		}
+
+		public ICorrespondenceModel CorrespondenceModel => null;
 	}
 }

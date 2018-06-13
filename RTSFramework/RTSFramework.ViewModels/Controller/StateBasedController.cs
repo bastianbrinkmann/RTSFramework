@@ -18,7 +18,8 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
+	public class StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+		: IArtefactBasedController<TVisualizationArtefact>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
 		where TDiscoveryDelta : IDelta<TModel>
@@ -33,17 +34,20 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
+		private readonly Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController,
 			ILoggingHelper loggingHelper,
-			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter)
+			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter,
+			Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter)
 		{
 			this.artefactAdapter = artefactAdapter;
 			this.modelBasedController = modelBasedController;
 			this.loggingHelper = loggingHelper;
 			this.resultArtefactAdapter = resultArtefactAdapter;
+			this.visualizationArtefactAdapter = visualizationArtefactAdapter;
 		}
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
@@ -68,6 +72,11 @@ namespace RTSFramework.ViewModels.Controller
 			modelBasedController.ImpactedTest -= ImpactedTest;
 
 			return resultArtefactAdapter.Unparse(processingResult);
+		}
+
+		public TVisualizationArtefact GetDependenciesVisualization()
+		{
+			return visualizationArtefactAdapter.Value.Unparse(modelBasedController.GetDependenciesVisualization());
 		}
 	}
 }

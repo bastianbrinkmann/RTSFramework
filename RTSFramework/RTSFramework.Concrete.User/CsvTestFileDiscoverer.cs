@@ -20,6 +20,7 @@ namespace RTSFramework.Concrete.User
 			this.runConfigurationProvider = runConfigurationProvider;
 		}
 
+		//TODO: Artefact Adapter
 		public Task<ISet<CsvFileTestcase>> GetTests(TDelta delta, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var csvFile = runConfigurationProvider.CsvTestsFile;

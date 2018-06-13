@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Msagl.Drawing;
 using RTSFramework.Concrete.CSharp.Core;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest;
@@ -24,8 +25,10 @@ using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
+using RTSFramework.Core.DependenciesVisualization;
 using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.RTSApproaches.Core;
@@ -64,12 +67,14 @@ namespace RTSFramework.ViewModels
 			InitStateBasedController(unityContainer);
 			InitDeltaBasedController(unityContainer);
 
+			InitDependenciesVisualizer(unityContainer);
+
 			container = unityContainer;
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact> 
-			GetStateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
+		internal static StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+			GetStateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType, bool withTimeLimit)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
@@ -77,13 +82,13 @@ namespace RTSFramework.ViewModels
 			where TSelectionDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
 
 			return factory(rtsApproachType, processingType, withTimeLimit);
 		}
 
-		internal static DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact> 
-			GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>
+		internal static DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+			GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType, bool withTimeLimit)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
@@ -91,7 +96,7 @@ namespace RTSFramework.ViewModels
 			where TSelectionDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
 
 			return factory(rtsApproachType, processingType, withTimeLimit);
 		}
@@ -144,9 +149,9 @@ namespace RTSFramework.ViewModels
 			where TTestCase : ITestCase
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>(
+					new Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 						(rtsApproachType, processingType, withTimeLimit) =>
 						{
 							ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
@@ -165,7 +170,7 @@ namespace RTSFramework.ViewModels
 								modelBasedController = modelLevelControllerFactory(rtsApproachType, processingType);
 							}
 
-							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>>(
+							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 								new ParameterOverride("modelBasedController", modelBasedController));
 
 						})));
@@ -216,9 +221,9 @@ namespace RTSFramework.ViewModels
 			where TTestCase : ITestCase 
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>(
+					new Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>(
 						(rtsApproachType, processingType, withTimeLimit) =>
 						{
 							ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult> modelBasedController;
@@ -238,7 +243,7 @@ namespace RTSFramework.ViewModels
 							}
 							
 
-							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>>(
+							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>(
 								new ParameterOverride("modelBasedController", modelBasedController));
 						})));
 		}
@@ -490,6 +495,7 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, GitCSharpProgramModel>, GitCSharpProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<TFS2010VersionIdentification, TFS2010ProgramModel>, TFS2010ProgramModelAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<Graph, VisualizationData>, VisualizationDataMsaglGraphAdapter>();
 
 			//MSTest
 			unityContainer.RegisterType<IArtefactAdapter<object, ITestsExecutionResult<MSTestTestcase>>, EmptyArtefactAdapter<ITestsExecutionResult<MSTestTestcase>>>();
@@ -530,6 +536,11 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 		{
 			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, TModelElement>, TModel>, IdentityDeltaAdapter<StructuralDelta<TModel, TModelElement>, TModel>>();
+		}
+
+		private static void InitDependenciesVisualizer(IUnityContainer unityContainer)
+		{
+			unityContainer.RegisterType<IDependenciesVisualizer, Random25LinksVisualizer>();
 		}
 
 		#endregion

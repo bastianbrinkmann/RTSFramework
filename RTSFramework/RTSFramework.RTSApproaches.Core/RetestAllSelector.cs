@@ -31,5 +31,6 @@ namespace RTSFramework.RTSApproaches.Core
 
 		public ISet<TTestCase> SelectedTests { get; private set; }
 		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
+		public ICorrespondenceModel CorrespondenceModel => null;
 	}
 }

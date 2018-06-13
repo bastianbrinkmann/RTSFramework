@@ -87,6 +87,18 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.Workspaces.Common.2.7.0\lib\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Msagl, Version=3.0.0.0, Culture=neutral, PublicKeyToken=640c57aa40e7ae7d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.1.0.2\lib\net40\Microsoft.Msagl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8a3d7c21d5fa1306, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.Drawing.1.0.2\lib\net40\Microsoft.Msagl.Drawing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.GraphViewerGdi, Version=3.0.0.0, Culture=neutral, PublicKeyToken=fffc27ea4058b3a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.GraphViewerGDI.1.0.2\lib\net40\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -147,6 +159,7 @@
       <HintPath>..\packages\System.Diagnostics.StackTrace.4.3.0\lib\net46\System.Diagnostics.StackTrace.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
       <Private>True</Private>

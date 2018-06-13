@@ -1,4 +1,5 @@
-﻿using Prism.Mvvm;
+﻿using Microsoft.Msagl.Drawing;
+using Prism.Mvvm;
 
 namespace RTSFramework.ViewModels.RequireUIServices
 {
@@ -17,5 +18,6 @@ namespace RTSFramework.ViewModels.RequireUIServices
 		bool SelectDirectory(string initialDirectory, out string selectedDirectory);
 
 		T OpenDialogByViewModel<T>() where T : BindableBase;
+		void ShowGraph(Graph graph);
 	}
 }

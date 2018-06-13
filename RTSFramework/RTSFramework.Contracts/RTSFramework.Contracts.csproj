@@ -76,9 +76,12 @@
   <ItemGroup>
     <Compile Include="Adapter\CancelableArtefactAdapter.cs" />
     <Compile Include="Adapter\IDeltaAdapter.cs" />
+    <Compile Include="ICorrespondenceModel.cs" />
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="ITestPrioritizer.cs" />
+    <Compile Include="Models\VisualizationData.cs" />
+    <Compile Include="SecondaryFeature\IDependenciesVisualizer.cs" />
     <Compile Include="Utilities\IApplicationClosedHandler.cs" />
     <Compile Include="Utilities\ILoggingHelper.cs" />
     <Compile Include="Utilities\ISettingsProvider.cs" />

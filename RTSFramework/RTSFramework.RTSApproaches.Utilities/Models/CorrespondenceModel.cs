@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 {
-    public class CorrespondenceModel
-    {
+    public class CorrespondenceModel : ICorrespondenceModel
+	{
         public string ProgramVersionId { get; set; }
 
         public GranularityLevel GranularityLevel { get; set; }

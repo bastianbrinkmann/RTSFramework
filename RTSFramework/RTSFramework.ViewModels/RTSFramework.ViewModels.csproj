@@ -35,6 +35,18 @@
       <HintPath>..\packages\Unity.5.8.5\lib\net46\CommonServiceLocator.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Msagl, Version=3.0.0.0, Culture=neutral, PublicKeyToken=640c57aa40e7ae7d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.1.0.2\lib\net40\Microsoft.Msagl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8a3d7c21d5fa1306, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.Drawing.1.0.2\lib\net40\Microsoft.Msagl.Drawing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Msagl.GraphViewerGdi, Version=3.0.0.0, Culture=neutral, PublicKeyToken=fffc27ea4058b3a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Msagl.GraphViewerGDI.1.0.2\lib\net40\Microsoft.Msagl.GraphViewerGdi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
       <Private>True</Private>
@@ -98,8 +110,10 @@
     <Compile Include="Adapter\JsonFileUserSettingsAdapter.cs" />
     <Compile Include="Adapter\TestsResultListViewItemViewModelsAdapter.cs" />
     <Compile Include="Adapter\TestResultListViewItemViewModelAdapter.cs" />
+    <Compile Include="Adapter\VisualizationDataMsaglGraphAdapter.cs" />
     <Compile Include="CommitViewModel.cs" />
     <Compile Include="Controller\DeltaBasedController.cs" />
+    <Compile Include="Controller\IArtefactBasedController.cs" />
     <Compile Include="Controller\LimitedTimeModelBasedController.cs" />
     <Compile Include="Controller\ModelBasedController.cs" />
     <Compile Include="IntendedChangesDialogViewModel.cs" />

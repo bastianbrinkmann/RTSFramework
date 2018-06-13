@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Drawing;
+using System.IO;
+using System.Net.Mime;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.GraphViewerGdi;
 using Prism.Mvvm;
 using RTSFramework.ViewModels.RequireUIServices;
+using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -88,6 +94,34 @@ namespace RTSFramework.GUI.RequireUIServices
 			view.Show();
 
 			return (T) view.DataContext;
+		}
+
+		public void ShowGraph(Graph graph)
+		{
+			if (graph == null)
+			{
+				ShowInformation("No correpondence model available, so no visualization possible!");
+				return;
+			}
+
+			Form form = new Form
+			{
+				Size = new System.Drawing.Size(1000, 500),
+				Icon = Properties.Resources.testselection
+			};
+
+			GViewer viewer = new GViewer
+			{
+				Graph = graph,
+				OutsideAreaBrush = Brushes.White
+			};
+
+			form.SuspendLayout();
+			viewer.Dock = DockStyle.Fill;
+			form.Controls.Add(viewer);
+			form.ResumeLayout();
+
+			form.ShowDialog();
 		}
 	}
 }

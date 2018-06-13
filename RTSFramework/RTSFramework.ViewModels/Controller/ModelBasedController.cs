@@ -7,6 +7,7 @@ using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -31,6 +32,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector;
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
+		private readonly Lazy<IDependenciesVisualizer> dependenciesVisualizer;
 
 		public ModelBasedController(
 			IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter,
@@ -39,7 +41,8 @@ namespace RTSFramework.ViewModels.Controller
 			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer,
-			ILoggingHelper loggingHelper)
+			ILoggingHelper loggingHelper,
+			Lazy<IDependenciesVisualizer> dependenciesVisualizer)
 		{
 			this.deltaAdapter = deltaAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
@@ -48,6 +51,7 @@ namespace RTSFramework.ViewModels.Controller
 			this.testSelector = testSelector;
 			this.testPrioritizer = testPrioritizer;
 			this.loggingHelper = loggingHelper;
+			this.dependenciesVisualizer = dependenciesVisualizer;
 		}
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
@@ -93,6 +97,11 @@ namespace RTSFramework.ViewModels.Controller
 			}
 
 			return processingResult;
+		}
+
+		public VisualizationData GetDependenciesVisualization()
+		{
+			return dependenciesVisualizer.Value.GetDependenciesVisualization(testSelector.CorrespondenceModel);
 		}
 	}
 }
