@@ -84,13 +84,22 @@
     <Compile Include="IdentityDeltaAdapter.cs" />
     <Compile Include="Models\FileElement.cs" />
     <Compile Include="NoOpPrioritizer.cs" />
+    <Compile Include="PercentageImpactedTestsStatisticsCollector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatisticsReportdataStringAdapter.cs" />
+    <Compile Include="PercentageImpactedTestsStatisticCsvFileAdapter.cs" />
+    <Compile Include="PercentageImpactedTestsStatistic.cs" />
+    <Compile Include="StatisticsReporting\AveragePercentageImpactedTestsReporter.cs" />
     <Compile Include="TerminationConditionReachedException.cs" />
     <Compile Include="Utilities\LoggingHelper.cs" />
     <Compile Include="Utilities\ProcessExtensions.cs" />
     <Compile Include="Utilities\RelativePathHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.Reporting\RTSFramework.Concrete.Reporting.csproj">
+      <Project>{F8157510-D324-4C91-AA56-D68571B9D1C1}</Project>
+      <Name>RTSFramework.Concrete.Reporting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>

@@ -16,13 +16,13 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-	public class RoslynCompiledIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel>
+	public class RoslynIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel>
 		where TCSharpModel : CSharpProgramModel
 	{
 		private readonly ISettingsProvider settingsProvider;
 		private List<Compilation> compilations;
 
-		public RoslynCompiledIntertypeRelationGraphBuilder(ISettingsProvider settingsProvider)
+		public RoslynIntertypeRelationGraphBuilder(ISettingsProvider settingsProvider)
 		{
 			this.settingsProvider = settingsProvider;
 		}

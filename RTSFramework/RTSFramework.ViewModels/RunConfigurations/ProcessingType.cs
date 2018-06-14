@@ -13,6 +13,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
 		[Description("CSV Impacted Tests")]
 		CsvReporting,
 		[Description("GUI Impacted Tests")]
-		ListReporting
+		ListReporting,
+		[Description("Statistics Impacted Tests")]
+		CollectStatistics
 	}
 }

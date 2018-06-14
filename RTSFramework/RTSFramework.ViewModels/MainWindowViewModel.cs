@@ -22,9 +22,11 @@ using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Concrete.User;
 using RTSFramework.Concrete.User.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
+using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.Models;
@@ -44,6 +46,8 @@ namespace RTSFramework.ViewModels
 		private readonly IDialogService dialogService;
 		private readonly IApplicationUiExecutor applicationUiExecutor;
 		private readonly IUserRunConfigurationProvider userRunConfigurationProvider;
+		private readonly IStatisticsReporter statisticsReporter;
+		private readonly IArtefactAdapter<string, StatisticsReportData> reportArtefactAdapter;
 		private readonly UserSettings userSettings;
 		private readonly GitCommitsProvider gitCommitsProvider;
 		private CancellationTokenSource cancellationTokenSource;
@@ -90,6 +94,7 @@ namespace RTSFramework.ViewModels
 		private bool areTestsAvailable;
 		private DelegateCommand visualizeDependenciesCommand;
 		private bool dependenciesVisualizationAvailable;
+		private DelegateCommand reportCollectedStatisticsCommand;
 
 		#endregion
 
@@ -97,11 +102,15 @@ namespace RTSFramework.ViewModels
 			GitCommitsProvider gitCommitsProvider,
 			IApplicationUiExecutor applicationUiExecutor,
 			IUserRunConfigurationProvider userRunConfigurationProvider,
-			UserSettingsProvider userRunSettingsProvider)
+			UserSettingsProvider userRunSettingsProvider,
+			IStatisticsReporter statisticsReporter,
+			IArtefactAdapter<string, StatisticsReportData> reportArtefactAdapter)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
 			this.userRunConfigurationProvider = userRunConfigurationProvider;
+			this.statisticsReporter = statisticsReporter;
+			this.reportArtefactAdapter = reportArtefactAdapter;
 			this.gitCommitsProvider = gitCommitsProvider;
 
 			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
@@ -111,6 +120,7 @@ namespace RTSFramework.ViewModels
 			SelectCsvTestsFileCommand = new DelegateCommand(SelectCsvTestsFile);
 			SpecitfyIntendedChangesCommand = new DelegateCommand(SpecifyIntendedChanges);
 			VisualizeDependenciesCommand = new DelegateCommand(VisualizeDependencies);
+			ReportCollectedStatisticsCommand = new DelegateCommand(ReportCollectedStatistics);
 
 			DiscoveryTypes = new ObservableCollection<DiscoveryType>();
 			ProcessingTypes = new ObservableCollection<ProcessingType>();
@@ -141,6 +151,13 @@ namespace RTSFramework.ViewModels
 
 			DiscoverNewTests = true;
 			AreTestsAvailable = false;
+		}
+
+		private void ReportCollectedStatistics()
+		{
+			string reportArtefact = reportArtefactAdapter.Unparse(statisticsReporter.GetStatisticsReport());
+
+			dialogService.ShowInformation(reportArtefact);
 		}
 
 		private void VisualizeDependencies()
@@ -234,10 +251,12 @@ namespace RTSFramework.ViewModels
 					ProcessingTypes.Add(ProcessingType.MSTestExecutionCreateCorrespondenceModel);
 					ProcessingTypes.Add(ProcessingType.ListReporting);
 					ProcessingTypes.Add(ProcessingType.CsvReporting);
+					ProcessingTypes.Add(ProcessingType.CollectStatistics);
 					break;
 				case TestType.CsvList:
 					ProcessingTypes.Add(ProcessingType.ListReporting);
 					ProcessingTypes.Add(ProcessingType.CsvReporting);
+					ProcessingTypes.Add(ProcessingType.CollectStatistics);
 					break;
 			}
 
@@ -713,6 +732,16 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
+		public DelegateCommand ReportCollectedStatisticsCommand
+		{
+			get { return reportCollectedStatisticsCommand; }
+			set
+			{
+				reportCollectedStatisticsCommand = value;
+				RaisePropertyChanged();
+			}
+		}
+
 		#endregion
 
 		private async void ExecuteRunFixModel()
@@ -835,6 +864,10 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.ListReporting:
 					var listReportingResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(deltaArtefact);
 					HandleListReportingResult(listReportingResult);
+					break;
+				case ProcessingType.CollectStatistics:
+					var statisticsResult = await ExecuteDeltaBasedRun<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(deltaArtefact);
+					HandleCsvCreationResult(statisticsResult);
 					break;
 			}
 		}
@@ -977,6 +1010,10 @@ namespace RTSFramework.ViewModels
 				case ProcessingType.ListReporting:
 					var listReportingResult = await ExecuteRun<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
 					HandleListReportingResult(listReportingResult);
+					break;
+				case ProcessingType.CollectStatistics:
+					var statisticsResult = await ExecuteRun<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(oldArtefact, newArtefact);
+					HandleCsvCreationResult(statisticsResult);
 					break;
 			}
 		}

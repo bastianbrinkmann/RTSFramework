@@ -80,8 +80,10 @@
     <Compile Include="ICSharpProgramArtefact.cs" />
     <Compile Include="Adapter\IArtefactAdapter.cs" />
     <Compile Include="ITestPrioritizer.cs" />
+    <Compile Include="Models\StatisticsReportData.cs" />
     <Compile Include="Models\VisualizationData.cs" />
     <Compile Include="SecondaryFeature\IDependenciesVisualizer.cs" />
+    <Compile Include="SecondaryFeature\IStatisticsReporter.cs" />
     <Compile Include="Utilities\IApplicationClosedHandler.cs" />
     <Compile Include="Utilities\ILoggingHelper.cs" />
     <Compile Include="Utilities\ISettingsProvider.cs" />

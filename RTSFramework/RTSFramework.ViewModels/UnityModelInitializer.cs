@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Msagl.Drawing;
@@ -24,12 +23,12 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
-using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.DependenciesVisualization;
 using RTSFramework.Core.Models;
+using RTSFramework.Core.StatisticsReporting;
 using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -67,7 +66,9 @@ namespace RTSFramework.ViewModels
 			InitStateBasedController(unityContainer);
 			InitDeltaBasedController(unityContainer);
 
+			//Secondary Scenarios
 			InitDependenciesVisualizer(unityContainer);
+			InitStatisticsReporter(unityContainer);
 
 			container = unityContainer;
 		}
@@ -140,6 +141,7 @@ namespace RTSFramework.ViewModels
 		{
 			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
 			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
+			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
 		}
 
 		private static void InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer)
@@ -212,6 +214,7 @@ namespace RTSFramework.ViewModels
 		{
 			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
 			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
 		}
 
 		private static void InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer) 
@@ -284,6 +287,7 @@ namespace RTSFramework.ViewModels
 			where TTestCase : ITestCase
 		{
 			InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>>(unityContainer);
+			InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, PercentageImpactedTestsStatistic>(unityContainer);
 		}
 
 		private static void InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>(IUnityContainer unityContainer)
@@ -428,9 +432,16 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<ITestProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 			unityContainer.RegisterType<ITestProcessor<CsvFileTestcase, TestListResult<CsvFileTestcase>, TDelta, TModel>, TestReporter<CsvFileTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
 
+			unityContainer.RegisterType<ITestProcessor<CsvFileTestcase, PercentageImpactedTestsStatistic, TDelta, TModel>, PercentageImpactedTestsStatisticsCollector<CsvFileTestcase, TDelta, TModel>>(ProcessingType.CollectStatistics.ToString());
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, PercentageImpactedTestsStatistic, TDelta, TModel>, PercentageImpactedTestsStatisticsCollector<MSTestTestcase, TDelta, TModel>>(ProcessingType.CollectStatistics.ToString());
+
 			InitTestProcessorsFactoryForTestType<ITestsExecutionResult<MSTestTestcase>, TDelta, TModel, MSTestTestcase>(unityContainer);
+
 			InitTestProcessorsFactoryForTestType<TestListResult<MSTestTestcase>, TDelta, TModel, MSTestTestcase>(unityContainer);
 			InitTestProcessorsFactoryForTestType<TestListResult<CsvFileTestcase>, TDelta, TModel, CsvFileTestcase>(unityContainer);
+
+			InitTestProcessorsFactoryForTestType<PercentageImpactedTestsStatistic, TDelta, TModel, MSTestTestcase>(unityContainer);
+			InitTestProcessorsFactoryForTestType<PercentageImpactedTestsStatistic, TDelta, TModel, CsvFileTestcase>(unityContainer);
 		}
 
 		private static void InitTestProcessorsFactoryForTestType<TResult, TDelta, TModel, TTestCase>(IUnityContainer unityContainer) 
@@ -478,7 +489,7 @@ namespace RTSFramework.ViewModels
 		private static void InitDataStructureProviderForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
 			unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, MonoIntertypeRelationGraphBuilder<TModel>>();
-			//unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, RoslynCompiledIntertypeRelationGraphBuilder<TModel>>();
+			//unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, RoslynIntertypeRelationGraphBuilder<TModel>>();
 			unityContainer.RegisterType<CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
 		}
 
@@ -496,6 +507,8 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, GitCSharpProgramModel>, GitCSharpProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<TFS2010VersionIdentification, TFS2010ProgramModel>, TFS2010ProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<Graph, VisualizationData>, VisualizationDataMsaglGraphAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<CsvFileArtefact, PercentageImpactedTestsStatistic>, PercentageImpactedTestsStatisticCsvFileAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<string, StatisticsReportData>, StatisticsReportDataStringAdapter>();
 
 			//MSTest
 			unityContainer.RegisterType<IArtefactAdapter<object, ITestsExecutionResult<MSTestTestcase>>, EmptyArtefactAdapter<ITestsExecutionResult<MSTestTestcase>>>();
@@ -538,11 +551,16 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, TModelElement>, TModel>, IdentityDeltaAdapter<StructuralDelta<TModel, TModelElement>, TModel>>();
 		}
 
+		#endregion
+
 		private static void InitDependenciesVisualizer(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<IDependenciesVisualizer, Random25LinksVisualizer>();
 		}
 
-		#endregion
+		private static void InitStatisticsReporter(IUnityContainer unityContainer)
+		{
+			unityContainer.RegisterType<IStatisticsReporter, AveragePercentageImpactedTestsReporter>();
+		}
 	}
 }
