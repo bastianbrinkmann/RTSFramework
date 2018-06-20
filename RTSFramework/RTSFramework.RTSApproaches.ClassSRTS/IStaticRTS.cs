@@ -10,7 +10,7 @@ namespace RTSFramework.RTSApproaches.Static
 {
 	public interface IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> where TTestCase : ITestCase where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
-		ISet<TTestCase> SelectTests(TDataStructure dataStructure, ISet<TTestCase> allTests, TDelta delta, CancellationToken cancellationToken);
+		ISet<TTestCase> SelectTests(TDataStructure dataStructure, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta delta, CancellationToken cancellationToken);
 
 		Func<string, IList<string>> GetResponsibleChangesByTestId { get; }
 	}

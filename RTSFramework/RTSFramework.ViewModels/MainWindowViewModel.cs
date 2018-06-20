@@ -134,10 +134,13 @@ namespace RTSFramework.ViewModels
 
 			userSettings = userRunSettingsProvider.GetUserSettings();
 
+			var discoveryTypeFromSettings = userSettings.DiscoveryType;
+			var processingTypeFromSettings = userSettings.ProcessingType;
+
 			ProgramModelType = userSettings.ProgramModelType;
 			TestType = userSettings.TestType;
-			DiscoveryType = userSettings.DiscoveryType;
-			ProcessingType = userSettings.ProcessingType;
+			DiscoveryType = discoveryTypeFromSettings;
+			ProcessingType = processingTypeFromSettings;
 			RTSApproachType = userSettings.RTSApproachType;
 			GranularityLevel = userSettings.GranularityLevel;
 			SolutionFilePath = userSettings.SolutionFilePath;

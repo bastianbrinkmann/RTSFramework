@@ -41,7 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CsvTestFileDiscoverer.cs" />
+    <Compile Include="CsvManualTestsDeltaDiscoverer.cs" />
     <Compile Include="IntendedChangesAdapter.cs" />
     <Compile Include="IntendedChangesArtefact.cs" />
     <Compile Include="Models\CsvFileTestcase.cs" />

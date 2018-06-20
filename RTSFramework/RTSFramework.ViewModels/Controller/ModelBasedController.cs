@@ -68,10 +68,10 @@ namespace RTSFramework.ViewModels.Controller
 		{
 			var convertedDelta = deltaAdapter.Convert(delta);
 
-			var allTests = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta, FilterFunction, token), "Tests Discovery");
+			var testsDelta = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(convertedDelta, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
-			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(allTests, convertedDelta, token), "Tests Selection");
+			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(testsDelta, convertedDelta, token), "Tests Selection");
 			var impactedTests = testSelector.SelectedTests;
 
 			foreach (var impactedTest in impactedTests)
@@ -90,7 +90,7 @@ namespace RTSFramework.ViewModels.Controller
 			{
 				executor.TestResultAvailable += TestResultAvailable;
 			}
-			var processingResult = await loggingHelper.ReportNeededTime(() => testProcessor.ProcessTests(prioritizedTests, allTests, convertedDelta, token), "Tests Processing");
+			var processingResult = await loggingHelper.ReportNeededTime(() => testProcessor.ProcessTests(prioritizedTests, testsDelta, convertedDelta, token), "Tests Processing");
 			if (executor != null)
 			{
 				executor.TestResultAvailable -= TestResultAvailable;

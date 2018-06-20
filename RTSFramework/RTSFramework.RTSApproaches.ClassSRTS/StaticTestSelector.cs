@@ -27,11 +27,11 @@ namespace RTSFramework.RTSApproaches.Static
 			this.staticSelector = staticSelector;
 		}
 
-		public async Task SelectTests(ISet<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken)
+		public async Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta delta, CancellationToken cancellationToken)
 		{
 			var dataStructure = await dataStructureProvider.GetDataStructure(delta.NewModel, cancellationToken);
 
-			SelectedTests = staticSelector.SelectTests(dataStructure, testCases, delta, cancellationToken);
+			SelectedTests = staticSelector.SelectTests(dataStructure, testsDelta, delta, cancellationToken);
 			GetResponsibleChangesByTestId = staticSelector.GetResponsibleChangesByTestId;
 		}
 

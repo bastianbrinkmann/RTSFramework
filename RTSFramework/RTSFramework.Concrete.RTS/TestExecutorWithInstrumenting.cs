@@ -41,7 +41,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.loggingHelper = loggingHelper;
 		}
 
-		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, ISet<TTestCase> allTests, TDelta impactedForDelta,
+		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta,
 			CancellationToken cancellationToken)
 		{
 			using (instrumentor)
@@ -51,7 +51,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				await instrumentor.Instrument(impactedForDelta.NewModel, impactedTests, cancellationToken);
 
 				executor.TestResultAvailable += TestResultAvailable;
-				var result = await executor.ProcessTests(impactedTests, allTests, impactedForDelta, cancellationToken);
+				var result = await executor.ProcessTests(impactedTests, testsDelta, impactedForDelta, cancellationToken);
 				executor.TestResultAvailable -= TestResultAvailable;
 
 				CoverageData coverage = instrumentor.GetCoverageData();
@@ -66,7 +66,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x));
 
-				correspondenceModelManager.UpdateCorrespondenceModel(coverage, impactedForDelta, allTests.Select(x => x.Id), failedTests);
+				correspondenceModelManager.UpdateCorrespondenceModel(coverage, impactedForDelta, testsDelta.DeletedElements.Select(x => x.Id), failedTests);
 
 				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;

@@ -12,5 +12,25 @@ namespace RTSFramework.Concrete.User.Models
 		public string AssociatedClass { get; set; }
 		public bool IsChildTestCase => false;
 		public Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
+
+		public override bool Equals(object obj)
+		{
+			CsvFileTestcase other = obj as CsvFileTestcase;
+			if (other != null)
+			{
+				return Id.Equals(other.Id);
+			}
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = Id?.GetHashCode() ?? 0;
+				return hashCode;
+			}
+		}
 	}
 }

@@ -35,13 +35,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return model;
 		}
 
-		public void UpdateCorrespondenceModel<TDelta>(CoverageData coverageData, TDelta currentDelta, IEnumerable<string> allTests, IEnumerable<string> failedTests)
+		public void UpdateCorrespondenceModel<TDelta>(CoverageData coverageData, TDelta currentDelta, IEnumerable<string> deletedTests, IEnumerable<string> failedTests)
 			where TDelta : IDelta<TModel>
 		{
 			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel);
 			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, currentDelta.NewModel.VersionId);
 			UpdateByNewLinks(newCorrespondenceModel, GetLinksByCoverageData(coverageData, currentDelta.NewModel));
-			RemoveDeletedTests(newCorrespondenceModel, allTests);
+			RemoveDeletedTests(newCorrespondenceModel, deletedTests);
 			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
 			PersistCorrespondenceModel(newCorrespondenceModel);
@@ -78,14 +78,9 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			failedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
 		}
 
-		private void RemoveDeletedTests(Models.CorrespondenceModel correspondenceModel, IEnumerable<string> allTests)
+		private void RemoveDeletedTests(Models.CorrespondenceModel correspondenceModel, IEnumerable<string> deletedTests)
 		{
-			var deletedTests = correspondenceModel.CorrespondenceModelLinks.Where(x => !allTests.Contains(x.Key)).Select(x => x.Key).ToList();
-
-			foreach (var deletedTest in deletedTests)
-			{
-				correspondenceModel.CorrespondenceModelLinks.Remove(deletedTest);
-			}
+			deletedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
 		}
 
 		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)

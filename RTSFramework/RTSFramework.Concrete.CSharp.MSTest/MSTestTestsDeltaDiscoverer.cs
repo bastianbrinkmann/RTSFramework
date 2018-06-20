@@ -12,49 +12,65 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Utilities;
+using RTSFramework.Core.Utilities;
+using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, MSTestTestcase>
+	public class MSTestTestsDeltaDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, MSTestTestcase>
 		where TModel : CSharpProgramModel where TDelta : IDelta<TModel>
 	{
+		private const string TestsModelsStoragePlace = "TestsModels";
+		private const string TestTypeIdentifier = "MSTest";
+
 		private readonly CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter;
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
 		private readonly IUserRunConfigurationProvider runConfiguration;
+		private readonly IArtefactAdapter<FileInfo, ISet<MSTestTestcase>> testsModelAdapter;
 
-		public InProcessMSTestTestDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
+		public MSTestTestsDeltaDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider,
-			IUserRunConfigurationProvider runConfiguration)
+			IUserRunConfigurationProvider runConfiguration,
+			IArtefactAdapter<FileInfo, ISet<MSTestTestcase>> testsModelAdapter)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;
 			this.runConfiguration = runConfiguration;
+			this.testsModelAdapter = testsModelAdapter;
 		}
 
-		private ISet<MSTestTestcase> discoveredTests;
-
-		public async Task<ISet<MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
-			var model = delta.NewModel;
+			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(delta.OldModel.VersionId));
 
-			if (!runConfiguration.DiscoverNewTests && discoveredTests != null)
+			if (!runConfiguration.DiscoverNewTests && oldTestsModel != null)
 			{
-				return discoveredTests;
+				return new StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>(oldTestsModel, oldTestsModel);
 			}
 
-			var parsingResult = await assembliesAdapter.Parse(model.AbsoluteSolutionPath, token);
+			if (oldTestsModel == null)
+			{
+				oldTestsModel = new HashSet<MSTestTestcase>();
+			}
+
+			var parsingResult = await assembliesAdapter.Parse(delta.NewModel.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
 			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith(settingsProvider.TestAssembliesFilter));
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			discoveredTests = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
+			var newTestsModel = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
+			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(delta.NewModel.VersionId));
 
-			return discoveredTests;
+			var testsDelta = new StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>(oldTestsModel, newTestsModel);
+			testsDelta.AddedElements.AddRange(newTestsModel.Except(oldTestsModel));
+			testsDelta.DeletedElements.AddRange(oldTestsModel.Except(newTestsModel));
+
+			return testsDelta;
 		}
 
 		//TODO: Artefact adapter
@@ -98,6 +114,12 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			token.ThrowIfCancellationRequested();
 
 			return handler.DiscoveredTestCases;
+		}
+
+		//TODO: To Super class
+		private FileInfo GetTestsStorage(string programVersionId)
+		{
+			return new FileInfo(Path.GetFullPath(Path.Combine(TestsModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{TestTypeIdentifier}_{JsonTestsModelAdapter<MSTestTestcase>.FileExtension}")));
 		}
 	}
 }

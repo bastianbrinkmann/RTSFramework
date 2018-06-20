@@ -357,6 +357,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var result = referencedAssemblies.FirstOrDefault(a => a.Name.Name == assemblyName);
 			if (result != null)
 			{
+				foreach (var referencedAssembly in referencedAssemblies)
+				{
+					if (referencedAssembly != result)
+					{
+						referencedAssembly.Dispose();
+					}
+				}
 				return result;
 			}
 
@@ -365,6 +372,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				result = GetReferencedAssembly(refAsm.MainModule, assemblyName, visited);
 				if (result != null)
 				{
+					foreach (var referencedAssembly in referencedAssemblies)
+					{
+						if (referencedAssembly != result)
+						{
+							referencedAssembly.Dispose();
+						}
+					}
 					return result;
 				}
 			}

@@ -15,14 +15,14 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class InProcessMSTestTestExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
+	public class MSTestTestExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel> where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
 		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
 
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
 
-		public InProcessMSTestTestExecutor(InProcessVsTestConnector vsTestConnector, ISettingsProvider settingsProvider)
+		public MSTestTestExecutor(InProcessVsTestConnector vsTestConnector, ISettingsProvider settingsProvider)
 		{
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;
@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private IList<MSTestTestcase> msTestTestcases;
 
-		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, ISet<MSTestTestcase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
 			msTestTestcases = impactedTests;
 

@@ -100,13 +100,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InProcessMSTestTestExecutor.cs" />
+    <Compile Include="MSTestTestExecutor.cs" />
     <Compile Include="Models\MSTestExectionResult.cs" />
     <Compile Include="Models\MSTestExectionWithCodeCoverageResult.cs" />
     <Compile Include="Models\MSTestTestcase.cs" />
     <Compile Include="Models\MSTestTestResult.cs" />
     <Compile Include="MSTestConstants.cs" />
-    <Compile Include="MonoMSTestTestDiscoverer.cs" />
     <Compile Include="ConsoleMSTestTestExecutor.cs" />
     <Compile Include="ConsoleMSTestTestExecutorWithOpenCoverage.cs" />
     <Compile Include="MSTestTestsInstrumentor.cs" />
@@ -115,7 +114,7 @@
     <Compile Include="Adapters\OpenCoverXmlCoverageAdapter.cs" />
     <Compile Include="Utilities\OrderedTestsHelper.cs" />
     <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
-    <Compile Include="InProcessMSTestTestDiscoverer.cs" />
+    <Compile Include="MSTestTestsDeltaDiscoverer.cs" />
     <Compile Include="VsTest\AsyncAutoResetEvent.cs" />
     <Compile Include="VsTest\DiscoveryEventHandler.cs" />
     <Compile Include="VsTest\InProcessVsTestConnector.cs" />

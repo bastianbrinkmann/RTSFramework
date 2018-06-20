@@ -40,6 +40,10 @@
       <HintPath>..\packages\Microsoft.Msagl.1.0.2\lib\net40\Microsoft.Msagl.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -91,6 +95,7 @@
     <Compile Include="PercentageImpactedTestsStatistic.cs" />
     <Compile Include="StatisticsReporting\AveragePercentageImpactedTestsReporter.cs" />
     <Compile Include="TerminationConditionReachedException.cs" />
+    <Compile Include="Utilities\JsonTestsModelAdapter.cs" />
     <Compile Include="Utilities\LoggingHelper.cs" />
     <Compile Include="Utilities\ProcessExtensions.cs" />
     <Compile Include="Utilities\RelativePathHelper.cs" />

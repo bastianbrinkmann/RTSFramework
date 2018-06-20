@@ -29,6 +29,7 @@ using RTSFramework.Core;
 using RTSFramework.Core.DependenciesVisualization;
 using RTSFramework.Core.Models;
 using RTSFramework.Core.StatisticsReporting;
+using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Dynamic;
 using RTSFramework.RTSApproaches.Core;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -344,8 +345,8 @@ namespace RTSFramework.ViewModels
 		private static void InitTestsDiscovererForDelta<TModel, TDelta>(IUnityContainer unityContainer) where TModel : CSharpProgramModel where TDelta: IDelta<TModel>
 		{
 			//unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
-			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, MSTestTestcase>, InProcessMSTestTestDiscoverer<TModel, TDelta>>(new ContainerControlledLifetimeManager());
-			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, CsvFileTestcase>, CsvTestFileDiscoverer<TModel, TDelta>>();
+			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, MSTestTestcase>, MSTestTestsDeltaDiscoverer<TModel, TDelta>>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, CsvFileTestcase>, CsvManualTestsDeltaDiscoverer<TModel, TDelta>>();
 		}
 
 		#endregion
@@ -423,8 +424,8 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, TestExecutorWithInstrumenting<TModel, TDelta, MSTestTestcase>>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, InProcessMSTestTestExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestExecutor<MSTestTestcase, TDelta, TModel>, InProcessMSTestTestExecutor<TDelta, TModel>>();
+			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, MSTestTestExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
+			unityContainer.RegisterType<ITestExecutor<MSTestTestcase, TDelta, TModel>, MSTestTestExecutor<TDelta, TModel>>();
 
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
@@ -509,6 +510,8 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<Graph, VisualizationData>, VisualizationDataMsaglGraphAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<CsvFileArtefact, PercentageImpactedTestsStatistic>, PercentageImpactedTestsStatisticCsvFileAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<string, StatisticsReportData>, StatisticsReportDataStringAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<FileInfo, ISet<MSTestTestcase>>, JsonTestsModelAdapter<MSTestTestcase>>();
+			unityContainer.RegisterType<IArtefactAdapter<FileInfo, ISet<CsvFileTestcase>>, JsonTestsModelAdapter<CsvFileTestcase>>();
 
 			//MSTest
 			unityContainer.RegisterType<IArtefactAdapter<object, ITestsExecutionResult<MSTestTestcase>>, EmptyArtefactAdapter<ITestsExecutionResult<MSTestTestcase>>>();

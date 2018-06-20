@@ -8,9 +8,9 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.RTSApproaches.Core.Contracts
 {
-	public interface ITestSelector<TModel, TDelta, TTestCase>
+	public interface ITestSelector<TModel, TProgramDelta, TTestCase>
 		where TModel : IProgramModel
-		where TDelta : IDelta<TModel>
+		where TProgramDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
 		ISet<TTestCase> SelectedTests { get; }
@@ -19,6 +19,6 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 
 		ICorrespondenceModel CorrespondenceModel { get; }
 
-		Task SelectTests(ISet<TTestCase> testCases, TDelta delta, CancellationToken cancellationToken);
+		Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TProgramDelta delta, CancellationToken cancellationToken);
 	}
 }

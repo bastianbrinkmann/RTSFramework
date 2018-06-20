@@ -24,5 +24,25 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Models
 		public bool IsChildTestCase { get; set; }
 
 	    public Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
+
+	    public override bool Equals(object obj)
+	    {
+		    MSTestTestcase other = obj as MSTestTestcase;
+		    if (other != null)
+		    {
+			    return Id.Equals(other.Id);
+		    }
+
+		    return false;
+	    }
+
+	    public override int GetHashCode()
+	    {
+		    unchecked
+		    {
+			    var hashCode = Id?.GetHashCode() ?? 0;
+			    return hashCode;
+		    }
+	    }
     }
 }

@@ -11,17 +11,16 @@ namespace RTSFramework.Core
 {
 	public class PercentageImpactedTestsStatisticsCollector<TTestCase, TDelta, TModel> : ITestProcessor<TTestCase, PercentageImpactedTestsStatistic, TDelta, TModel> where TTestCase : ITestCase where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
-		public Task<PercentageImpactedTestsStatistic> ProcessTests(IList<TTestCase> impactedTests, ISet<TTestCase> allTests, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public Task<PercentageImpactedTestsStatistic> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken)
 		{
-			double percentage = (double) impactedTests.Count / allTests.Count;
+			double percentage = (double) impactedTests.Count / testsDelta.NewModel.Count;
 
 			string deltaIdentifier = $"Delta: {impactedForDelta.OldModel.VersionId} --> {impactedForDelta.NewModel.VersionId}";
 
-			return Task.FromResult(new PercentageImpactedTestsStatistic
-			{
-				PercentageImpactedTests = percentage,
-				DeltaIdentifier = deltaIdentifier
-			});
+			var statistcs = new PercentageImpactedTestsStatistic();
+			statistcs.DeltaIdPercentageTestsTuples.Add(new Tuple<string, double>(deltaIdentifier, percentage));
+
+			return Task.FromResult(statistcs);
 		}
 	}
 }

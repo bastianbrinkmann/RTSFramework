@@ -23,14 +23,14 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.correspondenceModelProvider = correspondenceModelProvider;
 		}
 
-		public Task SelectTests(ISet<TTestCase> testCases, StructuralDelta<TModel, TModelElement> delta,
+		public Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta,
 			CancellationToken cancellationToken)
 		{
 			CorrespondenceModel = correspondenceModelProvider.GetCorrespondenceModel(delta.OldModel);
 
 			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
 
-			foreach (var testcase in testCases)
+			foreach (var testcase in testsDelta.NewModel)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
@@ -45,7 +45,6 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				}
 				else
 				{
-					//Unknown testcase - considered as new testcase so impacted
 					impactedTests.Add(testcase);
 				}
 			}
