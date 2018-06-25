@@ -53,7 +53,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 				openCoverArtefactAdapter.GranularityLevel = impactedForDelta.NewModel.GranularityLevel;
 				var coverageData = openCoverArtefactAdapter.Parse(executionResultParams);
-				result.CoverageData = coverageData;
+				result.CorrespondenceLinks = coverageData;
 			}
 
 			return result;

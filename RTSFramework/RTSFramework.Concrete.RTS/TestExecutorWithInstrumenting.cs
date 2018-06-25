@@ -54,11 +54,11 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				var result = await executor.ProcessTests(impactedTests, testsDelta, impactedForDelta, cancellationToken);
 				executor.TestResultAvailable -= TestResultAvailable;
 
-				CoverageData coverage = instrumentor.GetCoverageData();
+				CorrespondenceLinks coverage = instrumentor.GetCorrespondenceLinks();
 
 				var failedTests = result.TestcasesResults.Where(x => x.Outcome == TestExecutionOutcome.Failed).Select(x => x.TestCase.Id).ToList();
 
-				var coveredTests = coverage.CoverageDataEntries.Select(x => x.Item1).Distinct().ToList();
+				var coveredTests = coverage.Links.Select(x => x.Item1).Distinct().ToList();
 				var testsWithoutCoverage = impactedTests.Where(x => !coveredTests.Contains(x.Id)).Select(x => x.Id).ToList();
 				
 				testsWithoutCoverage.ForEach(x => loggingHelper.WriteMessage("Not covered: " + x));

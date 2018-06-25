@@ -182,7 +182,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		#endregion
 
-		public CoverageData GetCoverageData()
+		public CorrespondenceLinks GetCorrespondenceLinks()
 		{
 			var coverageData = new HashSet<Tuple<string, string>>();
 
@@ -210,7 +210,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				}
 			}
 
-			return new CoverageData(coverageData);
+			return new CorrespondenceLinks(coverageData);
 		}
 
 		#region Instrumenting TestAssemblies

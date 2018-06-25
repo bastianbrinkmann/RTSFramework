@@ -91,7 +91,7 @@
     <Compile Include="ITestExecutor.cs" />
     <Compile Include="ITestsInstrumentor.cs" />
     <Compile Include="ITestProcessingResult.cs" />
-    <Compile Include="Models\CoverageData.cs" />
+    <Compile Include="Models\CorrespondenceLinks.cs" />
     <Compile Include="Models\Delta\IDelta.cs" />
     <Compile Include="Models\GranularityLevel.cs" />
     <Compile Include="Models\CompositeTestCaseResult.cs" />
