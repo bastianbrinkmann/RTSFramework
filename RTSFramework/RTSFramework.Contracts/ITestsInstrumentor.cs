@@ -10,6 +10,6 @@ namespace RTSFramework.Contracts
 	{
 		Task Instrument(TModel toInstrument, IList<TTestCase> tests, CancellationToken token);
 
-		CoverageData GetCoverageData();
+		CorrespondenceLinks GetCorrespondenceLinks();
 	}
 }

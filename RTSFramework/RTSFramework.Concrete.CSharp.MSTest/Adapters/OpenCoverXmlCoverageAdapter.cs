@@ -11,11 +11,11 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 {
-	public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CoverageData>
+	public class OpenCoverXmlCoverageAdapter : IArtefactAdapter<MSTestExecutionResultParameters, CorrespondenceLinks>
 	{
 		public GranularityLevel GranularityLevel { get; set; }
 
-		public CoverageData Parse(MSTestExecutionResultParameters resultParameters)
+		public CorrespondenceLinks Parse(MSTestExecutionResultParameters resultParameters)
 		{
 			var serializer = new XmlSerializer(typeof(CoverageSession),
 													new[] { typeof(Module), typeof(OpenCover.Framework.Model.File), typeof(Class) });
@@ -45,7 +45,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 
 					var coverageEntries = GetCollectedCoverageEntries(session, coverageIdsTestCases);
 
-					return new CoverageData(coverageEntries);
+					return new CorrespondenceLinks(coverageEntries);
 				}
 			}
 		}
@@ -119,7 +119,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 			return coverageEntries;
 		}
 
-		public MSTestExecutionResultParameters Unparse(CoverageData model, MSTestExecutionResultParameters artefact)
+		public MSTestExecutionResultParameters Unparse(CorrespondenceLinks model, MSTestExecutionResultParameters artefact)
 		{
 			throw new NotImplementedException();
 		}

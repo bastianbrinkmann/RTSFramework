@@ -35,12 +35,12 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return model;
 		}
 
-		public void UpdateCorrespondenceModel<TDelta>(CoverageData coverageData, TDelta currentDelta, IEnumerable<string> deletedTests, IEnumerable<string> failedTests)
+		public void UpdateCorrespondenceModel<TDelta>(CorrespondenceLinks correspondenceLinks, TDelta currentDelta, IEnumerable<string> deletedTests, IEnumerable<string> failedTests)
 			where TDelta : IDelta<TModel>
 		{
 			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel);
 			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, currentDelta.NewModel.VersionId);
-			UpdateByNewLinks(newCorrespondenceModel, GetLinksByCoverageData(coverageData, currentDelta.NewModel));
+			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks, currentDelta.NewModel));
 			RemoveDeletedTests(newCorrespondenceModel, deletedTests);
 			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
@@ -83,11 +83,11 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			deletedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
 		}
 
-		private Dictionary<string, HashSet<string>> GetLinksByCoverageData(CoverageData coverageData, IProgramModel targetModel)
+		private Dictionary<string, HashSet<string>> ConvertLinks(CorrespondenceLinks correspondenceLinks, IProgramModel targetModel)
 		{
-			var links = coverageData.CoverageDataEntries.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
+			var links = correspondenceLinks.Links.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
-			foreach (var coverageEntry in coverageData.CoverageDataEntries)
+			foreach (var coverageEntry in correspondenceLinks.Links)
 			{
 				if (targetModel.GranularityLevel == GranularityLevel.Class)
 				{

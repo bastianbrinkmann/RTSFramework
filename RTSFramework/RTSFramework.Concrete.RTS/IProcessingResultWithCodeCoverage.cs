@@ -4,6 +4,6 @@ namespace RTSFramework.RTSApproaches.Dynamic
 {
 	public interface IProcessingResultWithCodeCoverage
 	{
-		CoverageData CoverageData { get; }
+		CorrespondenceLinks CorrespondenceLinks { get; }
 	}
 }
