@@ -154,6 +154,22 @@ namespace RTSFramework.ViewModels
 
 			DiscoverNewTests = true;
 			AreTestsAvailable = false;
+
+			RegularGitsCommitRefresh();
+		}
+
+		private void RegularGitsCommitRefresh()
+		{
+			Task.Run(async () =>
+			{
+				await Task.Delay(5000);
+				if (ProgramModelType == ProgramModelType.GitModel)
+				{
+					applicationUiExecutor.ExecuteOnUi(RefreshCommitsSelection);
+				}
+
+				RegularGitsCommitRefresh();
+			});
 		}
 
 		private void ReportCollectedStatistics()
@@ -210,9 +226,13 @@ namespace RTSFramework.ViewModels
 
 		private void RefreshCommitsSelection()
 		{
+			var fromCommitId = FromCommit?.Identifier;
+
 			FromCommitModels.Clear();
 			FromCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).Select(ConvertCommit));
-			FromCommit = FromCommitModels.FirstOrDefault();
+			var oldFromCommit = FromCommitModels.SingleOrDefault(x => x.Identifier == fromCommitId);
+
+			FromCommit = oldFromCommit ?? FromCommitModels.FirstOrDefault();
 			IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
 			IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
 		}
@@ -302,7 +322,7 @@ namespace RTSFramework.ViewModels
 						DisplayName = "Uncommitted Changes",
 						Identifier = UncommittedChangesIdentifier
 					});
-					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit.Identifier).Select(ConvertCommit));
+					ToCommitModels.AddRange(gitCommitsProvider.GetAllCommits(RepositoryPath).TakeWhile(x => x.ShaId != FromCommit?.Identifier).Select(ConvertCommit));
 					ToCommit = ToCommitModels.SingleOrDefault(x => x.Identifier == toCommitId) ?? ToCommitModels.FirstOrDefault();
 					break;
 				case nameof(TimeLimit):
