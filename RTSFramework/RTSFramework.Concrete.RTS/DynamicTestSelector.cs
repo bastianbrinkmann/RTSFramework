@@ -49,25 +49,12 @@ namespace RTSFramework.RTSApproaches.Dynamic
 				}
 			}
 
-			GetResponsibleChangesByTestId = id =>
-			{
-				if (CorrespondenceModel.CorrespondenceModelLinks.ContainsKey(id))
-				{
-					var linksOfTestcase = CorrespondenceModel.CorrespondenceModelLinks[id];
-					return linksOfTestcase.Where(x => delta.AddedElements.Any(y => y.Id == x) ||
-													  delta.ChangedElements.Any(y => y.Id == x) ||
-													  delta.DeletedElements.Any(y => y.Id == x)).ToList();
-				}
-
-				return new List<string>(new[] { "New Test" });
-			};
 			SelectedTests = impactedTests;
 
 			return Task.CompletedTask;
 		}
 
 		public ISet<TTestCase> SelectedTests { get; private set; }
-		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 		public ICorrespondenceModel CorrespondenceModel { get; private set; }
 	}
 }

@@ -19,7 +19,6 @@ namespace RTSFramework.RTSApproaches.Static
 		private readonly IDataStructureProvider<TDataStructure, TModel> dataStructureProvider;
 		private readonly IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector;
 		public ISet<TTestCase> SelectedTests { get; private set; }
-		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 		public StaticTestSelector(IDataStructureProvider<TDataStructure, TModel> dataStructureProvider,
 			IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector)
 		{
@@ -32,7 +31,6 @@ namespace RTSFramework.RTSApproaches.Static
 			var dataStructure = await dataStructureProvider.GetDataStructure(delta.NewModel, cancellationToken);
 
 			SelectedTests = staticSelector.SelectTests(dataStructure, testsDelta, delta, cancellationToken);
-			GetResponsibleChangesByTestId = staticSelector.GetResponsibleChangesByTestId;
 		}
 
 		public ICorrespondenceModel CorrespondenceModel => null;

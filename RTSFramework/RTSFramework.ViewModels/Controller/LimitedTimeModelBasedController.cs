@@ -31,8 +31,9 @@ namespace RTSFramework.ViewModels.Controller
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer, ILoggingHelper loggingHelper,
 			IUserRunConfigurationProvider runConfigurationProvider,
-			Lazy<IDependenciesVisualizer> dependenciesVisualizer)
-			: base(deltaAdapter, deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer)
+			Lazy<IDependenciesVisualizer> dependenciesVisualizer,
+			IResponsibleChangesReporter<TTestCase, TModel, TSelectionDelta> responsibleChangesReporter)
+			: base(deltaAdapter, deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer, responsibleChangesReporter)
 		{
 			this.runConfigurationProvider = runConfigurationProvider;
 		}

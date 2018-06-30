@@ -1120,8 +1120,7 @@ namespace RTSFramework.ViewModels
 
 		private void HandleListReportingResult(IList<TestResultListViewItemViewModel> viewModels)
 		{
-			TestResults.Clear();
-			TestResults.AddRange(viewModels);
+
 		}
 
 		private void HandleCsvCreationResult(CsvFileArtefact fileArtefact)

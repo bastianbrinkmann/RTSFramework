@@ -28,6 +28,7 @@ using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.DependenciesVisualization;
 using RTSFramework.Core.Models;
+using RTSFramework.Core.ResponsibleChanges;
 using RTSFramework.Core.StatisticsReporting;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Dynamic;
@@ -70,6 +71,7 @@ namespace RTSFramework.ViewModels
 			//Secondary Scenarios
 			InitDependenciesVisualizer(unityContainer);
 			InitStatisticsReporter(unityContainer);
+			InitResponsibleChangesReporter(unityContainer);
 
 			container = unityContainer;
 		}
@@ -556,6 +558,8 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
+		#region SecondaryFeatures
+
 		private static void InitDependenciesVisualizer(IUnityContainer unityContainer)
 		{
 			unityContainer.RegisterType<IDependenciesVisualizer, Random25LinksVisualizer>();
@@ -565,5 +569,40 @@ namespace RTSFramework.ViewModels
 		{
 			unityContainer.RegisterType<IStatisticsReporter, AveragePercentageImpactedTestsReporter>();
 		}
+
+		private static void InitResponsibleChangesReporter(IUnityContainer unityContainer)
+		{
+			InitResponsibleChangesReporterForTestTypes<MSTestTestcase>(unityContainer);
+			InitResponsibleChangesReporterForTestTypes<CsvFileTestcase>(unityContainer);
+		}
+
+		private static void InitResponsibleChangesReporterForTestTypes<TTestCase>(IUnityContainer unityContainer)
+			where TTestCase : ITestCase
+		{
+			InitResponsibleChangesReporterForModel<TTestCase, GitCSharpProgramModel>(unityContainer);
+			InitResponsibleChangesReporterForModel<TTestCase, TFS2010ProgramModel>(unityContainer);
+			InitResponsibleChangesReporterForModel<TTestCase, LocalProgramModel>(unityContainer);
+		}
+
+		private static void InitResponsibleChangesReporterForModel<TTestCase, TModel>(IUnityContainer unityContainer)
+			where TTestCase : ITestCase
+			where TModel : IProgramModel
+		{
+			InitResponsibleChangesReporterForDelta<TTestCase, TModel, FileElement>(unityContainer);
+			InitResponsibleChangesReporterForDelta<TTestCase, TModel, CSharpFileElement>(unityContainer);
+			InitResponsibleChangesReporterForDelta<TTestCase, TModel, CSharpClassElement>(unityContainer);
+		}
+
+		private static void InitResponsibleChangesReporterForDelta<TTestCase, TModel, TModelElement>(IUnityContainer unityContainer)
+			where TTestCase : ITestCase
+			where TModel : IProgramModel
+			where TModelElement : IProgramModelElement
+		{
+			unityContainer.RegisterType<IResponsibleChangesReporter<TTestCase, TModel, StructuralDelta<TModel, TModelElement>>, 
+				ResponsibleChangesReporter<TTestCase, TModel, TModelElement>>();
+		}
+
+		#endregion
+
 	}
 }

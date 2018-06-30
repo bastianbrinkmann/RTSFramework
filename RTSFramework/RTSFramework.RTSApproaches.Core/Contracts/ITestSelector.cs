@@ -15,8 +15,6 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 	{
 		ISet<TTestCase> SelectedTests { get; }
 
-		Func<string, IList<string>> GetResponsibleChangesByTestId { get; }
-
 		ICorrespondenceModel CorrespondenceModel { get; }
 
 		Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TProgramDelta delta, CancellationToken cancellationToken);

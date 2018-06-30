@@ -11,8 +11,6 @@ namespace RTSFramework.RTSApproaches.Static
 {
 	public class ClassSRTS<TModel, TTestCase> : IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase where TModel : IProgramModel
 	{
-		public Func<string, IList<string>> GetResponsibleChangesByTestId => null;
-
 		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();

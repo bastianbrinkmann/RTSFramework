@@ -33,6 +33,7 @@ namespace RTSFramework.ViewModels
 		private string displayName;
 		private int? executionId;
 		private DelegateCommand showResponsibleChangesCommand;
+		private IList<string> responsibleChanges;
 
 		public TestResultListViewItemViewModel(IDialogService dialogService)
 		{
@@ -80,7 +81,15 @@ namespace RTSFramework.ViewModels
 
 		#region Properties
 
-		public IList<string> ResponsibleChanges { get; set; }
+		public IList<string> ResponsibleChanges
+		{
+			get { return responsibleChanges; }
+			set
+			{
+				responsibleChanges = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public DelegateCommand ShowResponsibleChangesCommand
 		{

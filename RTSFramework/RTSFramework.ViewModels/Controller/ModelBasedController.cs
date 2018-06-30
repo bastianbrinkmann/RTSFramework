@@ -33,6 +33,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly Lazy<IDependenciesVisualizer> dependenciesVisualizer;
+		private readonly IResponsibleChangesReporter<TTestCase, TModel, TSelectionDelta> responsibleChangesReporter;
 
 		public ModelBasedController(
 			IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter,
@@ -42,7 +43,8 @@ namespace RTSFramework.ViewModels.Controller
 			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer,
 			ILoggingHelper loggingHelper,
-			Lazy<IDependenciesVisualizer> dependenciesVisualizer)
+			Lazy<IDependenciesVisualizer> dependenciesVisualizer,
+			IResponsibleChangesReporter<TTestCase, TModel, TSelectionDelta> responsibleChangesReporter)
 		{
 			this.deltaAdapter = deltaAdapter;
 			this.deltaDiscoverer = deltaDiscoverer;
@@ -52,6 +54,7 @@ namespace RTSFramework.ViewModels.Controller
 			this.testPrioritizer = testPrioritizer;
 			this.loggingHelper = loggingHelper;
 			this.dependenciesVisualizer = dependenciesVisualizer;
+			this.responsibleChangesReporter = responsibleChangesReporter;
 		}
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
@@ -76,7 +79,8 @@ namespace RTSFramework.ViewModels.Controller
 
 			foreach (var impactedTest in impactedTests)
 			{
-				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest, testSelector.GetResponsibleChangesByTestId?.Invoke(impactedTest.Id)));
+				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest, 
+					responsibleChangesReporter.GetResponsibleChanges(testSelector.CorrespondenceModel, impactedTest, convertedDelta)));
 			}
 
 			loggingHelper.WriteMessage($"{impactedTests.Count} Tests impacted");

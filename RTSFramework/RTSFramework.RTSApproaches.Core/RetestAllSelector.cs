@@ -18,19 +18,12 @@ namespace RTSFramework.RTSApproaches.Core
 
 		public Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
-			var allChangedElements = delta.AddedElements.Select(x => x.Id)
-				.Union(delta.ChangedElements.Select(x => x.Id))
-				.Union(delta.DeletedElements.Select(x => x.Id)).ToList();
-
-			GetResponsibleChangesByTestId = x => allChangedElements;
-
 			SelectedTests = testsDelta.NewModel;
 
 			return Task.CompletedTask;
 		}
 
 		public ISet<TTestCase> SelectedTests { get; private set; }
-		public Func<string, IList<string>> GetResponsibleChangesByTestId { get; private set; }
 		public ICorrespondenceModel CorrespondenceModel => null;
 	}
 }
