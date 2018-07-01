@@ -16,19 +16,19 @@ namespace RTSFramework.RTSApproaches.Static
 		where TDelta : IDelta<TModel>
 		where TTestCase : ITestCase
 	{
-		private readonly IDataStructureProvider<TDataStructure, TModel> dataStructureProvider;
+		private readonly IDataStructureBuilder<TDataStructure, TModel> dataStructureBuilder;
 		private readonly IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector;
 		public ISet<TTestCase> SelectedTests { get; private set; }
-		public StaticTestSelector(IDataStructureProvider<TDataStructure, TModel> dataStructureProvider,
+		public StaticTestSelector(IDataStructureBuilder<TDataStructure, TModel> dataStructureBuilder,
 			IStaticRTS<TModel, TDelta, TTestCase, TDataStructure> staticSelector)
 		{
-			this.dataStructureProvider = dataStructureProvider;
+			this.dataStructureBuilder = dataStructureBuilder;
 			this.staticSelector = staticSelector;
 		}
 
 		public async Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta delta, CancellationToken cancellationToken)
 		{
-			var dataStructure = await dataStructureProvider.GetDataStructure(delta.NewModel, cancellationToken);
+			var dataStructure = await dataStructureBuilder.GetDataStructure(delta.NewModel, cancellationToken);
 
 			SelectedTests = staticSelector.SelectTests(dataStructure, testsDelta, delta, cancellationToken);
 		}

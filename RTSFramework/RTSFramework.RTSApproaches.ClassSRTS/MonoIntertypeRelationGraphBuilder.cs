@@ -14,7 +14,7 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class MonoIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
+	public class MonoIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureBuilder<IntertypeRelationGraph, TCSharpModel> where TCSharpModel : CSharpProgramModel
 	{
 		private readonly IArtefactAdapter<string, IList<CSharpAssembly>> assembliesArtefactAdapter;
 
@@ -328,11 +328,6 @@ namespace RTSFramework.RTSApproaches.Static
 
 				graph.Nodes.Add(type.FullName);
 			}
-		}
-
-		public Task PersistDataStructure(IntertypeRelationGraph dataStructure)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

@@ -16,7 +16,7 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-	public class RoslynIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureProvider<IntertypeRelationGraph, TCSharpModel>
+	public class RoslynIntertypeRelationGraphBuilder<TCSharpModel> : IDataStructureBuilder<IntertypeRelationGraph, TCSharpModel>
 		where TCSharpModel : CSharpProgramModel
 	{
 		private readonly ISettingsProvider settingsProvider;
@@ -380,10 +380,5 @@ namespace RTSFramework.Concrete.CSharp.Roslyn
 		}
 
 		#endregion
-
-		public Task PersistDataStructure(IntertypeRelationGraph dataStructure)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

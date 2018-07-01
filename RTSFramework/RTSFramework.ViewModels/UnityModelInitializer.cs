@@ -491,8 +491,8 @@ namespace RTSFramework.ViewModels
 
 		private static void InitDataStructureProviderForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, MonoIntertypeRelationGraphBuilder<TModel>>();
-			//unityContainer.RegisterType<IDataStructureProvider<IntertypeRelationGraph, TModel>, RoslynIntertypeRelationGraphBuilder<TModel>>();
+			unityContainer.RegisterType<IDataStructureBuilder<IntertypeRelationGraph, TModel>, MonoIntertypeRelationGraphBuilder<TModel>>();
+			//unityContainer.RegisterType<IDataStructureBuilder<IntertypeRelationGraph, TModel>, RoslynIntertypeRelationGraphBuilder<TModel>>();
 			unityContainer.RegisterType<CorrespondenceModelManager<TModel>>(new ContainerControlledLifetimeManager());
 		}
 

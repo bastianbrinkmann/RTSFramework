@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\IDataStructureProvider.cs" />
+    <Compile Include="Contracts\IDataStructureBuilder.cs" />
     <Compile Include="DataStructures\IntertypeRelationGraph.cs" />
     <Compile Include="ImpactedTestEventArgs.cs" />
     <Compile Include="Contracts\ITestSelector.cs" />
