@@ -33,6 +33,6 @@ namespace RTSFramework.RTSApproaches.Static
 			SelectedTests = staticSelector.SelectTests(dataStructure, testsDelta, delta, cancellationToken);
 		}
 
-		public ICorrespondenceModel CorrespondenceModel => null;
+		public ICorrespondenceModel CorrespondenceModel => staticSelector.CorrespondenceModel;
 	}
 }

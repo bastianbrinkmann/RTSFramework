@@ -56,6 +56,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClassSRTS.cs" />
+    <Compile Include="AffectedType.cs" />
+    <Compile Include="ImpactedTest.cs" />
     <Compile Include="MonoIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IStaticRTS.cs" />
@@ -86,6 +88,10 @@
     <ProjectReference Include="..\RTSFramework.RTSApproaches.Core\RTSFramework.RTSApproaches.Core.csproj">
       <Project>{6BE9B2B8-9548-44A9-AB98-583BC4C3962B}</Project>
       <Name>RTSFramework.RTSApproaches.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.RTSApproaches.Utilities\RTSFramework.RTSApproaches.CorrespondenceModel.csproj">
+      <Project>{8E0E2C16-376E-4465-AF69-E1B300726080}</Project>
+      <Name>RTSFramework.RTSApproaches.CorrespondenceModel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

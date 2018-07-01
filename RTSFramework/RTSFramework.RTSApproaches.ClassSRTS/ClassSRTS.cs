@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
+using RTSFramework.Contracts;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.RTSApproaches.Core.DataStructures;
@@ -13,14 +14,14 @@ namespace RTSFramework.RTSApproaches.Static
 	{
 		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
-			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();
+			ISet<ImpactedTest<TTestCase>> impactedTests = new HashSet<ImpactedTest<TTestCase>>();
 
-			var changedTypes = new List<string>();
+			var changedTypes = new List<AffectedType>();
 
-			changedTypes.AddRange(delta.AddedElements.Select(x => x.Id));
-			changedTypes.AddRange(delta.ChangedElements.Select(x => x.Id));
+			changedTypes.AddRange(delta.AddedElements.Select(x => new AffectedType {Id = x.Id, ImpactedDueTo = x.Id}));
+			changedTypes.AddRange(delta.ChangedElements.Select(x => new AffectedType { Id = x.Id, ImpactedDueTo = x.Id }));
 
-			var affectedTypes = new List<string>(changedTypes);
+			var affectedTypes = new List<AffectedType>(changedTypes);
 
 			foreach (var type in changedTypes)
 			{
@@ -30,31 +31,41 @@ namespace RTSFramework.RTSApproaches.Static
 
 			testsDelta.AddedElements.ForEach(x =>
 			{
-				if (!impactedTests.Contains(x))
+				if (impactedTests.All(y => y.TestCase.Id != x.Id))
 				{
-					impactedTests.Add(x);
+					impactedTests.Add(new ImpactedTest<TTestCase> {TestCase = x, ImpactedDueTo = null});
 				}
 			});
 
-			return impactedTests;
+			CorrespondenceModel = new CorrespondenceModel.Models.CorrespondenceModel
+			{
+				ProgramVersionId = delta.NewModel.VersionId,
+				GranularityLevel = GranularityLevel.Class,
+				CorrespondenceModelLinks = impactedTests.ToDictionary(
+					x => x.TestCase.Id, 
+					x => x.ImpactedDueTo == null ? new HashSet<string>() : new HashSet<string>(new[] {x.ImpactedDueTo}))
+			};
+
+			return new HashSet<TTestCase>(impactedTests.Select(x => x.TestCase));
 		}
 
-		private void ExtendAffectedTypesAndReportImpactedTests(string type, IntertypeRelationGraph graph, List<string> affectedTypes, ISet<TTestCase> allTests, ISet<TTestCase> impactedTests, CancellationToken cancellationToken)
+		private void ExtendAffectedTypesAndReportImpactedTests(AffectedType type, IntertypeRelationGraph graph, List<AffectedType> affectedTypes, ISet<TTestCase> allTests, ISet<ImpactedTest<TTestCase>> impactedTests, CancellationToken cancellationToken)
 		{
-			foreach (var test in allTests.Where(x => x.AssociatedClass == type))
+			foreach (var test in allTests.Where(x => x.AssociatedClass == type.Id))
 			{
-				impactedTests.Add(test);
+				impactedTests.Add(new ImpactedTest<TTestCase> {TestCase = test, ImpactedDueTo = type.ImpactedDueTo});
 			}
 
-			var usedByTypes = graph.UseEdges.Where(x => x.Item2 == type).Select(x => x.Item1);
+			var usedByTypes = graph.UseEdges.Where(x => x.Item2 == type.Id).Select(x => x.Item1);
 
 			foreach (string usedByType in usedByTypes)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!affectedTypes.Contains(usedByType))
+				if (affectedTypes.All(x => x.Id != usedByType))
 				{
-					affectedTypes.Add(usedByType);
-					ExtendAffectedTypesAndReportImpactedTests(usedByType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
+					var newAffectedType = new AffectedType {Id = usedByType, ImpactedDueTo = type.ImpactedDueTo};
+					affectedTypes.Add(newAffectedType);
+					ExtendAffectedTypesAndReportImpactedTests(newAffectedType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 
@@ -63,32 +74,36 @@ namespace RTSFramework.RTSApproaches.Static
 			// "Note that ClassSRTS need not include supertypes of the changed types (but must include all subtypes) 
 			// in the transitive closure because a test cannot be affected statically by the changes even if the 
 			// test reaches supertype(s) of the changed types unless the test also reaches a changed type or (one of) its subtypes."
-			var subTypes = graph.InheritanceEdges.Where(x => x.Item2 == type).Select(x => x.Item1);
+			var subTypes = graph.InheritanceEdges.Where(x => x.Item2 == type.Id).Select(x => x.Item1);
 
 			foreach (string subtype in subTypes)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!affectedTypes.Contains(subtype))
+				if (affectedTypes.All(x => x.Id != subtype))
 				{
-					affectedTypes.Add(subtype);
-					ExtendAffectedTypesAndReportImpactedTests(subtype, graph, affectedTypes, allTests, impactedTests, cancellationToken);
+					var newAffectedType = new AffectedType { Id = subtype, ImpactedDueTo = type.ImpactedDueTo };
+					affectedTypes.Add(newAffectedType);
+					ExtendAffectedTypesAndReportImpactedTests(newAffectedType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 
 			//However, this might not be true if dependency injection is used:
 			//Instances of objects are injected dynamically which happens out of scope of the static analysis
 			//-> Pessimistic approach selects also all super types
-			var superTypes = graph.InheritanceEdges.Where(x => x.Item1 == type).Select(x => x.Item2);
+			var superTypes = graph.InheritanceEdges.Where(x => x.Item1 == type.Id).Select(x => x.Item2);
 
 			foreach (string superType in superTypes)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!affectedTypes.Contains(superType))
+				if (affectedTypes.All(x => x.Id != superType))
 				{
-					affectedTypes.Add(superType);
-					ExtendAffectedTypesAndReportImpactedTests(superType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
+					var newAffectedType = new AffectedType { Id = superType, ImpactedDueTo = type.ImpactedDueTo };
+					affectedTypes.Add(newAffectedType);
+					ExtendAffectedTypesAndReportImpactedTests(newAffectedType, graph, affectedTypes, allTests, impactedTests, cancellationToken);
 				}
 			}
 		}
+
+		public ICorrespondenceModel CorrespondenceModel { get; private set; }
 	}
 }
