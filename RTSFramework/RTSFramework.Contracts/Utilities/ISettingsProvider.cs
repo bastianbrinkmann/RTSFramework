@@ -7,7 +7,7 @@
 		string TestAssembliesFilter { get; }
 		bool CleanupTestResultsDirectory { get; }
 		bool LogToFile { get; }
-
 		string[] AdditionalReferences { get; }
+		double FontSize { get; }
 	}
 }

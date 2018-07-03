@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,10 +14,29 @@ namespace RTSFramework.GUI
 	/// </summary>
 	public partial class MainWindow
 	{
+		private readonly MainWindowViewModel viewModel;
+
 		public MainWindow(MainWindowViewModel viewModel)
 		{
 			InitializeComponent();
 			DataContext = viewModel;
+			this.viewModel = viewModel;
+
+			viewModel.PropertyChanged += ViewModelOnPropertyChanged;
+			SetFontSize();
+		}
+
+		private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+		{
+			if (propertyChangedEventArgs.PropertyName == nameof(MainWindowViewModel.FontSize))
+			{
+				SetFontSize();
+			}
+		}
+
+		private void SetFontSize()
+		{
+			FontSize = viewModel.FontSize;
 		}
 
 		private void ShowHideDetails(object sender, RoutedEventArgs e)

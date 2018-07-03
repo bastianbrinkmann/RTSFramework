@@ -91,10 +91,10 @@ namespace RTSFramework.ViewModels
 		private string csvTestsFile;
 		private bool isCsvTestsFileSelectable;
 		private bool discoverNewTests;
-		private bool areTestsAvailable;
 		private DelegateCommand visualizeDependenciesCommand;
 		private bool dependenciesVisualizationAvailable;
 		private DelegateCommand reportCollectedStatisticsCommand;
+		private double fontSize;
 
 		#endregion
 
@@ -104,7 +104,8 @@ namespace RTSFramework.ViewModels
 			IUserRunConfigurationProvider userRunConfigurationProvider,
 			UserSettingsProvider userRunSettingsProvider,
 			IStatisticsReporter statisticsReporter,
-			IArtefactAdapter<string, StatisticsReportData> reportArtefactAdapter)
+			IArtefactAdapter<string, StatisticsReportData> reportArtefactAdapter,
+			ISettingsProvider settingsProvider)
 		{
 			this.dialogService = dialogService;
 			this.applicationUiExecutor = applicationUiExecutor;
@@ -153,9 +154,10 @@ namespace RTSFramework.ViewModels
 			CsvTestsFile = userSettings.CsvTestsFile;
 
 			DiscoverNewTests = true;
-			AreTestsAvailable = false;
 
 			RegularGitsCommitRefresh();
+
+			FontSize = settingsProvider.FontSize;
 		}
 
 		private void RegularGitsCommitRefresh()
@@ -340,12 +342,12 @@ namespace RTSFramework.ViewModels
 
 		#region Properties
 
-		public bool AreTestsAvailable
+		public double FontSize
 		{
-			get { return areTestsAvailable; }
+			get { return fontSize; }
 			set
 			{
-				areTestsAvailable = value;
+				fontSize = value;
 				RaisePropertyChanged();
 			}
 		}
@@ -771,7 +773,6 @@ namespace RTSFramework.ViewModels
 		{
 			RunStatus = RunStatus.Running;
 			TestResults.Clear();
-			AreTestsAvailable = true;
 
 			cancellationTokenSource = new CancellationTokenSource();
 

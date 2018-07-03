@@ -26,6 +26,16 @@ namespace RTSFramework.GUI
 			}
 
 			AdditionalReferences = ConfigurationManager.AppSettings.Get("additionalReferences").Split(';');
+
+			double fontSize;
+			if (double.TryParse(ConfigurationManager.AppSettings.Get("fontSize"), out fontSize))
+			{
+				FontSize = fontSize;
+			}
+			else
+			{
+				FontSize = 12;
+			}
 		}
 
 		public string Configuration { get; }
@@ -34,5 +44,6 @@ namespace RTSFramework.GUI
 		public bool CleanupTestResultsDirectory { get; }
 		public bool LogToFile { get; }
 		public string[] AdditionalReferences { get; }
+		public double FontSize { get; }
 	}
 }

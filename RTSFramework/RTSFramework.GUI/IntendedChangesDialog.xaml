@@ -9,17 +9,18 @@
         Title="Intended Changes" Height="300" Width="500" Icon="Resources/testselection.ico" Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}" WindowStartupLocation="CenterScreen">
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="85"/>
-			<ColumnDefinition/>
+			<ColumnDefinition Width="150"/>
+			<ColumnDefinition Width="150"/>
+			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="29"/>
+			<RowDefinition Height="50"/>
 			<RowDefinition Height="242*"/>
 		</Grid.RowDefinitions>
-		<Button x:Name="BtnAddFile" Command="{Binding AddFileCommand}" Content="Add File" Margin="5,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Row="0" Grid.Column="0" Height="19"/>
-		<Button x:Name="BtnRemoveFile" Command="{Binding RemoveFileCommand}" Content="Remove File" Margin="4.2,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Row="0" Grid.Column="1" Height="19"/>
+		<Button x:Name="BtnAddFile" Command="{Binding AddFileCommand}" Content="Add File" Margin="5,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+		<Button x:Name="BtnRemoveFile" Command="{Binding RemoveFileCommand}" Content="Remove File" Margin="5,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" />
 
-		<ListView x:Name="LvIntendedChanges" Margin="5,5.2,4.6,5.4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" SelectedItem="{Binding SelectedFile}" ItemsSource="{Binding IntendedChanges}" Grid.Column="0" Grid.ColumnSpan="2">
+		<ListView x:Name="LvIntendedChanges" Margin="5,5,4,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" SelectedItem="{Binding SelectedFile}" ItemsSource="{Binding IntendedChanges}" Grid.Column="0" Grid.ColumnSpan="3">
 			<ListView.View>
 				<GridView>
 					<GridViewColumn Header="Intended Changes" Width="450"/>

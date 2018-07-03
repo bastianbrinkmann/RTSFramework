@@ -30,100 +30,101 @@
 	</Window.TaskbarItemInfo>
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="115"/>
-			<ColumnDefinition Width="506*"/>
+			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="30"/>
-			<RowDefinition Height="180"/>
-			<RowDefinition Height="66"/>
+			<RowDefinition Height="50"/>
+			<RowDefinition Height="230"/>
+			<RowDefinition Height="100"/>
 			<RowDefinition Height="278*"/>
 			<RowDefinition Height="25"/>
 			<RowDefinition/>
 		</Grid.RowDefinitions>
-		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="110" Command="{Binding StartRunCommand}" Height="20" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
-		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="110" Command="{Binding CancelRunCommand}" Height="20" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
-		<Grid Grid.Row="1" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" Margin="0,5,5,5" Grid.Column="0" Grid.ColumnSpan="2">
+		<Button x:Name="BtnStartRun" Content="Start Run" HorizontalAlignment="Stretch" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding StartRunCommand}" Grid.Row="0" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}"/>
+		<Button x:Name="BtnCancelRun" Content="Cancel Run" HorizontalAlignment="Stretch" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding CancelRunCommand}" Grid.Row="0" Grid.Column="1" IsEnabled="{Binding IsRunning}"/>
+		<Grid Grid.Row="1" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" Margin="0,5,5,5" Grid.Column="0" Grid.ColumnSpan="3">
 			<Grid.RowDefinitions >
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115*"/>
 				<ColumnDefinition Width="230*"/>
 				<ColumnDefinition Width="230*"/>
 				<ColumnDefinition Width="230*"/>
 			</Grid.ColumnDefinitions>
 
-			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="0" Margin="0,1" Width="78"/>
-			<Label x:Name="LblProgramModelType" Content="Program Model:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="1" Margin="0,1" Width="96" />
-			<Label x:Name="LblTestType" Content="Tests:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="2" Margin="0,1" Width="96" />
-			<Label x:Name="LblDiscoveryType" Content="Delta:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="3" Margin="0,1" Width="40"/>
-			<Label x:Name="LblRTSApproachType" Content="Selection:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="4" Margin="0,1" Width="61"/>
-			<Label x:Name="LblProcessingType" Content="Tests Processing:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="5" Margin="0,1" Width="98" />
+			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Margin="0,1"/>
+			<Label x:Name="LblProgramModelType" Content="Program Model:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Margin="0,1" />
+			<Label x:Name="LblTestType" Content="Tests:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Margin="0,1" />
+			<Label x:Name="LblDiscoveryType" Content="Delta:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="3" Margin="0,1" />
+			<Label x:Name="LblRTSApproachType" Content="Selection:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="4" Margin="0,1" />
+			<Label x:Name="LblProcessingType" Content="Tests Processing:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="5" Margin="0,1" />
 
-			<TextBox x:Name="TbSolutionFilePath" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding SolutionFilePath}" Margin="0,0,30,0" Grid.Row="0" Grid.Column="1"/>
-			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="24" Grid.Column="1" Grid.Row="0" />
-			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Height="22" Grid.Row="1" Grid.Column="1" />
-			<ComboBox x:Name="CbTestType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:TestType}}}" SelectedItem="{Binding TestType}" Height="22" Grid.Row="2" Grid.Column="1" />
-			<CheckBox x:Name="CbDiscoverNewTests"  Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsEnabled="{Binding AreTestsAvailable}" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
-			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Center" ItemsSource="{Binding DiscoveryTypes}" SelectedItem="{Binding DiscoveryType}" Height="22" Grid.Row="3" Grid.Column="1" />
-			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Height="22" Grid.Row="4" Grid.Column="1" />
-			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Center" ItemsSource="{Binding ProcessingTypes}" SelectedItem="{Binding ProcessingType}" Height="22" Grid.Row="5" Grid.Column="1" />
+			<TextBox x:Name="TbSolutionFilePath" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding SolutionFilePath}" Margin="0,0,30,0" Grid.Row="0" Grid.Column="1"/>
+			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Grid.Column="1" Grid.Row="0" />
+			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Grid.Row="1" Grid.Column="1" />
+			<ComboBox x:Name="CbTestType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:TestType}}}" SelectedItem="{Binding TestType}" Grid.Row="2" Grid.Column="1" />
+			<CheckBox x:Name="CbDiscoverNewTests"  Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
+			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Center" ItemsSource="{Binding DiscoveryTypes}" SelectedItem="{Binding DiscoveryType}" Grid.Row="3" Grid.Column="1" />
+			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Grid.Row="4" Grid.Column="1" />
+			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Center" ItemsSource="{Binding ProcessingTypes}" SelectedItem="{Binding ProcessingType}" Grid.Row="5" Grid.Column="1" />
 
-			<Label x:Name="LblRepositoryPath" Content="Repository Path:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Width="101" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="1" Grid.Column="2" Margin="0,1" />
-			<Label x:Name="LblGranularityLevel" Content="Granularity Level:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="4" Grid.Column="2"/>
+			<Label x:Name="LblRepositoryPath" Content="Repository Path:" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="1" Grid.Column="2" Margin="0,1" />
+			<Label x:Name="LblGranularityLevel" Content="Granularity Level:" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="4" Grid.Column="2"/>
 
-			<ComboBox x:Name="CbGranularityLevel" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type models:GranularityLevel}}}" SelectedItem="{Binding GranularityLevel}" Height="22" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="4" Grid.Column="3" />
-			
-			<TextBox x:Name="TbRepositoryPath" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding RepositoryPath}" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="0,0,30,0" Grid.Column="3"  Grid.Row="1" />
-			<Button x:Name="BtnSelectRepositoryPath" Command="{Binding SelectRepositoryCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="24" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3"  Grid.Row="1" />
-			
-			<Button x:Name="BtnIntendedChanges" Command="{Binding SpecitfyIntendedChangesCommand}" Content="Intended Changes" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="24" Visibility="{Binding IsIntededChangesEditingEnabled, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="2" Grid.Row="3" />
+			<ComboBox x:Name="CbGranularityLevel" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type models:GranularityLevel}}}" SelectedItem="{Binding GranularityLevel}" Visibility="{Binding IsGranularityLevelChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="4" Grid.Column="3" />
 
-			<TextBox x:Name="TbCsvTestsFile" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding CsvTestsFile}" Visibility="{Binding IsCsvTestsFileSelectable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="2,0,30,0" Grid.Column="2"  Grid.Row="2" />
-			<Button x:Name="BtnSelectCsvTestsFile" Command="{Binding SelectCsvTestsFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Height="24" Visibility="{Binding IsCsvTestsFileSelectable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="2"  Grid.Row="2" />
-			
-			<ComboBox x:Name="CbFromCommit" VerticalAlignment="Center" ItemsSource="{Binding FromCommitModels}" SelectedItem="{Binding FromCommit}" Height="22" Visibility="{Binding IsFromCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="2" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
-			<ComboBox x:Name="CbToCommit" VerticalAlignment="Center" ItemsSource="{Binding ToCommitModels}" SelectedItem="{Binding ToCommit}" Height="22" Visibility="{Binding IsToCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="3" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
+			<TextBox x:Name="TbRepositoryPath" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding RepositoryPath}" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="0,0,30,0" Grid.Column="3"  Grid.Row="1" />
+			<Button x:Name="BtnSelectRepositoryPath" Command="{Binding SelectRepositoryCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="{Binding IsRepositoryPathChangable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="3" Width="25" Grid.Row="1" />
+
+			<Button x:Name="BtnIntendedChanges" Command="{Binding SpecitfyIntendedChangesCommand}" Content="Intended Changes" HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="{Binding IsIntededChangesEditingEnabled, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="2" Grid.Row="3" />
+
+			<TextBox x:Name="TbCsvTestsFile" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding CsvTestsFile}" Visibility="{Binding IsCsvTestsFileSelectable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Margin="2,0,30,0" Grid.Column="2"  Grid.Row="2" />
+			<Button x:Name="BtnSelectCsvTestsFile" Command="{Binding SelectCsvTestsFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="{Binding IsCsvTestsFileSelectable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Column="2"  Grid.Row="2" />
+
+			<ComboBox x:Name="CbFromCommit" VerticalAlignment="Center" ItemsSource="{Binding FromCommitModels}" SelectedItem="{Binding FromCommit}" Visibility="{Binding IsFromCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="2" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
+			<ComboBox x:Name="CbToCommit" VerticalAlignment="Center" ItemsSource="{Binding ToCommitModels}" SelectedItem="{Binding ToCommit}" Visibility="{Binding IsToCommitChangeable, Converter={converters:VisibilityConverter}, Mode=OneWay}" Grid.Row="3" Grid.Column="3" Margin="2,0,2,0" DisplayMemberPath="DisplayName" />
 
 			<CheckBox x:Name="CbWithTimeLimit"  Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding WithTimeLimit}">With time limit?</CheckBox>
-			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" Height="24" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" IsEnabled="{Binding WithTimeLimit}" Margin="0,0,30,0" Grid.Column="3"  Grid.Row="0" />
-			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="24" Grid.Column="3" Grid.Row="0" IsEnabled="{Binding WithTimeLimit}" />
+			<TextBox x:Name="TbTimeLimit" PreviewTextInput="NumberValidationTextBox" VerticalContentAlignment="Center" TextWrapping="NoWrap" VerticalAlignment="Center" Text="{Binding TimeLimit}" IsEnabled="{Binding WithTimeLimit}" Margin="0,0,30,0" Grid.Column="3"  Grid.Row="0" />
+			<Label x:Name="LblProcessing" Content="in s" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="3" Grid.Row="0" IsEnabled="{Binding WithTimeLimit}" />
 		</Grid>
-		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
+		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,5,5,5" IsEnabled="{Binding IsRunning, Converter={converters:InverseBooleanConverter}}" >
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="115"/>
-				<ColumnDefinition Width="115"/>
-				<ColumnDefinition Width="115"/>
-				<ColumnDefinition Width="115"/>
-				<ColumnDefinition Width="115"/>
+				<ColumnDefinition Width="115*"/>
+				<ColumnDefinition Width="115*"/>
+				<ColumnDefinition Width="115*"/>
+				<ColumnDefinition Width="115*"/>
+				<ColumnDefinition Width="115*"/>
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
-				<RowDefinition Height="28"/>
-				<RowDefinition Height="28"/>
+				<RowDefinition Height="28*"/>
+				<RowDefinition Height="28*"/>
 			</Grid.RowDefinitions>
-			<Label x:Name="LblTestCaseName" Content="Test Case Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="0"/>
-			<Label x:Name="LblClassName" Content="Class Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="0" Grid.Row="1"/>
-			<Label x:Name="LblCategory" Content="Category:" HorizontalAlignment="Left" VerticalAlignment="Center" Height="26" Grid.Column="2" Grid.Row="0"/>
+			<Label x:Name="LblTestCaseName" Content="Test Case Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+			<Label x:Name="LblClassName" Content="Class Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1"/>
+			<Label x:Name="LblCategory" Content="Category:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
 
-			<TextBox x:Name="TbTestCaseName" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding TestCaseNameFilter}" Grid.Row="0" Grid.Column="1"/>
-			<TextBox x:Name="TbClassName" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding ClassNameFilter}" Grid.Row="1" Grid.Column="1"/>
-			<TextBox x:Name="TbCategory" Height="24" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding CategoryFilter}" Grid.Row="0" Grid.Column="3"/>
+			<TextBox x:Name="TbTestCaseName" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding TestCaseNameFilter}" Grid.Row="0" Grid.Column="1"/>
+			<TextBox x:Name="TbClassName" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding ClassNameFilter}" Grid.Row="1" Grid.Column="1"/>
+			<TextBox x:Name="TbCategory" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding CategoryFilter}" Grid.Row="0" Grid.Column="3"/>
 		</Grid>
-		<Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+		<Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
 			<Grid.RowDefinitions>
 				<RowDefinition Height="*"/>
-				<RowDefinition Height="28"/>
+				<RowDefinition Height="50"/>
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="150"/>
-				<ColumnDefinition Width="150"/>
+				<ColumnDefinition Width="200"/>
+				<ColumnDefinition Width="200"/>
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
 			<DataGrid Grid.ColumnSpan="3" x:Name="DgTests" IsReadOnly="True" AutoGenerateColumns="False" Margin="5,0,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding TestResults}"
@@ -195,11 +196,11 @@
 					<DataGridTextColumn Width="100" Header="Duration (in sec)" Binding="{Binding DurationInSeconds}" />
 				</DataGrid.Columns>
 			</DataGrid>
-			<Button Grid.Row="1" Grid.Column="0" x:Name="BtnVisualizeDependencies" Content="Visualize Dependencies" HorizontalAlignment="Center" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding VisualizeDependenciesCommand}" Height="20" IsEnabled="{Binding DependenciesVisualizationAvailable}"/>
-			<Button Grid.Row="1" Grid.Column="1" x:Name="BtnAveragePercentageImpactedTests" Content="Report collected statistics" HorizontalAlignment="Center" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding ReportCollectedStatisticsCommand}" Height="20" />
+			<Button Grid.Row="1" Grid.Column="0" x:Name="BtnVisualizeDependencies" Content="Visualize Dependencies" HorizontalAlignment="Stretch" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding VisualizeDependenciesCommand}" IsEnabled="{Binding DependenciesVisualizationAvailable}"/>
+			<Button Grid.Row="1" Grid.Column="1" x:Name="BtnAveragePercentageImpactedTests" Content="Report collected statistics" HorizontalAlignment="Stretch" Margin="5,5,0,0" VerticalAlignment="Top" Command="{Binding ReportCollectedStatisticsCommand}" />
 		</Grid>
 		
-		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Background="{StaticResource BackgroundColor}">
+		<StatusBar  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource BackgroundColor}">
 			<StatusBar.ItemsPanel>
 				<ItemsPanelTemplate>
 					<Grid>

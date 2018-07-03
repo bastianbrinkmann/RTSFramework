@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
+using RTSFramework.ViewModels;
 
 namespace RTSFramework.GUI
 {
@@ -7,9 +9,27 @@ namespace RTSFramework.GUI
 	/// </summary>
 	public partial class IntendedChangesDialog
 	{
-		public IntendedChangesDialog()
+
+		private IntendedChangesDialogViewModel viewModel;
+		public IntendedChangesDialog(IntendedChangesDialogViewModel viewModel)
 		{
 			InitializeComponent();
+			this.viewModel = viewModel;
+			viewModel.PropertyChanged += ViewModelOnPropertyChanged;
+			SetFontSize();
+		}
+
+		private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+		{
+			if (propertyChangedEventArgs.PropertyName == nameof(MainWindowViewModel.FontSize))
+			{
+				SetFontSize();
+			}
+		}
+
+		private void SetFontSize()
+		{
+			FontSize = viewModel.FontSize;
 		}
 	}
 }

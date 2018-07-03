@@ -22,12 +22,15 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<string> intendedChanges;
 		private ICommand addFileCommand;
 		private DelegateCommand removeFileCommand;
+		private double fontSize;
 
 		#endregion
 
 		private const string FileExtension = "Class Files (*.cs)|*.cs";
 
-		public IntendedChangesDialogViewModel(IDialogService dialogService, IUserRunConfigurationProvider userRunConfigurationProvider)
+		public IntendedChangesDialogViewModel(IDialogService dialogService, 
+			IUserRunConfigurationProvider userRunConfigurationProvider,
+			ISettingsProvider settingsProvider)
 		{
 			this.dialogService = dialogService;
 			this.userRunConfigurationProvider = userRunConfigurationProvider;
@@ -37,6 +40,8 @@ namespace RTSFramework.ViewModels
 
 			AddFileCommand = new DelegateCommand(AddFile);
 			RemoveFileCommand = new DelegateCommand(RemoveFile, () => SelectedFile != null);
+
+			FontSize = settingsProvider.FontSize;
 
 			PropertyChanged += OnPropertyChanged;
 		}
@@ -72,6 +77,16 @@ namespace RTSFramework.ViewModels
 		}
 
 		#region Properties
+
+		public double FontSize
+		{
+			get { return fontSize; }
+			set
+			{
+				fontSize = value;
+				RaisePropertyChanged();
+			}
+		}
 
 		public string SelectedFile
 		{
