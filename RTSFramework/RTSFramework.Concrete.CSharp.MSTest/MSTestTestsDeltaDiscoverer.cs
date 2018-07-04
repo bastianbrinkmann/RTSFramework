@@ -29,18 +29,21 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly ISettingsProvider settingsProvider;
 		private readonly IUserRunConfigurationProvider runConfiguration;
 		private readonly IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter;
+		private readonly IArtefactAdapter<TestCase, MSTestTestcase> vsTestCaseAdapter;
 
 		public MSTestTestsDeltaDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider,
 			IUserRunConfigurationProvider runConfiguration,
-			IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter)
+			IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter,
+			IArtefactAdapter<TestCase, MSTestTestcase> vsTestCaseAdapter)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
 			this.settingsProvider = settingsProvider;
 			this.runConfiguration = runConfiguration;
 			this.testsModelAdapter = testsModelAdapter;
+			this.vsTestCaseAdapter = vsTestCaseAdapter;
 		}
 
 		public async Task<StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
@@ -70,7 +73,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var newTestsModel = new TestsModel<MSTestTestcase>
 			{
-				TestSuite = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x))),
+				TestSuite = new HashSet<MSTestTestcase>(vsTestCases.Select(x => vsTestCaseAdapter.Parse(x)).Where(x => !x.Ignored && filterFunction(x))),
 				VersionId = delta.NewModel.VersionId
 			};
 			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(delta.NewModel.VersionId));
@@ -80,34 +83,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			testsDelta.DeletedElements.AddRange(oldTestsModel.TestSuite.Except(newTestsModel.TestSuite));
 
 			return testsDelta;
-		}
-
-		//TODO: Artefact adapter
-		private MSTestTestcase Convert(TestCase vsTestCase)
-		{
-			var testNameProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyTestClassName);
-			var isEnabledProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyIsEnabled);
-			var testCategoryProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyTestCategory);
-			var dataDrivenProperty = vsTestCase.Properties.SingleOrDefault(x => x.Id == MSTestConstants.PropertyIsDataDriven);
-
-			string testClassName = testNameProperty != null ? vsTestCase.GetPropertyValue(testNameProperty, "") : "";
-			bool isEnabled = isEnabledProperty == null || vsTestCase.GetPropertyValue(isEnabledProperty, true);
-			string[] categories = testCategoryProperty != null ? vsTestCase.GetPropertyValue(testCategoryProperty, new string[0]) : new string[0];
-			bool isDataDriven = dataDrivenProperty != null && vsTestCase.GetPropertyValue(dataDrivenProperty, false);
-
-			var msTestCase = new MSTestTestcase
-			{
-				Name = vsTestCase.DisplayName,
-				AssemblyPath = vsTestCase.Source,
-				Id = vsTestCase.FullyQualifiedName,
-				AssociatedClass = testClassName,
-				Ignored = !isEnabled,
-				VsTestTestCase = vsTestCase,
-				IsChildTestCase = isDataDriven
-			};
-			msTestCase.Categories.AddRange(categories);
-
-			return msTestCase;
 		}
 
 		private async Task<IEnumerable<TestCase>> DiscoverTests(IEnumerable<string> sources, CancellationToken token)

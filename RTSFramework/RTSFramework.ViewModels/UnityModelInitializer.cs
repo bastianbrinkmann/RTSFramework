@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Msagl.Drawing;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using RTSFramework.Concrete.CSharp.Core;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Concrete.CSharp.MSTest;
@@ -23,6 +24,7 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.DeltaDiscoverer;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Contracts.SecondaryFeature;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
@@ -427,7 +429,8 @@ namespace RTSFramework.ViewModels
 
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, MSTestTestExecutor<TDelta, TModel>>(ProcessingType.MSTestExecution.ToString());
-			unityContainer.RegisterType<ITestExecutor<MSTestTestcase, TDelta, TModel>, MSTestTestExecutor<TDelta, TModel>>();
+
+			unityContainer.RegisterType<ITestExecutor<MSTestTestcase, TDelta, TModel>, MSTestTestExecutor<TDelta, TModel>>(new ContainerControlledLifetimeManager());
 
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.ListReporting.ToString(), new ContainerControlledLifetimeManager());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, TestListResult<MSTestTestcase>, TDelta, TModel>, TestReporter<MSTestTestcase, TDelta, TModel>>(ProcessingType.CsvReporting.ToString(), new ContainerControlledLifetimeManager());
@@ -513,7 +516,9 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<string, StatisticsReportData>, StatisticsReportDataStringAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>>, JsonTestsModelAdapter<MSTestTestcase>>();
 			unityContainer.RegisterType<IArtefactAdapter<FileInfo, TestsModel<CsvFileTestcase>>, JsonTestsModelAdapter<CsvFileTestcase>>();
-
+			unityContainer.RegisterType<IArtefactAdapter<TestCase, MSTestTestcase>, VsTestCaseMSTestTestcaseAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<VsTestResultsToConvert, IList<ITestCaseResult<MSTestTestcase>>>, VsTestResultsAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<VsTestResultToConvert, ITestCaseResult<MSTestTestcase>>, VsTestResultAdapter>();
 			//MSTest
 			unityContainer.RegisterType<IArtefactAdapter<object, ITestsExecutionResult<MSTestTestcase>>, EmptyArtefactAdapter<ITestsExecutionResult<MSTestTestcase>>>();
 			unityContainer.RegisterType<IArtefactAdapter<CsvFileArtefact, TestListResult<MSTestTestcase>>, TestsCsvFileAdapter<MSTestTestcase>>();

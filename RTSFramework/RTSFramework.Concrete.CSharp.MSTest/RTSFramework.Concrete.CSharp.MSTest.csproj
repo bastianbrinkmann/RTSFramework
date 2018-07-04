@@ -100,6 +100,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapters\VsTestCaseMSTestTestcaseAdapter.cs" />
+    <Compile Include="Adapters\VsTestResultAdapter.cs" />
+    <Compile Include="Adapters\VsTestResultsAdapter.cs" />
+    <Compile Include="Adapters\VsTestResultToConvert.cs" />
+    <Compile Include="Adapters\VsTestResultsToConvert.cs" />
     <Compile Include="MSTestTestExecutor.cs" />
     <Compile Include="Models\MSTestExectionResult.cs" />
     <Compile Include="Models\MSTestExectionWithCodeCoverageResult.cs" />
