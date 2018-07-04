@@ -75,7 +75,7 @@
 			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Grid.Column="1" Grid.Row="0" />
 			<ComboBox x:Name="CbProgramModelType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Grid.Row="1" Grid.Column="1" />
 			<ComboBox x:Name="CbTestType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:TestType}}}" SelectedItem="{Binding TestType}" Grid.Row="2" Grid.Column="1" />
-			<CheckBox x:Name="CbDiscoverNewTests"  Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
+			<CheckBox x:Name="CbDiscoverNewTests" IsEnabled="False" Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
 			<ComboBox x:Name="CbDiscoveryType" VerticalAlignment="Center" ItemsSource="{Binding DiscoveryTypes}" SelectedItem="{Binding DiscoveryType}" Grid.Row="3" Grid.Column="1" />
 			<ComboBox x:Name="CbRTSApproachType" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:RTSApproachType}}}" SelectedItem="{Binding RTSApproachType}" Grid.Row="4" Grid.Column="1" />
 			<ComboBox x:Name="CbProcessingType" VerticalAlignment="Center" ItemsSource="{Binding ProcessingTypes}" SelectedItem="{Binding ProcessingType}" Grid.Row="5" Grid.Column="1" />
