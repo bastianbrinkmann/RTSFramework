@@ -18,12 +18,11 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+	public class StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
 		: IArtefactBasedController<TVisualizationArtefact>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
-		where TDiscoveryDelta : IDelta<TModel>
-		where TSelectionDelta : IDelta<TModel>
+		where TProgramDelta : IDelta<TModel>
 		where TResult : ITestProcessingResult
 	{
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
@@ -31,14 +30,14 @@ namespace RTSFramework.ViewModels.Controller
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
 		private readonly IArtefactAdapter<TArtefact, TModel> artefactAdapter;
-		private readonly ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
+		private readonly ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 		private readonly Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter;
 
 		public StateBasedController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
-			ModelBasedController<TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult> modelBasedController,
+			ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController,
 			ILoggingHelper loggingHelper,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter,
 			Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter)

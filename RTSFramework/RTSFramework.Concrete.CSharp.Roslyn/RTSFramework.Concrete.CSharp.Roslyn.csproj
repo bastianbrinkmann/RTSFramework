@@ -197,6 +197,7 @@
   <ItemGroup>
     <Compile Include="Adapters\SolutionAssembliesAdapter.cs" />
     <Compile Include="CSharpFileClassDeltaAdapter.cs" />
+    <Compile Include="ResponsibleChanges\ClassLevelResponsibleChangesReporter.cs" />
     <Compile Include="RoslynIntertypeRelationGraphBuilder.cs" />
     <Compile Include="Models\CSharpClassElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

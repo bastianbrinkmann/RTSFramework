@@ -14,27 +14,26 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
+	public class DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 		: IArtefactBasedController<TVisualizationArtefact>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
-		where TParsedDelta : IDelta<TModel>
-		where TSelectionDelta : IDelta<TModel>
+		where TProgramDelta : IDelta<TModel>
 		where TResult : ITestProcessingResult
 	{
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
-		private readonly IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter;
-		private readonly ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
+		private readonly IArtefactAdapter<TDeltaArtefact, TProgramDelta> deltaArtefactAdapter;
+		private readonly ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 		private readonly Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter;
 
 		public DeltaBasedController(
-			IArtefactAdapter<TDeltaArtefact, TParsedDelta> deltaArtefactAdapter,
-			ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController,
+			IArtefactAdapter<TDeltaArtefact, TProgramDelta> deltaArtefactAdapter,
+			ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController,
 			IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter,
 			ILoggingHelper loggingHelper,
 			Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter)

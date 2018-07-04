@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts;
+using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.RTSApproaches.Core.Contracts;
@@ -11,21 +13,26 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicTestSelector<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
+	public class DynamicTestSelector<TModel,TProgramDelta, TTestCase> : ITestSelector<TModel, TProgramDelta, TTestCase>
 		where TTestCase : class, ITestCase
 		where TModel : IProgramModel
-		where TModelElement : IProgramModelElement
+		where TProgramDelta : IDelta<TModel>
 	{
 		private readonly CorrespondenceModelManager<TModel> correspondenceModelProvider;
+		private readonly IDeltaAdapter<TProgramDelta, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter;
 
-		public DynamicTestSelector(CorrespondenceModelManager<TModel> correspondenceModelProvider)
+		public DynamicTestSelector(CorrespondenceModelManager<TModel> correspondenceModelProvider,
+			IDeltaAdapter<TProgramDelta, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter)
 		{
 			this.correspondenceModelProvider = correspondenceModelProvider;
+			this.deltaAdapter = deltaAdapter;
 		}
 
-		public Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta,
+		public Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta programDelta,
 			CancellationToken cancellationToken)
 		{
+			var delta = deltaAdapter.Convert(programDelta);
+
 			CorrespondenceModel = correspondenceModelProvider.GetCorrespondenceModel(delta.OldModel, testsDelta.OldModel);
 
 			ISet<TTestCase> impactedTests = new HashSet<TTestCase>();

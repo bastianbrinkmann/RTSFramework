@@ -10,13 +10,13 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Core
 {
-	public class RetestAllSelector<TModel, TModelElement, TTestCase> : ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>
+	public class RetestAllSelector<TModel, TProgramDelta, TTestCase> : ITestSelector<TModel, TProgramDelta, TTestCase>
 		where TModel : IProgramModel
-		where TModelElement : IProgramModelElement
+		where TProgramDelta : IDelta<TModel>
 		where TTestCase : class, ITestCase
 	{
 
-		public Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta programDelta, CancellationToken cancellationToken)
 		{
 			SelectedTests = testsDelta.NewModel.TestSuite;
 

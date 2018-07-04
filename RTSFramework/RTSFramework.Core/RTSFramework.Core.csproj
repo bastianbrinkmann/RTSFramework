@@ -90,7 +90,6 @@
     <Compile Include="NoOpPrioritizer.cs" />
     <Compile Include="PercentageImpactedTestsStatisticsCollector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResponsibleChanges\ResponsibleChangesReporter.cs" />
     <Compile Include="StatisticsReportdataStringAdapter.cs" />
     <Compile Include="PercentageImpactedTestsStatisticCsvFileAdapter.cs" />
     <Compile Include="PercentageImpactedTestsStatistic.cs" />

@@ -12,6 +12,7 @@ using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Concrete.CSharp.Roslyn;
 using RTSFramework.Concrete.CSharp.Roslyn.Adapters;
 using RTSFramework.Concrete.CSharp.Roslyn.Models;
+using RTSFramework.Concrete.CSharp.Roslyn.ResponsibleChanges;
 using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.Reporting;
@@ -30,7 +31,6 @@ using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core;
 using RTSFramework.Core.DependenciesVisualization;
 using RTSFramework.Core.Models;
-using RTSFramework.Core.ResponsibleChanges;
 using RTSFramework.Core.StatisticsReporting;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.Dynamic;
@@ -79,30 +79,28 @@ namespace RTSFramework.ViewModels
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
-			GetStateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
+		internal static StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+			GetStateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType, bool withTimeLimit)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TDiscoveryDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDiscoveryDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
 
 			return factory(rtsApproachType, processingType, withTimeLimit);
 		}
 
-		internal static DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
-			GetDeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
+		internal static DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+			GetDeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType, bool withTimeLimit)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
-			where TParsedDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
 
 			return factory(rtsApproachType, processingType, withTimeLimit);
 		}
@@ -123,61 +121,57 @@ namespace RTSFramework.ViewModels
 		private static void InitDeltaBasedControllerFactoryDelta<TDeltaArtefact, TModel>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 		{
-			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, StructuralDelta<TModel, FileElement> , StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, StructuralDelta<TModel, FileElement> , StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
 		}
 
-		private static void InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta>(IUnityContainer unityContainer)
+		private static void InitDeltaBasedControllerFactoryTestcase<TDeltaArtefact, TModel, TProgramDelta>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TParsedDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 		{
-			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
+			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
 
-			InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, MSTestTestcase>(unityContainer);
-			InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, CsvFileTestcase>(unityContainer);
+			InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TProgramDelta, MSTestTestcase>(unityContainer);
+			InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TProgramDelta, CsvFileTestcase>(unityContainer);
 		}
 
-		private static void InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase>(IUnityContainer unityContainer)
+		private static void InitDeltaBasedControllerFactoryResult<TDeltaArtefact, TModel, TProgramDelta, TTestCase>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TParsedDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 		{
-			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
-			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
-			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
+			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
+			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
+			InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
 		}
 
-		private static void InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer)
+		private static void InitDeltaBasedControllerFactory<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TParsedDelta : IDelta<TModel>
-			where TSelectionDelta : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>(
+					new Func<RTSApproachType, ProcessingType, bool, DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 						(rtsApproachType, processingType, withTimeLimit) =>
 						{
-							ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult> modelBasedController;
+							ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController;
 							if (withTimeLimit)
 							{
 								var limitedTimeControllerFactory =
 									unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-										LimitedTimeModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult>>>();
+										LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>();
 								modelBasedController = limitedTimeControllerFactory(rtsApproachType, processingType);
 							}
 							else
 							{
 								var modelLevelControllerFactory =
 								unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-											ModelBasedController<TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult>>>();
+											ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>();
 								modelBasedController = modelLevelControllerFactory(rtsApproachType, processingType);
 							}
 
-							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TParsedDelta, TSelectionDelta, TTestCase, TResult, TResultArtefact, Graph>>(
+							return unityContainer.Resolve<DeltaBasedController<TDeltaArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 								new ParameterOverride("modelBasedController", modelBasedController));
 
 						})));
@@ -196,62 +190,58 @@ namespace RTSFramework.ViewModels
 		private static void InitStateBasedControllerFactoryDelta<TArtefact, TModel>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 		{
-			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TDeltaDisovery, TDeltaSelection>(IUnityContainer unityContainer)
+		private static void InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TProgramDelta>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 		{
-			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
 
-			InitStateBasedControllerFactoryResult<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, MSTestTestcase>(unityContainer);
-			InitStateBasedControllerFactoryResult<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, CsvFileTestcase>(unityContainer);
+			InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, MSTestTestcase>(unityContainer);
+			InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, CsvFileTestcase>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryResult<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase>(IUnityContainer unityContainer) 
+		private static void InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, TTestCase>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel> 
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 		{
-			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
-			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
-			InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
+			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactory<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer) 
+		private static void InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase 
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>(
+					new Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 						(rtsApproachType, processingType, withTimeLimit) =>
 						{
-							ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult> modelBasedController;
+							ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController;
 							if (withTimeLimit)
 							{
 								var limitedTimeControllerFactory =
 									unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-										LimitedTimeModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>();
+										LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>();
 								modelBasedController = limitedTimeControllerFactory(rtsApproachType, processingType);
 							}
 							else
 							{
 								var modelLevelControllerFactory =
 								unityContainer.Resolve<Func<RTSApproachType, ProcessingType,
-											ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>();
+											ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>();
 								modelBasedController = modelLevelControllerFactory(rtsApproachType, processingType);
 							}
 							
 
-							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>>(
+							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 								new ParameterOverride("modelBasedController", modelBasedController));
 						})));
 		}
@@ -270,59 +260,55 @@ namespace RTSFramework.ViewModels
 		private static void InitModelLevelControllerFactoryDelta<TModel>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 		{
-			InitModelLevelControllerFactoryTestcase<TModel, StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitModelLevelControllerFactoryTestcase<TModel, StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitModelLevelControllerFactoryTestcase<TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
 		}
 
-		private static void InitModelLevelControllerFactoryTestcase<TModel, TDeltaDisovery, TDeltaSelection>(IUnityContainer unityContainer)
+		private static void InitModelLevelControllerFactoryTestcase<TModel, TProgramDelta>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 		{
-			InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(unityContainer);
+			InitModelLevelControllerFactory<TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>>(unityContainer);
 
-			InitModelLevelControllerFactoryResult<TModel, TDeltaDisovery, TDeltaSelection, MSTestTestcase>(unityContainer);
-			InitModelLevelControllerFactoryResult<TModel, TDeltaDisovery, TDeltaSelection, CsvFileTestcase>(unityContainer);
+			InitModelLevelControllerFactoryResult<TModel, TProgramDelta, MSTestTestcase>(unityContainer);
+			InitModelLevelControllerFactoryResult<TModel, TProgramDelta, CsvFileTestcase>(unityContainer);
 		}
 
-		private static void InitModelLevelControllerFactoryResult<TModel, TDeltaDisovery, TDeltaSelection, TTestCase>(IUnityContainer unityContainer)
+		private static void InitModelLevelControllerFactoryResult<TModel, TProgramDelta, TTestCase>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 		{
-			InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TestListResult<TTestCase>>(unityContainer);
-			InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, PercentageImpactedTestsStatistic>(unityContainer);
+			InitModelLevelControllerFactory<TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>>(unityContainer);
+			InitModelLevelControllerFactory<TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic>(unityContainer);
 		}
 
-		private static void InitModelLevelControllerFactory<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>(IUnityContainer unityContainer)
+		private static void InitModelLevelControllerFactory<TModel, TProgramDelta, TTestCase, TResult>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
-			where TDeltaDisovery : IDelta<TModel>
-			where TDeltaSelection : IDelta<TModel>
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+					new Func<RTSApproachType, ProcessingType, ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDeltaSelection, TTestCase>>>();
-							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDeltaSelection, TModel>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TProgramDelta, TTestCase>>>();
+							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TProgramDelta, TModel>>>();
 
-							return unityContainer.Resolve<ModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+							return unityContainer.Resolve<ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>(
 								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, LimitedTimeModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, LimitedTimeModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+					new Func<RTSApproachType, ProcessingType, LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>(
 						(rtsApproachType, processingType) =>
 						{
-							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TDeltaSelection, TTestCase>>>();
-							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TDeltaSelection, TModel>>>();
+							var rtsApproachFactory = unityContainer.Resolve<Func<RTSApproachType, ITestSelector<TModel, TProgramDelta, TTestCase>>>();
+							var testProcessorFactory = unityContainer.Resolve<Func<ProcessingType, ITestProcessor<TTestCase, TResult, TProgramDelta, TModel>>>();
 
-							return unityContainer.Resolve<LimitedTimeModelBasedController<TModel, TDeltaDisovery, TDeltaSelection, TTestCase, TResult>>(
+							return unityContainer.Resolve<LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult>>(
 								new ParameterOverride("testSelector", rtsApproachFactory(rtsApproachType)),
 								new ParameterOverride("testProcessor", testProcessorFactory(processingType)));
 						})));
@@ -384,10 +370,9 @@ namespace RTSFramework.ViewModels
 			where TModel : CSharpProgramModel
 			where TTestCase : class, ITestCase
 		{
-			unityContainer
-				.RegisterType<IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>, ClassSRTS<TModel, TTestCase>>();
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase>, StaticTestSelector<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>, ClassSRTS<TModel, TTestCase>>();
 
+			InitTestSelectorsForModelAndElementType<TModel, FileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpClassElement, TTestCase>(unityContainer);
 		}
@@ -397,8 +382,9 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicTestSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, TModelElement, TTestCase>>(RTSApproachType.RetestAll.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, StaticTestSelector<TModel, StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicTestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(RTSApproachType.RetestAll.ToString());
 
 			unityContainer.RegisterType<Func<RTSApproachType, ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>>(
 				new InjectionFactory(c =>
@@ -418,8 +404,7 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsProcessors<TModel>(IUnityContainer unityContainer) where TModel : IProgramModel
 		{
-			InitTestsProcessors<StructuralDelta<TModel, CSharpFileElement>, TModel>(unityContainer);
-			InitTestsProcessors<StructuralDelta<TModel, CSharpClassElement>, TModel>(unityContainer);
+			InitTestsProcessors<StructuralDelta<TModel, FileElement>, TModel>(unityContainer);
 		}
 
 		private static void InitTestsProcessors<TDelta, TModel>(IUnityContainer unityContainer) where TDelta : IDelta<TModel> where TModel : IProgramModel
@@ -603,7 +588,7 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 		{
 			unityContainer.RegisterType<IResponsibleChangesReporter<TTestCase, TModel, StructuralDelta<TModel, TModelElement>>, 
-				ResponsibleChangesReporter<TTestCase, TModel, TModelElement>>();
+				ClassLevelResponsibleChangesReporter<TTestCase, TModel, TModelElement>>();
 		}
 
 		#endregion

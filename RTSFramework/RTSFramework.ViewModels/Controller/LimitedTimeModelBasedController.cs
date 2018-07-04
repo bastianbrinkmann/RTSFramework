@@ -14,31 +14,29 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class LimitedTimeModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult> 
-		: ModelBasedController<TModel, TInputDelta, TSelectionDelta, TTestCase, TResult>
+	public class LimitedTimeModelBasedController<TModel, TProgramDelta, TTestCase, TResult> 
+		: ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
-		where TInputDelta : IDelta<TModel>
-		where TSelectionDelta : IDelta<TModel>
+		where TProgramDelta : IDelta<TModel>
 		where TResult : ITestProcessingResult
 	{
 		private readonly IUserRunConfigurationProvider runConfigurationProvider;
 
-		public LimitedTimeModelBasedController(IDeltaAdapter<TInputDelta, TSelectionDelta, TModel> deltaAdapter, 
-			Lazy<IOfflineDeltaDiscoverer<TModel, TInputDelta>> deltaDiscoverer, 
-			ITestDiscoverer<TModel, TSelectionDelta, TTestCase> testDiscoverer, 
-			ITestSelector<TModel, TSelectionDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult, TSelectionDelta, TModel> testProcessor,
+		public LimitedTimeModelBasedController(Lazy<IOfflineDeltaDiscoverer<TModel, TProgramDelta>> deltaDiscoverer, 
+			ITestDiscoverer<TModel, TProgramDelta, TTestCase> testDiscoverer, 
+			ITestSelector<TModel, TProgramDelta, TTestCase> testSelector,
+			ITestProcessor<TTestCase, TResult, TProgramDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer, ILoggingHelper loggingHelper,
 			IUserRunConfigurationProvider runConfigurationProvider,
 			Lazy<IDependenciesVisualizer> dependenciesVisualizer,
-			IResponsibleChangesReporter<TTestCase, TModel, TSelectionDelta> responsibleChangesReporter)
-			: base(deltaAdapter, deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer, responsibleChangesReporter)
+			IResponsibleChangesReporter<TTestCase, TModel, TProgramDelta> responsibleChangesReporter)
+			: base(deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer, responsibleChangesReporter)
 		{
 			this.runConfigurationProvider = runConfigurationProvider;
 		}
 
-		public override async Task<TResult> ExecuteRTSRun(TInputDelta delta, CancellationToken token)
+		public override async Task<TResult> ExecuteRTSRun(TProgramDelta delta, CancellationToken token)
 		{
 			double timeLimitInSeconds = runConfigurationProvider.TimeLimit;
 

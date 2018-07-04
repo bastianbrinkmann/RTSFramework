@@ -6,8 +6,8 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts
 {
-    public interface ITestProcessor<TTestCase, TResult, TDelta, TModel> where TTestCase : ITestCase where TResult : ITestProcessingResult where TDelta : IDelta<TModel> where TModel : IProgramModel
+    public interface ITestProcessor<TTestCase, TResult, TProgramDelta, TModel> where TTestCase : ITestCase where TResult : ITestProcessingResult where TProgramDelta : IDelta<TModel> where TModel : IProgramModel
 	{
-        Task<TResult> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken);
+        Task<TResult> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta impactedForDelta, CancellationToken cancellationToken);
     }
 }

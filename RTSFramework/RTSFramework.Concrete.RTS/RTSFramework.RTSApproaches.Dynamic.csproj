@@ -80,6 +80,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RTSFramework.Concrete.CSharp.Roslyn\RTSFramework.Concrete.CSharp.Roslyn.csproj">
+      <Project>{37205D1E-838E-4CBC-951F-777050368862}</Project>
+      <Name>RTSFramework.Concrete.CSharp.Roslyn</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.Contracts\RTSFramework.Contracts.csproj">
       <Project>{ED8744A8-1310-45B9-B2E4-93E1F70BCBCC}</Project>
       <Name>RTSFramework.Contracts</Name>

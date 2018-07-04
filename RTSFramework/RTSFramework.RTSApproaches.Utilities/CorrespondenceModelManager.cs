@@ -37,13 +37,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			return model;
 		}
 
-		public void UpdateCorrespondenceModel<TDelta, TTestCase>(CorrespondenceLinks correspondenceLinks, TDelta currentDelta, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, IEnumerable<string> failedTests)
-			where TDelta : IDelta<TModel>
+		public void UpdateCorrespondenceModel<TProgramDelta, TTestCase>(CorrespondenceLinks correspondenceLinks, TProgramDelta programDelta, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, IEnumerable<string> failedTests)
+			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 		{
-			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel, testsDelta.OldModel);
-			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, currentDelta.NewModel.VersionId);
-			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks, currentDelta.NewModel));
+			var oldCorrespondenceModel = GetCorrespondenceModel(programDelta.OldModel, testsDelta.OldModel);
+			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, programDelta.NewModel.VersionId);
+			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks, programDelta.NewModel));
 			RemoveDeletedTests(newCorrespondenceModel, testsDelta);
 			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
