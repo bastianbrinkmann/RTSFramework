@@ -14,34 +14,34 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class ModelBasedController<TModel, TProgramDelta, TTestCase, TResult>
+	public class ModelBasedController<TProgram, TProgramDelta, TTestCase, TResult>
 		where TTestCase : ITestCase
-		where TModel : IProgramModel
-		where TProgramDelta : IDelta<TModel>
+		where TProgram : IProgramModel
+		where TProgramDelta : IDelta<TProgram>
 		where TResult : ITestProcessingResult
 	{
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 		public event EventHandler<ImpactedTestEventArgs<TTestCase>> ImpactedTest;
 		public event EventHandler<TestsPrioritizedEventArgs<TTestCase>> TestsPrioritized;
 
-		private readonly Lazy<IOfflineDeltaDiscoverer<TModel, TProgramDelta>> deltaDiscoverer;
-		private readonly ITestProcessor<TTestCase, TResult, TProgramDelta, TModel> testProcessor;
-		private readonly ITestDiscoverer<TModel, TProgramDelta, TTestCase> testDiscoverer;
-		private readonly ITestSelector<TModel, TProgramDelta, TTestCase> testSelector;
+		private readonly Lazy<IOfflineDeltaDiscoverer<TProgram, TProgramDelta>> deltaDiscoverer;
+		private readonly ITestProcessor<TTestCase, TResult, TProgramDelta, TProgram> testProcessor;
+		private readonly ITestDiscoverer<TProgram, TProgramDelta, TTestCase> testDiscoverer;
+		private readonly ITestSelector<TProgram, TProgramDelta, TTestCase> testSelector;
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
 		private readonly Lazy<IDependenciesVisualizer> dependenciesVisualizer;
-		private readonly IResponsibleChangesReporter<TTestCase, TModel, TProgramDelta> responsibleChangesReporter;
+		private readonly IResponsibleChangesReporter<TTestCase, TProgram, TProgramDelta> responsibleChangesReporter;
 
 		public ModelBasedController(
-			Lazy<IOfflineDeltaDiscoverer<TModel, TProgramDelta>> deltaDiscoverer,
-			ITestDiscoverer<TModel, TProgramDelta, TTestCase> testDiscoverer,
-			ITestSelector<TModel, TProgramDelta, TTestCase> testSelector,
-			ITestProcessor<TTestCase, TResult, TProgramDelta, TModel> testProcessor,
+			Lazy<IOfflineDeltaDiscoverer<TProgram, TProgramDelta>> deltaDiscoverer,
+			ITestDiscoverer<TProgram, TProgramDelta, TTestCase> testDiscoverer,
+			ITestSelector<TProgram, TProgramDelta, TTestCase> testSelector,
+			ITestProcessor<TTestCase, TResult, TProgramDelta, TProgram> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer,
 			ILoggingHelper loggingHelper,
 			Lazy<IDependenciesVisualizer> dependenciesVisualizer,
-			IResponsibleChangesReporter<TTestCase, TModel, TProgramDelta> responsibleChangesReporter)
+			IResponsibleChangesReporter<TTestCase, TProgram, TProgramDelta> responsibleChangesReporter)
 		{
 			this.deltaDiscoverer = deltaDiscoverer;
 			this.testProcessor = testProcessor;
@@ -55,17 +55,17 @@ namespace RTSFramework.ViewModels.Controller
 
 		public Func<TTestCase, bool> FilterFunction { private get; set; }
 
-		public async Task<TResult> ExecuteRTSRun(TModel oldProgramModel, TModel newProgramModel, CancellationToken token)
+		public async Task<TResult> ExecuteRTSRun(TProgram oldProgramModel, TProgram newProgramModel, CancellationToken token)
 		{
-			var delta = deltaDiscoverer.Value.Discover(oldProgramModel, newProgramModel);
+			var programDelta = deltaDiscoverer.Value.Discover(oldProgramModel, newProgramModel);
 			token.ThrowIfCancellationRequested();
 
-			return await ExecuteRTSRun(delta, token);
+			return await ExecuteRTSRun(programDelta, token);
 		}
 
 		public virtual async Task<TResult> ExecuteRTSRun(TProgramDelta programDelta, CancellationToken token)
 		{
-			var testsDelta = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTests(programDelta, FilterFunction, token), "Tests Discovery");
+			var testsDelta = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTestsDelta(programDelta, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(testsDelta, programDelta, token), "Tests Selection");
@@ -83,7 +83,7 @@ namespace RTSFramework.ViewModels.Controller
 
 			TestsPrioritized?.Invoke(this, new TestsPrioritizedEventArgs<TTestCase>(prioritizedTests));
 
-			var executor = testProcessor as ITestExecutor<TTestCase, TProgramDelta, TModel>;
+			var executor = testProcessor as ITestExecutor<TTestCase, TProgramDelta, TProgram>;
 			if (executor != null)
 			{
 				executor.TestResultAvailable += TestResultAvailable;

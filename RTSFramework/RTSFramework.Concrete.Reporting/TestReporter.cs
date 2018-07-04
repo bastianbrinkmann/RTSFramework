@@ -6,9 +6,9 @@ using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Concrete.Reporting{
-    public class TestReporter<TTestCase, TDelta, TModel> : ITestProcessor<TTestCase, TestListResult<TTestCase>, TDelta, TModel> where TTestCase : ITestCase where TDelta : IDelta<TModel> where TModel : IProgramModel
+    public class TestReporter<TTestCase, TProgramDelta, TProgram> : ITestProcessor<TTestCase, TestListResult<TTestCase>, TProgramDelta, TProgram> where TTestCase : ITestCase where TProgramDelta : IDelta<TProgram> where TProgram : IProgramModel
     {
-	    public Task<TestListResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken)
+	    public Task<TestListResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta programDelta, CancellationToken cancellationToken)
 		{
 		    return Task.FromResult(new TestListResult<TTestCase> {IdentifiedTests = impactedTests});
 	    }

@@ -17,9 +17,9 @@ using RTSFramework.Contracts.Utilities;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MSTestTestExecutor<TDelta, TModel> : ITestExecutor<MSTestTestcase, TDelta, TModel>
+	public class MSTestTestExecutor<TProgramDelta, TProgram> : ITestExecutor<MSTestTestcase, TProgramDelta, TProgram>
 
-		where TDelta : IDelta<TModel> where TModel : IProgramModel
+		where TProgramDelta : IDelta<TProgram> where TProgram : IProgramModel
 	{
 		public event EventHandler<TestCaseResultEventArgs<MSTestTestcase>> TestResultAvailable;
 
@@ -28,7 +28,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly IArtefactAdapter<VsTestResultsToConvert, IList<ITestCaseResult<MSTestTestcase>>> testResultsAdapter;
 		private readonly IArtefactAdapter<VsTestResultToConvert, ITestCaseResult<MSTestTestcase>> testResultAdapter;
 
-		public MSTestTestExecutor(InProcessVsTestConnector vsTestConnector, 
+		public MSTestTestExecutor(InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider,
 			IArtefactAdapter<VsTestResultsToConvert, IList<ITestCaseResult<MSTestTestcase>>> testResultsAdapter,
 			IArtefactAdapter<VsTestResultToConvert, ITestCaseResult<MSTestTestcase>> testResultAdapter)
@@ -41,7 +41,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private IList<MSTestTestcase> msTestTestcases;
 
-		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken)
+		public virtual async Task<ITestsExecutionResult<MSTestTestcase>> ProcessTests(IList<MSTestTestcase> impactedTests, StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase> testsDelta, TProgramDelta programDelta, CancellationToken cancellationToken)
 		{
 			msTestTestcases = impactedTests;
 

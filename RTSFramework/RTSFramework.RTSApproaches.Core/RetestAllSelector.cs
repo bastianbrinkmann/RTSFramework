@@ -10,9 +10,9 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Core
 {
-	public class RetestAllSelector<TModel, TProgramDelta, TTestCase> : ITestSelector<TModel, TProgramDelta, TTestCase>
-		where TModel : IProgramModel
-		where TProgramDelta : IDelta<TModel>
+	public class RetestAllSelector<TProgram, TProgramDelta, TTestCase> : ITestSelector<TProgram, TProgramDelta, TTestCase>
+		where TProgram : IProgramModel
+		where TProgramDelta : IDelta<TProgram>
 		where TTestCase : class, ITestCase
 	{
 

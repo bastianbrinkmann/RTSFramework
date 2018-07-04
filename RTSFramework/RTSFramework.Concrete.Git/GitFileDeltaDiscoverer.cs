@@ -14,22 +14,22 @@ namespace RTSFramework.Concrete.Git
 {
     public class GitFileDeltaDiscoverer : IOfflineDeltaDiscoverer<GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>
     {
-		public StructuralDelta<GitCSharpProgramModel, FileElement> Discover(GitCSharpProgramModel oldModel, GitCSharpProgramModel newModel)
+		public StructuralDelta<GitCSharpProgramModel, FileElement> Discover(GitCSharpProgramModel oldVersion, GitCSharpProgramModel newVersion)
         {
-            if (oldModel.GitVersionIdentification.RepositoryPath != newModel.GitVersionIdentification.RepositoryPath)
+            if (oldVersion.GitVersionIdentification.RepositoryPath != newVersion.GitVersionIdentification.RepositoryPath)
             {
-                throw new ArgumentException($"Git Models must be for the same repository! OldRepoPath: {oldModel.GitVersionIdentification.RepositoryPath} NewRepoPath: {newModel.GitVersionIdentification.RepositoryPath}");
+                throw new ArgumentException($"Git Models must be for the same repository! OldRepoPath: {oldVersion.GitVersionIdentification.RepositoryPath} NewRepoPath: {newVersion.GitVersionIdentification.RepositoryPath}");
             }
 
-            var repositoryPath = oldModel.GitVersionIdentification.RepositoryPath;
+            var repositoryPath = oldVersion.GitVersionIdentification.RepositoryPath;
 
-	        var delta = new StructuralDelta<GitCSharpProgramModel, FileElement>(oldModel, newModel);
+	        var delta = new StructuralDelta<GitCSharpProgramModel, FileElement>(oldVersion, newVersion);
 
             using (Repository repo = new Repository(repositoryPath))
             {
-				AddDeltaBetweenCommits(delta, repo, oldModel.GitVersionIdentification, newModel.GitVersionIdentification, repositoryPath);
+				AddDeltaBetweenCommits(delta, repo, oldVersion.GitVersionIdentification, newVersion.GitVersionIdentification, repositoryPath);
 
-                if (newModel.GitVersionIdentification.ReferenceType == GitVersionReferenceType.CurrentChanges)
+                if (newVersion.GitVersionIdentification.ReferenceType == GitVersionReferenceType.CurrentChanges)
                 {
 	                AddCurrentChanges(delta, repo);
                 }
@@ -38,36 +38,36 @@ namespace RTSFramework.Concrete.Git
 	        return delta;
         }
 
-	    private void AddCurrentChanges(StructuralDelta<GitCSharpProgramModel, FileElement> delta, Repository repo)
+	    private void AddCurrentChanges(StructuralDelta<GitCSharpProgramModel, FileElement> programDelta, Repository repo)
 	    {
 		    var lastCommit = repo.Head.Tip;
 
 			var status = repo.RetrieveStatus();
 			status.Added.Union(status.Untracked).ForEach(addedFile =>
 			{
-				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, addedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
+				var fullPath = Path.Combine(programDelta.NewModel.GitVersionIdentification.RepositoryPath, addedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(programDelta.NewModel, fullPath);
 
-				if (delta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-					delta.AddedElements.Add(new FileElement(relativePathToSolution, () => File.ReadAllText(fullPath)));
+				if (programDelta.AddedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+					programDelta.AddedElements.Add(new FileElement(relativePathToSolution, () => File.ReadAllText(fullPath)));
 			});
 
 			status.Modified.Union(status.Staged).ForEach(changedFile =>
 			{
-				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
+				var fullPath = Path.Combine(programDelta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(programDelta.NewModel, fullPath);
 
-				if (delta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-					delta.ChangedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
+				if (programDelta.ChangedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+					programDelta.ChangedElements.Add(new FileElement(relativePathToSolution, () => GetContent(programDelta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
 			});
 
 			status.Missing.Union(status.Removed).ForEach(changedFile =>
 			{
-				var fullPath = Path.Combine(delta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
-				var relativePathToSolution = RelativePathHelper.GetRelativePath(delta.NewModel, fullPath);
+				var fullPath = Path.Combine(programDelta.NewModel.GitVersionIdentification.RepositoryPath, changedFile.FilePath);
+				var relativePathToSolution = RelativePathHelper.GetRelativePath(programDelta.NewModel, fullPath);
 
-				if (delta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
-					delta.DeletedElements.Add(new FileElement(relativePathToSolution, () => GetContent(delta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
+				if (programDelta.DeletedElements.All(x => !x.Id.Equals(relativePathToSolution, StringComparison.Ordinal)))
+					programDelta.DeletedElements.Add(new FileElement(relativePathToSolution, () => GetContent(programDelta.NewModel.GitVersionIdentification.RepositoryPath, lastCommit.Id.Sha, changedFile.FilePath)));
 			});
 		}
 

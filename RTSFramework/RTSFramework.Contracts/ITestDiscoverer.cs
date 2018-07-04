@@ -7,8 +7,8 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestDiscoverer<TModel, TDelta, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel where TDelta: IDelta<TModel>
+	public interface ITestDiscoverer<TProgram, TProgramDelta, TTestCase> where TTestCase : ITestCase where TProgram : IProgramModel where TProgramDelta: IDelta<TProgram>
 	{
-        Task<StructuralDelta<TestsModel<TTestCase>, TTestCase>> GetTests(TDelta delta, Func<TTestCase, bool> filterFunction, CancellationToken token);
+        Task<StructuralDelta<TestsModel<TTestCase>, TTestCase>> GetTestsDelta(TProgramDelta programDelta, Func<TTestCase, bool> filterFunction, CancellationToken token);
 	}
 }

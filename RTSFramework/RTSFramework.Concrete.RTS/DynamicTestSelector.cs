@@ -13,16 +13,16 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class DynamicTestSelector<TModel,TProgramDelta, TTestCase> : ITestSelector<TModel, TProgramDelta, TTestCase>
+	public class DynamicTestSelector<TProgram,TProgramDelta, TTestCase> : ITestSelector<TProgram, TProgramDelta, TTestCase>
 		where TTestCase : class, ITestCase
-		where TModel : IProgramModel
-		where TProgramDelta : IDelta<TModel>
+		where TProgram : IProgramModel
+		where TProgramDelta : IDelta<TProgram>
 	{
-		private readonly CorrespondenceModelManager<TModel> correspondenceModelProvider;
-		private readonly IDeltaAdapter<TProgramDelta, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter;
+		private readonly CorrespondenceModelManager<TProgram> correspondenceModelProvider;
+		private readonly IDeltaAdapter<TProgramDelta, StructuralDelta<TProgram, CSharpClassElement>, TProgram> deltaAdapter;
 
-		public DynamicTestSelector(CorrespondenceModelManager<TModel> correspondenceModelProvider,
-			IDeltaAdapter<TProgramDelta, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter)
+		public DynamicTestSelector(CorrespondenceModelManager<TProgram> correspondenceModelProvider,
+			IDeltaAdapter<TProgramDelta, StructuralDelta<TProgram, CSharpClassElement>, TProgram> deltaAdapter)
 		{
 			this.correspondenceModelProvider = correspondenceModelProvider;
 			this.deltaAdapter = deltaAdapter;

@@ -8,29 +8,27 @@ using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Models.TestExecution;
 using RTSFramework.Contracts.Utilities;
-using RTSFramework.Core.Utilities;
-using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 using Unity.Interception.Utilities;
 
 namespace RTSFramework.RTSApproaches.Dynamic
 {
-	public class TestExecutorWithInstrumenting<TModel, TDelta, TTestCase> : ITestExecutor<TTestCase, TDelta, TModel>
+	public class TestExecutorWithInstrumenting<TProgram, TProgramDelta, TTestCase> : ITestExecutor<TTestCase, TProgramDelta, TProgram>
 		where TTestCase : ITestCase
-		where TModel : IProgramModel
-		where TDelta : IDelta<TModel>
+		where TProgram : IProgramModel
+		where TProgramDelta : IDelta<TProgram>
 	{
-		private readonly ITestExecutor<TTestCase, TDelta, TModel> executor;
-		private readonly ITestsInstrumentor<TModel, TTestCase> instrumentor;
-		private readonly CorrespondenceModelManager<TModel> correspondenceModelManager;
+		private readonly ITestExecutor<TTestCase, TProgramDelta, TProgram> executor;
+		private readonly ITestsInstrumentor<TProgram, TTestCase> instrumentor;
+		private readonly CorrespondenceModelManager<TProgram> correspondenceModelManager;
 		private readonly IApplicationClosedHandler applicationClosedHandler;
 		private readonly ILoggingHelper loggingHelper;
 
 		public event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 
-		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TDelta, TModel> executor,
-			ITestsInstrumentor<TModel, TTestCase> instrumentor,
-			CorrespondenceModelManager<TModel> correspondenceModelManager,
+		public TestExecutorWithInstrumenting(ITestExecutor<TTestCase, TProgramDelta, TProgram> executor,
+			ITestsInstrumentor<TProgram, TTestCase> instrumentor,
+			CorrespondenceModelManager<TProgram> correspondenceModelManager,
 			IApplicationClosedHandler applicationClosedHandler,
 			ILoggingHelper loggingHelper)
 		{
@@ -41,17 +39,17 @@ namespace RTSFramework.RTSApproaches.Dynamic
 			this.loggingHelper = loggingHelper;
 		}
 
-		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta,
+		public async Task<ITestsExecutionResult<TTestCase>> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta programDelta,
 			CancellationToken cancellationToken)
 		{
 			using (instrumentor)
 			{
 				applicationClosedHandler.AddApplicationClosedListener(instrumentor);
 
-				await instrumentor.Instrument(impactedForDelta.NewModel, impactedTests, cancellationToken);
+				await instrumentor.Instrument(programDelta.NewModel, impactedTests, cancellationToken);
 
 				executor.TestResultAvailable += TestResultAvailable;
-				var result = await executor.ProcessTests(impactedTests, testsDelta, impactedForDelta, cancellationToken);
+				var result = await executor.ProcessTests(impactedTests, testsDelta, programDelta, cancellationToken);
 				executor.TestResultAvailable -= TestResultAvailable;
 
 				CorrespondenceLinks coverage = instrumentor.GetCorrespondenceLinks();
@@ -66,7 +64,7 @@ namespace RTSFramework.RTSApproaches.Dynamic
 
 				testsWithoutCoverage.Except(failedTests).ForEach(x => loggingHelper.WriteMessage("Not covered and not failed Tests: " + x));
 
-				correspondenceModelManager.UpdateCorrespondenceModel(coverage, impactedForDelta, testsDelta, failedTests);
+				correspondenceModelManager.UpdateCorrespondenceModel(coverage, programDelta, testsDelta, failedTests);
 
 				applicationClosedHandler.RemovedApplicationClosedListener(instrumentor);
 				return result;

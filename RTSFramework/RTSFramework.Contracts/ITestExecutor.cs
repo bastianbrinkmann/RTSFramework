@@ -5,10 +5,10 @@ using RTSFramework.Contracts.Models.TestExecution;
 
 namespace RTSFramework.Contracts
 {
-	public interface ITestExecutor<TTestCase, TDelta, TModel> : ITestProcessor<TTestCase, ITestsExecutionResult<TTestCase>, TDelta, TModel>
+	public interface ITestExecutor<TTestCase, TDelta, TProgram> : ITestProcessor<TTestCase, ITestsExecutionResult<TTestCase>, TDelta, TProgram>
 		where TTestCase : ITestCase
-		where TDelta : IDelta<TModel>
-		where TModel : IProgramModel
+		where TDelta : IDelta<TProgram>
+		where TProgram : IProgramModel
 	{
 		event EventHandler<TestCaseResultEventArgs<TTestCase>> TestResultAvailable;
 	}

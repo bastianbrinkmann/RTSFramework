@@ -14,7 +14,7 @@ using RTSFramework.Core.Utilities;
 
 namespace RTSFramework.Concrete.User
 {
-	public class CsvManualTestsDeltaDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, CsvFileTestcase> where TModel : IProgramModel where TDelta : IDelta<TModel>
+	public class CsvManualTestsDeltaDiscoverer<TProgram, TProgramDelta> : ITestDiscoverer<TProgram, TProgramDelta, CsvFileTestcase> where TProgram : IProgramModel where TProgramDelta : IDelta<TProgram>
 	{
 		private const string TestsModelsStoragePlace = "TestsModels";
 		private const string TestTypeIdentifier = "CsvFile";
@@ -30,7 +30,7 @@ namespace RTSFramework.Concrete.User
 		}
 
 		//TODO: Artefact Adapter
-		public Task<StructuralDelta<TestsModel<CsvFileTestcase>, CsvFileTestcase>> GetTests(TDelta delta, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
+		public Task<StructuralDelta<TestsModel<CsvFileTestcase>, CsvFileTestcase>> GetTestsDelta(TProgramDelta programDelta, Func<CsvFileTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var csvFile = runConfigurationProvider.CsvTestsFile;
 			if (!File.Exists(csvFile))
@@ -38,20 +38,20 @@ namespace RTSFramework.Concrete.User
 				throw new ArgumentException($"The CSV file '{csvFile}' does not exist!");
 			}
 
-			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(delta.OldModel.VersionId));
+			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(programDelta.OldModel.VersionId));
 			if (oldTestsModel == null)
 			{
 				oldTestsModel = new TestsModel<CsvFileTestcase>
 				{
 					TestSuite = new HashSet<CsvFileTestcase>(),
-					VersionId = delta.OldModel.VersionId
+					VersionId = programDelta.OldModel.VersionId
 				};
 			}
 
 			TestsModel<CsvFileTestcase> newTestsModel = new TestsModel<CsvFileTestcase>
 			{
 				TestSuite = new HashSet<CsvFileTestcase>(),
-				VersionId = delta.NewModel.VersionId
+				VersionId = programDelta.NewModel.VersionId
 			};
 
 			foreach (string line in File.ReadAllLines(csvFile))
@@ -72,7 +72,7 @@ namespace RTSFramework.Concrete.User
 					newTestsModel.TestSuite.Add(testCase);
 				}
 			}
-			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(delta.NewModel.VersionId));
+			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(programDelta.NewModel.VersionId));
 
 			var testsDelta = new StructuralDelta<TestsModel<CsvFileTestcase>, CsvFileTestcase>(oldTestsModel, newTestsModel);
 			testsDelta.AddedElements.AddRange(newTestsModel.TestSuite.Except(oldTestsModel.TestSuite));

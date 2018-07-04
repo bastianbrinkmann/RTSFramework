@@ -46,9 +46,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.vsTestCaseAdapter = vsTestCaseAdapter;
 		}
 
-		public async Task<StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>> GetTestsDelta(TDelta programDelta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
-			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(delta.OldModel.VersionId));
+			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(programDelta.OldModel.VersionId));
 
 			if (!runConfiguration.DiscoverNewTests && oldTestsModel != null)
 			{
@@ -60,11 +60,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 				oldTestsModel = new TestsModel<MSTestTestcase>
 				{
 					TestSuite = new HashSet<MSTestTestcase>(),
-					VersionId = delta.OldModel.VersionId
+					VersionId = programDelta.OldModel.VersionId
 				};
 			}
 
-			var parsingResult = await assembliesAdapter.Parse(delta.NewModel.AbsoluteSolutionPath, token);
+			var parsingResult = await assembliesAdapter.Parse(programDelta.NewModel.AbsoluteSolutionPath, token);
 			token.ThrowIfCancellationRequested();
 
 			var sources = parsingResult.Select(x => x.AbsolutePath).Where(x => x.EndsWith(settingsProvider.TestAssembliesFilter));
@@ -74,9 +74,9 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			var newTestsModel = new TestsModel<MSTestTestcase>
 			{
 				TestSuite = new HashSet<MSTestTestcase>(vsTestCases.Select(x => vsTestCaseAdapter.Parse(x)).Where(x => !x.Ignored && filterFunction(x))),
-				VersionId = delta.NewModel.VersionId
+				VersionId = programDelta.NewModel.VersionId
 			};
-			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(delta.NewModel.VersionId));
+			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(programDelta.NewModel.VersionId));
 
 			var testsDelta = new StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>(oldTestsModel, newTestsModel);
 			testsDelta.AddedElements.AddRange(newTestsModel.TestSuite.Except(oldTestsModel.TestSuite));

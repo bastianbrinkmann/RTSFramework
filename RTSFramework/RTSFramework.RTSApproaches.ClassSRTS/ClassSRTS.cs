@@ -10,16 +10,16 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class ClassSRTS<TModel, TTestCase> : IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase where TModel : IProgramModel
+	public class ClassSRTS<TProgram, TTestCase> : IStaticRTS<TProgram, StructuralDelta<TProgram, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase where TProgram : IProgramModel
 	{
-		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TProgram, CSharpClassElement> programDelta, CancellationToken cancellationToken)
 		{
 			ISet<ImpactedTest<TTestCase>> impactedTests = new HashSet<ImpactedTest<TTestCase>>();
 
 			var changedTypes = new List<AffectedType>();
 
-			changedTypes.AddRange(delta.AddedElements.Select(x => new AffectedType {Id = x.Id, ImpactedDueTo = x.Id}));
-			changedTypes.AddRange(delta.ChangedElements.Select(x => new AffectedType { Id = x.Id, ImpactedDueTo = x.Id }));
+			changedTypes.AddRange(programDelta.AddedElements.Select(x => new AffectedType {Id = x.Id, ImpactedDueTo = x.Id}));
+			changedTypes.AddRange(programDelta.ChangedElements.Select(x => new AffectedType { Id = x.Id, ImpactedDueTo = x.Id }));
 
 			var affectedTypes = new List<AffectedType>(changedTypes);
 
@@ -39,7 +39,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 			CorrespondenceModel = new CorrespondenceModel.Models.CorrespondenceModel
 			{
-				ProgramVersionId = delta.NewModel.VersionId,
+				ProgramVersionId = programDelta.NewModel.VersionId,
 				GranularityLevel = GranularityLevel.Class,
 				CorrespondenceModelLinks = impactedTests.ToDictionary(
 					x => x.TestCase.Id, 
