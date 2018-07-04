@@ -908,7 +908,6 @@ namespace RTSFramework.ViewModels
 			deltaBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
 			lastUsedController = deltaBasedController;
-			DependenciesVisualizationAvailable = true;
 
 			deltaBasedController.ImpactedTest += HandleImpactedTest;
 			deltaBasedController.TestResultAvailable += HandleTestExecutionResult;
@@ -916,6 +915,7 @@ namespace RTSFramework.ViewModels
 
 			var result = await Task.Run(() => deltaBasedController.ExecuteRTSRun(deltaArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
 
+			DependenciesVisualizationAvailable = true;
 			deltaBasedController.ImpactedTest -= HandleImpactedTest;
 			deltaBasedController.TestResultAvailable -= HandleTestExecutionResult;
 			deltaBasedController.TestsPrioritized -= HandleTestsPrioritized;
@@ -1052,7 +1052,6 @@ namespace RTSFramework.ViewModels
 			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TDeltaDiscovery, TDeltaSelection, TTestCase, TResult, TResultArtefact, Graph>(RTSApproachType, ProcessingType, WithTimeLimit);
 
 			lastUsedController = stateBasedController;
-			DependenciesVisualizationAvailable = true;
 
 			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
 
@@ -1062,6 +1061,7 @@ namespace RTSFramework.ViewModels
 
 			var result = await Task.Run(() => stateBasedController.ExecuteRTSRun(oldArtefact, newArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
 
+			DependenciesVisualizationAvailable = true;
 			stateBasedController.ImpactedTest -= HandleImpactedTest;
 			stateBasedController.TestResultAvailable -= HandleTestExecutionResult;
 			stateBasedController.TestsPrioritized -= HandleTestsPrioritized;
