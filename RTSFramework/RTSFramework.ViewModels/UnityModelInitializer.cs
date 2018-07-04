@@ -511,8 +511,8 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<Graph, VisualizationData>, VisualizationDataMsaglGraphAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<CsvFileArtefact, PercentageImpactedTestsStatistic>, PercentageImpactedTestsStatisticCsvFileAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<string, StatisticsReportData>, StatisticsReportDataStringAdapter>();
-			unityContainer.RegisterType<IArtefactAdapter<FileInfo, ISet<MSTestTestcase>>, JsonTestsModelAdapter<MSTestTestcase>>();
-			unityContainer.RegisterType<IArtefactAdapter<FileInfo, ISet<CsvFileTestcase>>, JsonTestsModelAdapter<CsvFileTestcase>>();
+			unityContainer.RegisterType<IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>>, JsonTestsModelAdapter<MSTestTestcase>>();
+			unityContainer.RegisterType<IArtefactAdapter<FileInfo, TestsModel<CsvFileTestcase>>, JsonTestsModelAdapter<CsvFileTestcase>>();
 
 			//MSTest
 			unityContainer.RegisterType<IArtefactAdapter<object, ITestsExecutionResult<MSTestTestcase>>, EmptyArtefactAdapter<ITestsExecutionResult<MSTestTestcase>>>();

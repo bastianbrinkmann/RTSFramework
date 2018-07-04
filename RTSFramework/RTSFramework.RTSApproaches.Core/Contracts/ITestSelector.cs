@@ -17,6 +17,6 @@ namespace RTSFramework.RTSApproaches.Core.Contracts
 
 		ICorrespondenceModel CorrespondenceModel { get; }
 
-		Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TProgramDelta delta, CancellationToken cancellationToken);
+		Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TProgramDelta delta, CancellationToken cancellationToken);
 	}
 }

@@ -7,6 +7,8 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 {
     public class CorrespondenceModel : ICorrespondenceModel
 	{
+		public string TestType { get; set; }
+
         public string ProgramVersionId { get; set; }
 
         public GranularityLevel GranularityLevel { get; set; }

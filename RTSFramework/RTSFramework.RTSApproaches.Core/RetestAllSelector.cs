@@ -16,9 +16,9 @@ namespace RTSFramework.RTSApproaches.Core
 		where TTestCase : class, ITestCase
 	{
 
-		public Task SelectTests(StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
+		public Task SelectTests(StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, TModelElement> delta, CancellationToken cancellationToken)
 		{
-			SelectedTests = testsDelta.NewModel;
+			SelectedTests = testsDelta.NewModel.TestSuite;
 
 			return Task.CompletedTask;
 		}

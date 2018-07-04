@@ -10,6 +10,7 @@ using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Concrete.CSharp.MSTest.VsTest;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Utilities;
 using RTSFramework.Core.Utilities;
@@ -27,13 +28,13 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly InProcessVsTestConnector vsTestConnector;
 		private readonly ISettingsProvider settingsProvider;
 		private readonly IUserRunConfigurationProvider runConfiguration;
-		private readonly IArtefactAdapter<FileInfo, ISet<MSTestTestcase>> testsModelAdapter;
+		private readonly IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter;
 
 		public MSTestTestsDeltaDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider,
 			IUserRunConfigurationProvider runConfiguration,
-			IArtefactAdapter<FileInfo, ISet<MSTestTestcase>> testsModelAdapter)
+			IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter)
 		{
 			this.assembliesAdapter = assembliesAdapter;
 			this.vsTestConnector = vsTestConnector;
@@ -42,18 +43,22 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			this.testsModelAdapter = testsModelAdapter;
 		}
 
-		public async Task<StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
+		public async Task<StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>> GetTests(TDelta delta, Func<MSTestTestcase, bool> filterFunction, CancellationToken token)
 		{
 			var oldTestsModel = testsModelAdapter.Parse(GetTestsStorage(delta.OldModel.VersionId));
 
 			if (!runConfiguration.DiscoverNewTests && oldTestsModel != null)
 			{
-				return new StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>(oldTestsModel, oldTestsModel);
+				return new StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>(oldTestsModel, oldTestsModel);
 			}
 
 			if (oldTestsModel == null)
 			{
-				oldTestsModel = new HashSet<MSTestTestcase>();
+				oldTestsModel = new TestsModel<MSTestTestcase>
+				{
+					TestSuite = new HashSet<MSTestTestcase>(),
+					VersionId = delta.OldModel.VersionId
+				};
 			}
 
 			var parsingResult = await assembliesAdapter.Parse(delta.NewModel.AbsoluteSolutionPath, token);
@@ -63,12 +68,16 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 			var vsTestCases = await DiscoverTests(sources, token);
 
-			var newTestsModel = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x)));
+			var newTestsModel = new TestsModel<MSTestTestcase>
+			{
+				TestSuite = new HashSet<MSTestTestcase>(vsTestCases.Select(Convert).Where(x => !x.Ignored && filterFunction(x))),
+				VersionId = delta.NewModel.VersionId
+			};
 			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(delta.NewModel.VersionId));
 
-			var testsDelta = new StructuralDelta<ISet<MSTestTestcase>, MSTestTestcase>(oldTestsModel, newTestsModel);
-			testsDelta.AddedElements.AddRange(newTestsModel.Except(oldTestsModel));
-			testsDelta.DeletedElements.AddRange(oldTestsModel.Except(newTestsModel));
+			var testsDelta = new StructuralDelta<TestsModel<MSTestTestcase>, MSTestTestcase>(oldTestsModel, newTestsModel);
+			testsDelta.AddedElements.AddRange(newTestsModel.TestSuite.Except(oldTestsModel.TestSuite));
+			testsDelta.DeletedElements.AddRange(oldTestsModel.TestSuite.Except(newTestsModel.TestSuite));
 
 			return testsDelta;
 		}

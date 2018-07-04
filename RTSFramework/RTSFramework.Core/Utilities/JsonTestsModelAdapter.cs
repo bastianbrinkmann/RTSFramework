@@ -7,11 +7,11 @@ using RTSFramework.Contracts.Models;
 
 namespace RTSFramework.Core.Utilities
 {
-	public class JsonTestsModelAdapter<TTestCase> : IArtefactAdapter<FileInfo, ISet<TTestCase>> where TTestCase : ITestCase
+	public class JsonTestsModelAdapter<TTestCase> : IArtefactAdapter<FileInfo, TestsModel<TTestCase>> where TTestCase : ITestCase
 	{
 		public const string FileExtension = ".json";
 
-		public ISet<TTestCase> Parse(FileInfo artefact)
+		public TestsModel<TTestCase> Parse(FileInfo artefact)
 		{
 			if (artefact.Extension != FileExtension)
 			{
@@ -27,7 +27,7 @@ namespace RTSFramework.Core.Utilities
 						using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
 						{
 							var serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
-							return serializer.Deserialize<ISet<TTestCase>>(jsonReader);
+							return serializer.Deserialize<TestsModel<TTestCase>>(jsonReader);
 						}
 					}
 				}
@@ -36,7 +36,7 @@ namespace RTSFramework.Core.Utilities
 			return null;
 		}
 
-		public FileInfo Unparse(ISet<TTestCase> model, FileInfo artefact)
+		public FileInfo Unparse(TestsModel<TTestCase> model, FileInfo artefact)
 		{
 			if (artefact.DirectoryName != null && !Directory.Exists(artefact.DirectoryName))
 			{

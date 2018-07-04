@@ -19,29 +19,32 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			this.correspondenceModelAdapter = correspondenceModelAdapter;
 		}
 
-		public Models.CorrespondenceModel GetCorrespondenceModel(TModel programModel)
+		public Models.CorrespondenceModel GetCorrespondenceModel<TTestCase>(TModel programModel, TestsModel<TTestCase> testsModel)
+			where TTestCase : ITestCase
 		{
-			var artefact = GetFile(programModel.VersionId, programModel.GranularityLevel);
+			string testType = typeof(TTestCase).Name;
+			var artefact = GetFile(testType, programModel.VersionId, programModel.GranularityLevel);
 
 			var defaultModel = new Models.CorrespondenceModel
 			{
 				ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName),
-				GranularityLevel = programModel.GranularityLevel
+				GranularityLevel = programModel.GranularityLevel,
+				TestType = testType
 			};
-
 
 			var model = correspondenceModelAdapter.Parse(artefact) ?? defaultModel;
 
 			return model;
 		}
 
-		public void UpdateCorrespondenceModel<TDelta>(CorrespondenceLinks correspondenceLinks, TDelta currentDelta, IEnumerable<string> deletedTests, IEnumerable<string> failedTests)
+		public void UpdateCorrespondenceModel<TDelta, TTestCase>(CorrespondenceLinks correspondenceLinks, TDelta currentDelta, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, IEnumerable<string> failedTests)
 			where TDelta : IDelta<TModel>
+			where TTestCase : ITestCase
 		{
-			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel);
+			var oldCorrespondenceModel = GetCorrespondenceModel(currentDelta.OldModel, testsDelta.OldModel);
 			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, currentDelta.NewModel.VersionId);
 			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks, currentDelta.NewModel));
-			RemoveDeletedTests(newCorrespondenceModel, deletedTests);
+			RemoveDeletedTests(newCorrespondenceModel, testsDelta);
 			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
 			PersistCorrespondenceModel(newCorrespondenceModel);
@@ -55,7 +58,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 				clone.Add(testcaseRelatedElements.Key, new HashSet<string>(testcaseRelatedElements.Value));
 			}
 
-			return new Models.CorrespondenceModel { ProgramVersionId = newId, CorrespondenceModelLinks = clone, GranularityLevel = correspondenceModel.GranularityLevel };
+			return new Models.CorrespondenceModel
+			{
+				ProgramVersionId = newId,
+				CorrespondenceModelLinks = clone,
+				GranularityLevel = correspondenceModel.GranularityLevel,
+				TestType = correspondenceModel.TestType
+			};
 		}
 
 		private void UpdateByNewLinks(Models.CorrespondenceModel correspondenceModel, Dictionary<string, HashSet<string>> newLinks)
@@ -78,9 +87,10 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			failedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
 		}
 
-		private void RemoveDeletedTests(Models.CorrespondenceModel correspondenceModel, IEnumerable<string> deletedTests)
+		private void RemoveDeletedTests<TTestCase>(Models.CorrespondenceModel correspondenceModel, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta)
+			where TTestCase : ITestCase
 		{
-			deletedTests.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x));
+			testsDelta.DeletedElements.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x.Id));
 		}
 
 		private Dictionary<string, HashSet<string>> ConvertLinks(CorrespondenceLinks correspondenceLinks, IProgramModel targetModel)
@@ -121,13 +131,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 				Directory.CreateDirectory(CorrespondenceModelsStoragePlace);
 			}
 
-			var artefact = GetFile(model.ProgramVersionId, model.GranularityLevel);
+			var artefact = GetFile(model.TestType, model.ProgramVersionId, model.GranularityLevel);
 			correspondenceModelAdapter.Unparse(model, artefact);
 		}
 
-		private static FileInfo GetFile(string programVersionId, GranularityLevel granularityLevel)
+		private static FileInfo GetFile(string testModelType, string programVersionId, GranularityLevel granularityLevel)
 		{
-			return new FileInfo(Path.GetFullPath(Path.Combine(CorrespondenceModelsStoragePlace, $"{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}")));
+			return new FileInfo(Path.GetFullPath(Path.Combine(CorrespondenceModelsStoragePlace, $"{testModelType}_{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}")));
 		}
 	}
 }

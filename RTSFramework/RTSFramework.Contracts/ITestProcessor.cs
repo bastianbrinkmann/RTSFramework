@@ -8,6 +8,6 @@ namespace RTSFramework.Contracts
 {
     public interface ITestProcessor<TTestCase, TResult, TDelta, TModel> where TTestCase : ITestCase where TResult : ITestProcessingResult where TDelta : IDelta<TModel> where TModel : IProgramModel
 	{
-        Task<TResult> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken);
+        Task<TResult> ProcessTests(IList<TTestCase> impactedTests, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, TDelta impactedForDelta, CancellationToken cancellationToken);
     }
 }

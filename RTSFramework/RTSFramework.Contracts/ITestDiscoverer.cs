@@ -9,6 +9,6 @@ namespace RTSFramework.Contracts
 {
 	public interface ITestDiscoverer<TModel, TDelta, TTestCase> where TTestCase : ITestCase where TModel : IProgramModel where TDelta: IDelta<TModel>
 	{
-        Task<StructuralDelta<ISet<TTestCase>, TTestCase>> GetTests(TDelta delta, Func<TTestCase, bool> filterFunction, CancellationToken token);
+        Task<StructuralDelta<TestsModel<TTestCase>, TTestCase>> GetTests(TDelta delta, Func<TTestCase, bool> filterFunction, CancellationToken token);
 	}
 }

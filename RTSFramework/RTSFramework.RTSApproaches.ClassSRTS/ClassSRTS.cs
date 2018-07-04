@@ -12,7 +12,7 @@ namespace RTSFramework.RTSApproaches.Static
 {
 	public class ClassSRTS<TModel, TTestCase> : IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase where TModel : IProgramModel
 	{
-		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<ISet<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
+		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TModel, CSharpClassElement> delta, CancellationToken cancellationToken)
 		{
 			ISet<ImpactedTest<TTestCase>> impactedTests = new HashSet<ImpactedTest<TTestCase>>();
 
@@ -26,7 +26,7 @@ namespace RTSFramework.RTSApproaches.Static
 			foreach (var type in changedTypes)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				ExtendAffectedTypesAndReportImpactedTests(type, dataStructure, affectedTypes, testsDelta.NewModel, impactedTests, cancellationToken);
+				ExtendAffectedTypesAndReportImpactedTests(type, dataStructure, affectedTypes, testsDelta.NewModel.TestSuite, impactedTests, cancellationToken);
 			}
 
 			testsDelta.AddedElements.ForEach(x =>
