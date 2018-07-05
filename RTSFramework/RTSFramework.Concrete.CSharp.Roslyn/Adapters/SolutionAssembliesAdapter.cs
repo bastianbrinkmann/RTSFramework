@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
@@ -38,7 +40,19 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.Adapters
 				if (!File.Exists(project.OutputFilePath))
 				{
 					throw new ArgumentException($"The assembly {project.OutputFilePath} for project {project.Name} does not exist!" +
-												"\nCheck the configuration and platform configured in the app settings.");
+												$"\nCheck the configuration and platform configured in the app settings (Configuration: {settingsProvider.Configuration}, Platform: {settingsProvider.Platform}).");
+				}
+
+				VersionStamp latestDocumentVersion = await project.GetLatestDocumentVersionAsync(token);
+
+				var assemblyCreationTime = File.GetLastWriteTimeUtc(project.OutputFilePath);
+				
+				var assemblyVersionStamp = VersionStamp.Create(assemblyCreationTime);
+
+				var newerTimeStamp = latestDocumentVersion.GetNewerVersion(assemblyVersionStamp);
+				if (newerTimeStamp != assemblyVersionStamp)
+				{
+					throw new ArgumentException($"The assembly {project.OutputFilePath} for project {project.Name} is not up-to-date, please compile the project first!");
 				}
 
 				token.ThrowIfCancellationRequested();
