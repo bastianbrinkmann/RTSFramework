@@ -60,7 +60,7 @@ namespace RTSFramework.ViewModels
 			InitDataStructureProvider(unityContainer);
 
 			InitDeltaDiscoverer(unityContainer);
-			InitTestsDiscoverer(unityContainer);
+			InitTestsDeltaAdapter(unityContainer);
 			InitTestsSelectors(unityContainer);
 			InitTestsProcessors(unityContainer);
 			InitTestsInstrumentors(unityContainer);
@@ -316,25 +316,24 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		#region TestsDiscoverer
+		#region TestsDeltaAdapter
 
-		private static void InitTestsDiscoverer(IUnityContainer unityContainer)
+		private static void InitTestsDeltaAdapter(IUnityContainer unityContainer)
 		{
-			InitTestsDiscovererForModel<GitCSharpProgramModel>(unityContainer);
-			InitTestsDiscovererForModel<TFS2010ProgramModel>(unityContainer);
-			InitTestsDiscovererForModel<LocalProgramModel>(unityContainer);
+			InitTestsDeltaAdapterForModel<GitCSharpProgramModel>(unityContainer);
+			InitTestsDeltaAdapterForModel<TFS2010ProgramModel>(unityContainer);
+			InitTestsDeltaAdapterForModel<LocalProgramModel>(unityContainer);
 		}
 
-		private static void InitTestsDiscovererForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
+		private static void InitTestsDeltaAdapterForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
 		{
-			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
-			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
-			InitTestsDiscovererForDelta<TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
+			InitTestsDeltaAdapterForProgramDelta<TModel, StructuralDelta<TModel, CSharpClassElement>>(unityContainer);
+			InitTestsDeltaAdapterForProgramDelta<TModel, StructuralDelta<TModel, CSharpFileElement>>(unityContainer);
+			InitTestsDeltaAdapterForProgramDelta<TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
 		}
 
-		private static void InitTestsDiscovererForDelta<TModel, TDelta>(IUnityContainer unityContainer) where TModel : CSharpProgramModel where TDelta: IDelta<TModel>
+		private static void InitTestsDeltaAdapterForProgramDelta<TModel, TDelta>(IUnityContainer unityContainer) where TModel : CSharpProgramModel where TDelta: IDelta<TModel>
 		{
-			//unityContainer.RegisterType<ITestsDeltaAdapter<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
 			unityContainer.RegisterType<ITestsDeltaAdapter<TModel, TDelta, MSTestTestcase>, MSTestTestsDeltaAdapter<TModel, TDelta>>(new ContainerControlledLifetimeManager());
 			unityContainer.RegisterType<ITestsDeltaAdapter<TModel, TDelta, CsvFileTestcase>, CsvManualTestsDeltaAdapter<TModel, TDelta>>();
 		}
@@ -409,7 +408,6 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsProcessors<TDelta, TModel>(IUnityContainer unityContainer) where TDelta : IDelta<TModel> where TModel : IProgramModel
 		{
-			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutorWithOpenCoverage>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 			unityContainer.RegisterType<ITestProcessor<MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, TDelta, TModel>, TestExecutorWithInstrumenting<TModel, TDelta, MSTestTestcase>>(ProcessingType.MSTestExecutionCreateCorrespondenceModel.ToString());
 
 			//unityContainer.RegisterType<ITestsProcessor<MSTestTestcase, MSTestExectionResult>, ConsoleMSTestTestsExecutor>(ProcessingType.MSTestExecution.ToString());
