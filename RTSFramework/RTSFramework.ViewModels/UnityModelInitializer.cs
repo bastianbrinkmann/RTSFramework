@@ -67,7 +67,7 @@ namespace RTSFramework.ViewModels
 			InitTestsPrioritizers(unityContainer);
 
 			InitModelLevelController(unityContainer);
-			InitStateBasedController(unityContainer);
+			InitOfflineController(unityContainer);
 			InitDeltaBasedController(unityContainer);
 
 			//Secondary Scenarios
@@ -79,15 +79,15 @@ namespace RTSFramework.ViewModels
 		}
 
 		private static IUnityContainer container;
-		internal static StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
-			GetStateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
+		internal static OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+			GetOfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>
 			(RTSApproachType rtsApproachType, ProcessingType processingType, bool withTimeLimit)
 			where TTestCase : ITestCase
 			where TModel : IProgramModel
 			where TProgramDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 		{
-			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
+			var factory = container.Resolve<Func<RTSApproachType, ProcessingType, bool, OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact>>>();
 
 			return factory(rtsApproachType, processingType, withTimeLimit);
 		}
@@ -179,49 +179,49 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		#region StateBasedController
+		#region OfflineController
 
-		private static void InitStateBasedController(IUnityContainer unityContainer)
+		private static void InitOfflineController(IUnityContainer unityContainer)
 		{
-			InitStateBasedControllerFactoryDelta<GitVersionIdentification, GitCSharpProgramModel>(unityContainer);
-			InitStateBasedControllerFactoryDelta<TFS2010VersionIdentification, TFS2010ProgramModel>(unityContainer);
+			InitOfflineControllerFactoryDelta<GitVersionIdentification, GitCSharpProgramModel>(unityContainer);
+			InitOfflineControllerFactoryDelta<TFS2010VersionIdentification, TFS2010ProgramModel>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryDelta<TArtefact, TModel>(IUnityContainer unityContainer)
+		private static void InitOfflineControllerFactoryDelta<TArtefact, TModel>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 		{
-			InitStateBasedControllerFactoryTestcase<TArtefact, TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
+			InitOfflineControllerFactoryTestcase<TArtefact, TModel, StructuralDelta<TModel, FileElement>>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryTestcase<TArtefact, TModel, TProgramDelta>(IUnityContainer unityContainer)
+		private static void InitOfflineControllerFactoryTestcase<TArtefact, TModel, TProgramDelta>(IUnityContainer unityContainer)
 			where TModel : IProgramModel
 			where TProgramDelta : IDelta<TModel>
 		{
-			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
+			InitOfflineControllerFactory<TArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(unityContainer);
 
-			InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, MSTestTestcase>(unityContainer);
-			InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, CsvFileTestcase>(unityContainer);
+			InitOfflineControllerFactoryResult<TArtefact, TModel, TProgramDelta, MSTestTestcase>(unityContainer);
+			InitOfflineControllerFactoryResult<TArtefact, TModel, TProgramDelta, CsvFileTestcase>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactoryResult<TArtefact, TModel, TProgramDelta, TTestCase>(IUnityContainer unityContainer) 
+		private static void InitOfflineControllerFactoryResult<TArtefact, TModel, TProgramDelta, TTestCase>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel
 			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
 		{
-			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
-			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
-			InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
+			InitOfflineControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(unityContainer);
+			InitOfflineControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(unityContainer);
+			InitOfflineControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(unityContainer);
 		}
 
-		private static void InitStateBasedControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer) 
+		private static void InitOfflineControllerFactory<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(IUnityContainer unityContainer) 
 			where TModel : IProgramModel 
 			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase 
 			where TResult : ITestProcessingResult
 		{
-			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
+			unityContainer.RegisterType<Func<RTSApproachType, ProcessingType, bool, OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>>(
 				new InjectionFactory(c =>
-					new Func<RTSApproachType, ProcessingType, bool, StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
+					new Func<RTSApproachType, ProcessingType, bool, OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 						(rtsApproachType, processingType, withTimeLimit) =>
 						{
 							ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController;
@@ -241,7 +241,7 @@ namespace RTSFramework.ViewModels
 							}
 							
 
-							return unityContainer.Resolve<StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
+							return unityContainer.Resolve<OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>>(
 								new ParameterOverride("modelBasedController", modelBasedController));
 						})));
 		}
@@ -334,9 +334,9 @@ namespace RTSFramework.ViewModels
 
 		private static void InitTestsDiscovererForDelta<TModel, TDelta>(IUnityContainer unityContainer) where TModel : CSharpProgramModel where TDelta: IDelta<TModel>
 		{
-			//unityContainer.RegisterType<ITestDiscoverer<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
-			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, MSTestTestcase>, MSTestTestsDeltaDiscoverer<TModel, TDelta>>(new ContainerControlledLifetimeManager());
-			unityContainer.RegisterType<ITestDiscoverer<TModel, TDelta, CsvFileTestcase>, CsvManualTestsDeltaDiscoverer<TModel, TDelta>>();
+			//unityContainer.RegisterType<ITestsDeltaAdapter<TModel, MSTestTestcase>, MonoMSTestTestDiscoverer<TModel>>();
+			unityContainer.RegisterType<ITestsDeltaAdapter<TModel, TDelta, MSTestTestcase>, MSTestTestsDeltaAdapter<TModel, TDelta>>(new ContainerControlledLifetimeManager());
+			unityContainer.RegisterType<ITestsDeltaAdapter<TModel, TDelta, CsvFileTestcase>, CsvManualTestsDeltaAdapter<TModel, TDelta>>();
 		}
 
 		#endregion

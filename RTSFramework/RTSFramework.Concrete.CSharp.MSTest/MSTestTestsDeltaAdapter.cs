@@ -18,7 +18,7 @@ using RTSFramework.RTSApproaches.CorrespondenceModel;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
-	public class MSTestTestsDeltaDiscoverer<TModel, TDelta> : ITestDiscoverer<TModel, TDelta, MSTestTestcase>
+	public class MSTestTestsDeltaAdapter<TModel, TDelta> : ITestsDeltaAdapter<TModel, TDelta, MSTestTestcase>
 		where TModel : CSharpProgramModel where TDelta : IDelta<TModel>
 	{
 		private const string TestsModelsStoragePlace = "TestsModels";
@@ -31,7 +31,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private readonly IArtefactAdapter<FileInfo, TestsModel<MSTestTestcase>> testsModelAdapter;
 		private readonly IArtefactAdapter<TestCase, MSTestTestcase> vsTestCaseAdapter;
 
-		public MSTestTestsDeltaDiscoverer(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
+		public MSTestTestsDeltaAdapter(CancelableArtefactAdapter<string, IList<CSharpAssembly>> assembliesAdapter, 
 			InProcessVsTestConnector vsTestConnector,
 			ISettingsProvider settingsProvider,
 			IUserRunConfigurationProvider runConfiguration,

@@ -18,7 +18,7 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.ViewModels.Controller
 {
-	public class StateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
+	public class OfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, TVisualizationArtefact> 
 		: IArtefactBasedController<TVisualizationArtefact>
 		where TTestCase : ITestCase
 		where TModel : IProgramModel
@@ -35,7 +35,7 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly IArtefactAdapter<TResultArtefact, TResult> resultArtefactAdapter;
 		private readonly Lazy<IArtefactAdapter<TVisualizationArtefact, VisualizationData>> visualizationArtefactAdapter;
 
-		public StateBasedController(
+		public OfflineController(
 			IArtefactAdapter<TArtefact, TModel> artefactAdapter,
 			ModelBasedController<TModel, TProgramDelta, TTestCase, TResult> modelBasedController,
 			ILoggingHelper loggingHelper,

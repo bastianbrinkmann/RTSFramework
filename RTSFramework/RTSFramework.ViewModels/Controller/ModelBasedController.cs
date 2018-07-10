@@ -26,7 +26,7 @@ namespace RTSFramework.ViewModels.Controller
 
 		private readonly Lazy<IOfflineDeltaDiscoverer<TProgram, TProgramDelta>> deltaDiscoverer;
 		private readonly ITestProcessor<TTestCase, TResult, TProgramDelta, TProgram> testProcessor;
-		private readonly ITestDiscoverer<TProgram, TProgramDelta, TTestCase> testDiscoverer;
+		private readonly ITestsDeltaAdapter<TProgram, TProgramDelta, TTestCase> testsDeltaAdapter;
 		private readonly ITestSelector<TProgram, TProgramDelta, TTestCase> testSelector;
 		private readonly ITestPrioritizer<TTestCase> testPrioritizer;
 		private readonly ILoggingHelper loggingHelper;
@@ -35,7 +35,7 @@ namespace RTSFramework.ViewModels.Controller
 
 		public ModelBasedController(
 			Lazy<IOfflineDeltaDiscoverer<TProgram, TProgramDelta>> deltaDiscoverer,
-			ITestDiscoverer<TProgram, TProgramDelta, TTestCase> testDiscoverer,
+			ITestsDeltaAdapter<TProgram, TProgramDelta, TTestCase> testsDeltaAdapter,
 			ITestSelector<TProgram, TProgramDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TProgramDelta, TProgram> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer,
@@ -45,7 +45,7 @@ namespace RTSFramework.ViewModels.Controller
 		{
 			this.deltaDiscoverer = deltaDiscoverer;
 			this.testProcessor = testProcessor;
-			this.testDiscoverer = testDiscoverer;
+			this.testsDeltaAdapter = testsDeltaAdapter;
 			this.testSelector = testSelector;
 			this.testPrioritizer = testPrioritizer;
 			this.loggingHelper = loggingHelper;
@@ -65,7 +65,7 @@ namespace RTSFramework.ViewModels.Controller
 
 		public virtual async Task<TResult> ExecuteRTSRun(TProgramDelta programDelta, CancellationToken token)
 		{
-			var testsDelta = await loggingHelper.ReportNeededTime(() => testDiscoverer.GetTestsDelta(programDelta, FilterFunction, token), "Tests Discovery");
+			var testsDelta = await loggingHelper.ReportNeededTime(() => testsDeltaAdapter.GetTestsDelta(programDelta, FilterFunction, token), "Tests Discovery");
 			token.ThrowIfCancellationRequested();
 
 			await loggingHelper.ReportNeededTime(() => testSelector.SelectTests(testsDelta, programDelta, token), "Tests Selection");

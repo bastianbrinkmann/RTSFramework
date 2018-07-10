@@ -24,14 +24,14 @@ namespace RTSFramework.ViewModels.Controller
 		private readonly IUserRunConfigurationProvider runConfigurationProvider;
 
 		public LimitedTimeModelBasedController(Lazy<IOfflineDeltaDiscoverer<TModel, TProgramDelta>> deltaDiscoverer, 
-			ITestDiscoverer<TModel, TProgramDelta, TTestCase> testDiscoverer, 
+			ITestsDeltaAdapter<TModel, TProgramDelta, TTestCase> testsDeltaAdapter, 
 			ITestSelector<TModel, TProgramDelta, TTestCase> testSelector,
 			ITestProcessor<TTestCase, TResult, TProgramDelta, TModel> testProcessor,
 			ITestPrioritizer<TTestCase> testPrioritizer, ILoggingHelper loggingHelper,
 			IUserRunConfigurationProvider runConfigurationProvider,
 			Lazy<IDependenciesVisualizer> dependenciesVisualizer,
 			IResponsibleChangesReporter<TTestCase, TModel, TProgramDelta> responsibleChangesReporter)
-			: base(deltaDiscoverer, testDiscoverer, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer, responsibleChangesReporter)
+			: base(deltaDiscoverer, testsDeltaAdapter, testSelector, testProcessor, testPrioritizer, loggingHelper, dependenciesVisualizer, responsibleChangesReporter)
 		{
 			this.runConfigurationProvider = runConfigurationProvider;
 		}

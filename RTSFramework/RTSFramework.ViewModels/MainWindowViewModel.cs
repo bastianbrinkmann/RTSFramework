@@ -114,7 +114,7 @@ namespace RTSFramework.ViewModels
 			this.reportArtefactAdapter = reportArtefactAdapter;
 			this.gitCommitsProvider = gitCommitsProvider;
 
-			StartRunCommand = new DelegateCommand(ExecuteRunFixModel);
+			StartRunCommand = new DelegateCommand(ExecuteOfflineRunFixModel);
 			CancelRunCommand = new DelegateCommand(CancelRun);
 			SelectSolutionFileCommand = new DelegateCommand(SelectSolutionFile);
 			SelectRepositoryCommand = new DelegateCommand(SelectRepository);
@@ -769,7 +769,7 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		private async void ExecuteRunFixModel()
+		private async void ExecuteOfflineRunFixModel()
 		{
 			RunStatus = RunStatus.Running;
 			TestResults.Clear();
@@ -905,7 +905,7 @@ namespace RTSFramework.ViewModels
 
 		#endregion
 
-		#region StateBasedController
+		#region OfflineController
 
 		private async Task ExecuteGitRun()
 		{
@@ -942,7 +942,7 @@ namespace RTSFramework.ViewModels
 				};
 			}
 
-			await ExecuteRunFixTestType<GitVersionIdentification, GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
+			await ExecuteOfflineRunFixTestType<GitVersionIdentification, GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
 		}
 
 		private async Task ExecuteTFS2010Run()
@@ -960,25 +960,25 @@ namespace RTSFramework.ViewModels
 				CommitId = "Test2"
 			};
 
-			await ExecuteRunFixTestType<TFS2010VersionIdentification, TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>(oldTfsProgramArtefact, newTfsProgramArtefact);
+			await ExecuteOfflineRunFixTestType<TFS2010VersionIdentification, TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>(oldTfsProgramArtefact, newTfsProgramArtefact);
 		}
 
-		private async Task ExecuteRunFixTestType<TArtefact, TModel, TProgramDelta>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)
+		private async Task ExecuteOfflineRunFixTestType<TArtefact, TModel, TProgramDelta>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)
 			where TModel : CSharpProgramModel
 			where TProgramDelta : IDelta<TModel>
 		{
 			switch (TestType)
 			{
 				case TestType.MSTest:
-					await ExecuteRunFixProcessingType<TArtefact, TModel, TProgramDelta, MSTestTestcase>(oldProgramArtefact, newProgramArtefact);
+					await ExecuteOfflineRunFixProcessingType<TArtefact, TModel, TProgramDelta, MSTestTestcase>(oldProgramArtefact, newProgramArtefact);
 					break;
 				case TestType.CsvList:
-					await ExecuteRunFixProcessingType<TArtefact, TModel, TProgramDelta, CsvFileTestcase>(oldProgramArtefact, newProgramArtefact);
+					await ExecuteOfflineRunFixProcessingType<TArtefact, TModel, TProgramDelta, CsvFileTestcase>(oldProgramArtefact, newProgramArtefact);
 					break;
 			}
 		}
 
-		private async Task ExecuteRunFixProcessingType<TArtefact, TModel, TProgramDelta, TTestCase>(TArtefact oldArtefact, TArtefact newArtefact)
+		private async Task ExecuteOfflineRunFixProcessingType<TArtefact, TModel, TProgramDelta, TTestCase>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TProgramDelta : IDelta<TModel>
 			where TTestCase : ITestCase
@@ -987,45 +987,45 @@ namespace RTSFramework.ViewModels
 			{
 				case ProcessingType.MSTestExecution:
 				case ProcessingType.MSTestExecutionCreateCorrespondenceModel:
-					await ExecuteRun<TArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
+					await ExecuteOfflineRun<TArtefact, TModel, TProgramDelta, MSTestTestcase, ITestsExecutionResult<MSTestTestcase>, object>(oldArtefact, newArtefact);
 					break;
 				case ProcessingType.CsvReporting:
-					var csvCreationResult = await ExecuteRun<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(oldArtefact, newArtefact);
+					var csvCreationResult = await ExecuteOfflineRun<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, CsvFileArtefact>(oldArtefact, newArtefact);
 					HandleCsvCreationResult(csvCreationResult);
 					break;
 				case ProcessingType.ListReporting:
-					var listReportingResult = await ExecuteRun<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
+					var listReportingResult = await ExecuteOfflineRun<TArtefact, TModel, TProgramDelta, TTestCase, TestListResult<TTestCase>, IList<TestResultListViewItemViewModel>>(oldArtefact, newArtefact);
 					HandleListReportingResult(listReportingResult);
 					break;
 				case ProcessingType.CollectStatistics:
-					var statisticsResult = await ExecuteRun<TArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(oldArtefact, newArtefact);
+					var statisticsResult = await ExecuteOfflineRun<TArtefact, TModel, TProgramDelta, TTestCase, PercentageImpactedTestsStatistic, CsvFileArtefact>(oldArtefact, newArtefact);
 					HandleCsvCreationResult(statisticsResult);
 					break;
 			}
 		}
 
-		private async Task<TResultArtefact> ExecuteRun<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(TArtefact oldArtefact, TArtefact newArtefact)
+		private async Task<TResultArtefact> ExecuteOfflineRun<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact>(TArtefact oldArtefact, TArtefact newArtefact)
 			where TModel : IProgramModel
 			where TProgramDelta : IDelta<TModel>
 			where TResult : ITestProcessingResult
 			where TTestCase : ITestCase
 		{
-			var stateBasedController = UnityModelInitializer.GetStateBasedController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>(RTSApproachType, ProcessingType, WithTimeLimit);
+			var offlineController = UnityModelInitializer.GetOfflineController<TArtefact, TModel, TProgramDelta, TTestCase, TResult, TResultArtefact, Graph>(RTSApproachType, ProcessingType, WithTimeLimit);
 
-			lastUsedController = stateBasedController;
+			lastUsedController = offlineController;
 
-			stateBasedController.FilterFunction = GetFilterFunction<TTestCase>();
+			offlineController.FilterFunction = GetFilterFunction<TTestCase>();
 
-			stateBasedController.ImpactedTest += HandleImpactedTest;
-			stateBasedController.TestResultAvailable += HandleTestExecutionResult;
-			stateBasedController.TestsPrioritized += HandleTestsPrioritized;
+			offlineController.ImpactedTest += HandleImpactedTest;
+			offlineController.TestResultAvailable += HandleTestExecutionResult;
+			offlineController.TestsPrioritized += HandleTestsPrioritized;
 
-			var result = await Task.Run(() => stateBasedController.ExecuteRTSRun(oldArtefact, newArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
+			var result = await Task.Run(() => offlineController.ExecuteRTSRun(oldArtefact, newArtefact, cancellationTokenSource.Token), cancellationTokenSource.Token);
 
 			DependenciesVisualizationAvailable = true;
-			stateBasedController.ImpactedTest -= HandleImpactedTest;
-			stateBasedController.TestResultAvailable -= HandleTestExecutionResult;
-			stateBasedController.TestsPrioritized -= HandleTestsPrioritized;
+			offlineController.ImpactedTest -= HandleImpactedTest;
+			offlineController.TestResultAvailable -= HandleTestExecutionResult;
+			offlineController.TestsPrioritized -= HandleTestsPrioritized;
 
 			return result;
 		}

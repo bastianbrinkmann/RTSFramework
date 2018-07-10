@@ -117,7 +117,7 @@
     <Compile Include="Adapters\MSTestExecutionResultParameters.cs" />
     <Compile Include="Utilities\OrderedTestsHelper.cs" />
     <Compile Include="Adapters\TrxFileMsTestExecutionResultAdapter.cs" />
-    <Compile Include="MSTestTestsDeltaDiscoverer.cs" />
+    <Compile Include="MSTestTestsDeltaAdapter.cs" />
     <Compile Include="VsTest\AsyncAutoResetEvent.cs" />
     <Compile Include="VsTest\DiscoveryEventHandler.cs" />
     <Compile Include="VsTest\InProcessVsTestConnector.cs" />

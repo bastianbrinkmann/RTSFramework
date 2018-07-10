@@ -105,7 +105,7 @@
     <Compile Include="DeltaDiscoverer\IOfflineDeltaDiscoverer.cs" />
     <Compile Include="Models\IProgramModel.cs" />
     <Compile Include="Models\ITestCase.cs" />
-    <Compile Include="ITestDiscoverer.cs" />
+    <Compile Include="ITestsDeltaAdapter.cs" />
     <Compile Include="ITestProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\EnumDescriptionTypeConverter.cs" />
