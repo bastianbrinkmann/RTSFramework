@@ -12,11 +12,11 @@ using Unity.Interception.Utilities;
 
 namespace RTSFramework.Concrete.Git
 {
-	public class GitCSharpProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, FilesProgramModel>
+	public class GitFilesProgramModelAdapter : IArtefactAdapter<GitVersionIdentification, FilesProgramModel>
 	{
 		private readonly GitCommitsProvider gitCommitsProvider;
 
-		public GitCSharpProgramModelAdapter(GitCommitsProvider gitCommitsProvider)
+		public GitFilesProgramModelAdapter(GitCommitsProvider gitCommitsProvider)
 		{
 			this.gitCommitsProvider = gitCommitsProvider;
 		}

@@ -478,7 +478,7 @@ namespace RTSFramework.ViewModels
 			unityContainer.RegisterType<IArtefactAdapter<FileInfo, CorrespondenceModel>, JsonCorrespondenceModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<MSTestExecutionResultParameters, MSTestExectionResult>, TrxFileMsTestExecutionResultAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<string, IList<CSharpAssembly>>, SolutionAssembliesAdapter>();
-			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, FilesProgramModel>, GitCSharpProgramModelAdapter>();
+			unityContainer.RegisterType<IArtefactAdapter<GitVersionIdentification, FilesProgramModel>, GitFilesProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<TFS2010VersionIdentification, FilesProgramModel>, TFS2010ProgramModelAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<Graph, VisualizationData>, VisualizationDataMsaglGraphAdapter>();
 			unityContainer.RegisterType<IArtefactAdapter<CsvFileArtefact, PercentageImpactedTestsStatistic>, PercentageImpactedTestsStatisticCsvFileAdapter>();
