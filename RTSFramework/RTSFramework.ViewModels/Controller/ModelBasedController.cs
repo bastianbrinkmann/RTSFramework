@@ -73,6 +73,7 @@ namespace RTSFramework.ViewModels.Controller
 
 			foreach (var impactedTest in impactedTests)
 			{
+				token.ThrowIfCancellationRequested();
 				ImpactedTest?.Invoke(this, new ImpactedTestEventArgs<TTestCase>(impactedTest, 
 					responsibleChangesReporter.GetResponsibleChanges(testSelector.CorrespondenceModel, impactedTest, programDelta)));
 			}

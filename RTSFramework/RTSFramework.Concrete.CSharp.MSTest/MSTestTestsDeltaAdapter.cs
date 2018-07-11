@@ -13,6 +13,7 @@ using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
 using RTSFramework.Contracts.Utilities;
+using RTSFramework.Core.Models;
 using RTSFramework.Core.Utilities;
 using RTSFramework.RTSApproaches.CorrespondenceModel;
 

@@ -23,12 +23,11 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			where TTestCase : ITestCase
 		{
 			string testType = typeof(TTestCase).Name;
-			var artefact = GetFile(testType, programModel.VersionId, programModel.GranularityLevel);
+			var artefact = GetFile(testType, programModel.VersionId);
 
 			var defaultModel = new Models.CorrespondenceModel
 			{
 				ProgramVersionId = Path.GetFileNameWithoutExtension(artefact.FullName),
-				GranularityLevel = programModel.GranularityLevel,
 				TestType = testType
 			};
 
@@ -43,7 +42,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 		{
 			var oldCorrespondenceModel = GetCorrespondenceModel(programDelta.OldModel, testsDelta.OldModel);
 			var newCorrespondenceModel = CloneModel(oldCorrespondenceModel, programDelta.NewModel.VersionId);
-			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks, programDelta.NewModel));
+			UpdateByNewLinks(newCorrespondenceModel, ConvertLinks(correspondenceLinks));
 			RemoveDeletedTests(newCorrespondenceModel, testsDelta);
 			RemoveFailedTests(newCorrespondenceModel, failedTests);
 
@@ -62,7 +61,6 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			{
 				ProgramVersionId = newId,
 				CorrespondenceModelLinks = clone,
-				GranularityLevel = correspondenceModel.GranularityLevel,
 				TestType = correspondenceModel.TestType
 			};
 		}
@@ -93,33 +91,16 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 			testsDelta.DeletedElements.ForEach(x => correspondenceModel.CorrespondenceModelLinks.Remove(x.Id));
 		}
 
-		private Dictionary<string, HashSet<string>> ConvertLinks(CorrespondenceLinks correspondenceLinks, IProgramModel targetModel)
+		private Dictionary<string, HashSet<string>> ConvertLinks(CorrespondenceLinks correspondenceLinks)
 		{
 			var links = correspondenceLinks.Links.Select(x => x.Item1).Distinct().ToDictionary(x => x, x => new HashSet<string>());
 
 			foreach (var coverageEntry in correspondenceLinks.Links)
 			{
-				if (targetModel.GranularityLevel == GranularityLevel.Class)
+				if (!links[coverageEntry.Item1].Contains(coverageEntry.Item2))
 				{
-					if (!links[coverageEntry.Item1].Contains(coverageEntry.Item2))
-					{
-						links[coverageEntry.Item1].Add(coverageEntry.Item2);
-					}
+					links[coverageEntry.Item1].Add(coverageEntry.Item2);
 				}
-				/* TODO Granularity Level File
-				 * 
-				 * else if(targetModel.GranularityLevel == GranularityLevel.File)
-				{
-					if (!coverageEntry.Item2.EndsWith(".cs"))
-					{
-						continue;
-					}
-					var relativePath = RelativePathHelper.GetRelativePath(targetModel, coverageEntry.Item2);
-					if (!links[coverageEntry.Item1].Contains(relativePath))
-					{
-						links[coverageEntry.Item1].Add(relativePath);
-					}
-				}*/
 			}
 			return links;
 		}
@@ -131,13 +112,13 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel
 				Directory.CreateDirectory(CorrespondenceModelsStoragePlace);
 			}
 
-			var artefact = GetFile(model.TestType, model.ProgramVersionId, model.GranularityLevel);
+			var artefact = GetFile(model.TestType, model.ProgramVersionId);
 			correspondenceModelAdapter.Unparse(model, artefact);
 		}
 
-		private static FileInfo GetFile(string testModelType, string programVersionId, GranularityLevel granularityLevel)
+		private static FileInfo GetFile(string testModelType, string programVersionId)
 		{
-			return new FileInfo(Path.GetFullPath(Path.Combine(CorrespondenceModelsStoragePlace, $"{testModelType}_{Uri.EscapeUriString(programVersionId)}_{Uri.EscapeUriString(granularityLevel.ToString())}{JsonCorrespondenceModelAdapter.FileExtension}")));
+			return new FileInfo(Path.GetFullPath(Path.Combine(CorrespondenceModelsStoragePlace, $"{testModelType}_{Uri.EscapeUriString(programVersionId)}{JsonCorrespondenceModelAdapter.FileExtension}")));
 		}
 	}
 }

@@ -30,6 +30,7 @@ using RTSFramework.Contracts;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Utilities;
+using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.MSTest
 {
@@ -67,7 +68,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 		private List<string> testAssemblies;
 		private List<string> assemblyNames;
 		private IList<MSTestTestcase> msTestTestcases;
-		private GranularityLevel granularityLevel;
 
 		private const string DependencyMonitorClassFullName = "RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor";
 		private const string TypeMethodFullName = "System.Void RTSFramework.Concrete.CSharp.DependencyMonitor.DependencyMonitor::T(System.String)";
@@ -93,94 +93,11 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 			assemblies = parsingResult.Select(x => x.AbsolutePath).ToList();
 			assemblyNames = assemblies.Select(Path.GetFileName).ToList();
 			msTestTestcases = tests;
-			granularityLevel = toInstrument.GranularityLevel;
 			testNamesToExecutionIds = tests.Select(x => new Tuple<string, int>(x.Id, tests.IndexOf(x))).ToList();
-
-			/* TODO Granularity Level File
-			 * 
-			 * if (granularityLevel == GranularityLevel.File)
-			{
-				InitClassFilesMapping(token);
-			}*/
 
 			loggingHelper.ReportNeededTime(() => InstrumentProgramAssemblies(token), "Instrumenting Program Assemblies");
 			loggingHelper.ReportNeededTime(() => InstrumentTestAssemblies(token), "Instrumenting Test Assemblies");
 		}
-
-		#region File Level
-
-		private void InitClassFilesMapping(CancellationToken token)
-		{
-			var parallelOptions = new ParallelOptions
-			{
-				CancellationToken = token,
-				MaxDegreeOfParallelism = Environment.ProcessorCount
-			};
-			Parallel.ForEach(assemblies, parallelOptions, assembly =>
-			{
-				parallelOptions.CancellationToken.ThrowIfCancellationRequested();
-
-				var module = LoadModuleDefinitionWithSymbols(assembly);
-				foreach (var type in module.GetTypes())
-				{
-					if (type.Name == MonoModuleTyp)
-					{
-						continue;
-					}
-
-					if (!classToFileNamesMapping.ContainsKey(type.FullName))
-					{
-						var fileName = TrackFileName(type);
-						if (fileName != null)
-						{
-							classToFileNamesMapping.Add(type.FullName, fileName);
-						}
-					}
-				}
-				module.Dispose();
-			});
-		}
-
-		private string TrackFileName(TypeDefinition type)
-		{
-			if (type.HasMethods)
-			{
-				foreach (var method in type.Methods)
-				{
-					if (method.DebugInformation != null && method.DebugInformation.HasSequencePoints)
-					{
-						foreach (var sequencePoint in method.DebugInformation.SequencePoints)
-						{
-							if (sequencePoint.Document != null)
-							{
-								return sequencePoint.Document.Url;
-							}
-						}
-					}
-				}
-			}
-
-			return null;
-		}
-
-		private ModuleDefinition LoadModuleDefinitionWithSymbols(string assembly)
-		{
-			try
-			{
-				var readerParameters = new ReaderParameters
-				{
-					ReadSymbols = true,
-					SymbolReaderProvider = new PdbReaderProvider()
-				};
-				return ModuleDefinition.ReadModule(assembly, readerParameters);
-			}
-			catch (Exception e)
-			{
-				throw new ArgumentException($"Error loading symbols for assembly {assembly}.", e);
-			}
-		}
-
-		#endregion
 
 		public CorrespondenceLinks GetCorrespondenceLinks()
 		{
@@ -388,9 +305,6 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private IList<AssemblyDefinition> GetReferencedAssemblies(ModuleDefinition module)
 		{
-			// TODO: Clear up what the difference between ModuleDefinition.ModuleReferences and ModuleDefinition.AssemblyReferences is.
-			// TODO: Modify this method to accept assembly name and only resolve assembly(ies) that match the name.
-
 			if (module == null)
 			{
 				return null;
@@ -667,17 +581,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest
 
 		private string GetTypeReferenceIdentifier(TypeReference dependency)
 		{
-			if (granularityLevel == GranularityLevel.Class)
-			{
-				return dependency.FullName;
-			}
-			/* TODO Granularity Level File
-			 * 
-			 * if (granularityLevel == GranularityLevel.File)
-			{
-				return classToFileNamesMapping.ContainsKey(dependency.FullName) ? classToFileNamesMapping[dependency.FullName] : null;
-			}*/
-			return null;
+			return dependency.FullName;
 		}
 
 		/// <summary>

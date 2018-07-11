@@ -66,7 +66,6 @@ namespace RTSFramework.Concrete.CSharp.DependencyMonitor
 
 			if (testMethodIdentifier != null)
 			{
-				//TODO Granularity Level File
 				dependencies.Add(testClass);
 			}
 		}

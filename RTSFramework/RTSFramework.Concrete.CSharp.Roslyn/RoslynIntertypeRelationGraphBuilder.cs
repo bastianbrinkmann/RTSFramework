@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.Operations;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts;
 using RTSFramework.Contracts.Utilities;
+using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.Core.DataStructures;
 

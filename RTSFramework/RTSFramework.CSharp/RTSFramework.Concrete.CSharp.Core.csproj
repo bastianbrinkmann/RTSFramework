@@ -46,7 +46,6 @@
   <ItemGroup>
     <Compile Include="Models\CSharpAssembly.cs" />
     <Compile Include="Models\CSharpFileElement.cs" />
-    <Compile Include="Models\CSharpProgramModel.cs" />
     <Compile Include="Models\ICSharpTestcase.cs" />
     <Compile Include="FilesCSharpFilesDeltaAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

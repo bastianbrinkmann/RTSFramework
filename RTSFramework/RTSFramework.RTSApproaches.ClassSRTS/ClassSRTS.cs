@@ -40,7 +40,6 @@ namespace RTSFramework.RTSApproaches.Static
 			CorrespondenceModel = new CorrespondenceModel.Models.CorrespondenceModel
 			{
 				ProgramVersionId = programDelta.NewModel.VersionId,
-				GranularityLevel = GranularityLevel.Class,
 				CorrespondenceModelLinks = impactedTests.ToDictionary(
 					x => x.TestCase.Id, 
 					x => x.ImpactedDueTo == null ? new HashSet<string>() : new HashSet<string>(new[] {x.ImpactedDueTo}))

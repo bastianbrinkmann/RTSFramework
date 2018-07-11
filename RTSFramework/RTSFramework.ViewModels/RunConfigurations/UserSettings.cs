@@ -9,7 +9,6 @@ namespace RTSFramework.ViewModels.RunConfigurations
 		public DiscoveryType DiscoveryType { get; set; }
 		public ProcessingType ProcessingType { get; set; }
 		public RTSApproachType RTSApproachType { get; set; }
-		public GranularityLevel GranularityLevel { get; set; }
 		public string SolutionFilePath { get; set; }
 		public string RepositoryPath { get; set; }
 		public bool WithTimeLimit { get; set; }

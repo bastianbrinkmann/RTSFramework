@@ -1,21 +1,20 @@
-﻿using RTSFramework.Concrete.TFS2010.Models;
-using RTSFramework.Contracts.Adapter;
+﻿using RTSFramework.Contracts.Adapter;
+using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.TFS2010
 {
-    public class TFS2010ProgramModelAdapter : IArtefactAdapter<TFS2010VersionIdentification, TFS2010ProgramModel>
+    public class TFS2010ProgramModelAdapter : IArtefactAdapter<TFS2010VersionIdentification, FilesProgramModel>
     {
-	    public TFS2010ProgramModel Parse(TFS2010VersionIdentification artefact)
+	    public FilesProgramModel Parse(TFS2010VersionIdentification artefact)
 	    {
-		    return new TFS2010ProgramModel
-		    {
+		    return new FilesProgramModel
+			{
 			    AbsoluteSolutionPath = artefact.AbsoluteSolutionPath,
-			    GranularityLevel = artefact.GranularityLevel,
 			    VersionId = artefact.CommitId
 		    };
 	    }
 
-	    public TFS2010VersionIdentification Unparse(TFS2010ProgramModel model, TFS2010VersionIdentification artefact)
+	    public TFS2010VersionIdentification Unparse(FilesProgramModel model, TFS2010VersionIdentification artefact)
 	    {
 		    throw new System.NotImplementedException();
 	    }

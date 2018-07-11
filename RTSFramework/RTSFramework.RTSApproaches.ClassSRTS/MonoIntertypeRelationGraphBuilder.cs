@@ -9,6 +9,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using RTSFramework.Concrete.CSharp.Core.Models;
 using RTSFramework.Contracts.Adapter;
+using RTSFramework.Core.Models;
 using RTSFramework.RTSApproaches.Core.Contracts;
 using RTSFramework.RTSApproaches.Core.DataStructures;
 

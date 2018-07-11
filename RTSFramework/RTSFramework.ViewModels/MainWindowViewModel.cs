@@ -18,7 +18,6 @@ using RTSFramework.Concrete.Git;
 using RTSFramework.Concrete.Git.Models;
 using RTSFramework.Concrete.Reporting;
 using RTSFramework.Concrete.TFS2010;
-using RTSFramework.Concrete.TFS2010.Models;
 using RTSFramework.Concrete.User;
 using RTSFramework.Concrete.User.Models;
 using RTSFramework.Contracts;
@@ -58,8 +57,6 @@ namespace RTSFramework.ViewModels
 		private ProcessingType processingType;
 		private DiscoveryType discoveryType;
 		private RTSApproachType rtsApproachType;
-		private GranularityLevel granularityLevel;
-		private bool isGranularityLevelChangable;
 		private string solutionFilePath;
 		private string repositoryPath;
 		private bool isRunning;
@@ -143,7 +140,6 @@ namespace RTSFramework.ViewModels
 			DiscoveryType = discoveryTypeFromSettings;
 			ProcessingType = processingTypeFromSettings;
 			RTSApproachType = userSettings.RTSApproachType;
-			GranularityLevel = userSettings.GranularityLevel;
 			SolutionFilePath = userSettings.SolutionFilePath;
 			RepositoryPath = userSettings.RepositoryPath;
 			TimeLimit = userSettings.TimeLimit;
@@ -292,15 +288,6 @@ namespace RTSFramework.ViewModels
 		{
 			switch (propertyChangedEventArgs.PropertyName)
 			{
-				case nameof(RTSApproachType):
-					/*TODO Granularity Level File
-					 * 
-					 * if (RTSApproachType == RTSApproachType.ClassSRTS)
-					{
-						GranularityLevel = GranularityLevel.Class;
-					}
-					IsGranularityLevelChangable = RTSApproachType == RTSApproachType.DynamicRTS;*/
-					break;
 				case nameof(ProgramModelType):
 					IsRepositoryPathChangable = ProgramModelType == ProgramModelType.GitModel;
 					RefreshDiscoveryTypes();
@@ -662,27 +649,6 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public bool IsGranularityLevelChangable
-		{
-			get { return isGranularityLevelChangable; }
-			set
-			{
-				isGranularityLevelChangable = value;
-				RaisePropertyChanged();
-			}
-		}
-
-		public GranularityLevel GranularityLevel
-		{
-			get { return granularityLevel; }
-			set
-			{
-				granularityLevel = value;
-				RaisePropertyChanged();
-				userSettings.GranularityLevel = value;
-			}
-		}
-
 		public RTSApproachType RTSApproachType
 		{
 			get { return rtsApproachType; }
@@ -825,15 +791,14 @@ namespace RTSFramework.ViewModels
 			var intendedChangesArtefact = new IntendedChangesArtefact
 			{
 				IntendedChanges = userRunConfigurationProvider.IntendedChanges,
-				LocalProgramModel = new LocalProgramModel
+				ProgramModel = new FilesProgramModel
 				{
-					GranularityLevel = GranularityLevel,
 					AbsoluteSolutionPath = SolutionFilePath,
 					VersionId = versionId
 				}
 			};
 
-			await ExecuteDeltaBasedRunFixTestType<IntendedChangesArtefact, LocalProgramModel, StructuralDelta<LocalProgramModel, FileElement>>(intendedChangesArtefact);
+			await ExecuteDeltaBasedRunFixTestType<IntendedChangesArtefact, FilesProgramModel, StructuralDelta<FilesProgramModel, FileElement>>(intendedChangesArtefact);
 		}
 
 		private async Task ExecuteDeltaBasedRunFixTestType<TDeltaArtefact, TModel, TProgramDelta>(TDeltaArtefact deltaArtefact)
@@ -916,8 +881,7 @@ namespace RTSFramework.ViewModels
 				ReferenceType = GitVersionReferenceType.SpecificCommit,
 				Commit = new GitCommit { ShaId = FromCommit.Identifier },
 				RepositoryPath = RepositoryPath,
-				AbsoluteSolutionPath = SolutionFilePath,
-				GranularityLevel = GranularityLevel
+				AbsoluteSolutionPath = SolutionFilePath
 			};
 
 			if (ToCommit.Identifier == UncommittedChangesIdentifier)
@@ -926,8 +890,7 @@ namespace RTSFramework.ViewModels
 				{
 					ReferenceType = GitVersionReferenceType.CurrentChanges,
 					RepositoryPath = RepositoryPath,
-					AbsoluteSolutionPath = SolutionFilePath,
-					GranularityLevel = GranularityLevel
+					AbsoluteSolutionPath = SolutionFilePath
 				};
 			}
 			else
@@ -937,12 +900,11 @@ namespace RTSFramework.ViewModels
 					ReferenceType = GitVersionReferenceType.SpecificCommit,
 					Commit = new GitCommit { ShaId = ToCommit.Identifier },
 					RepositoryPath = RepositoryPath,
-					AbsoluteSolutionPath = SolutionFilePath,
-					GranularityLevel = GranularityLevel
+					AbsoluteSolutionPath = SolutionFilePath
 				};
 			}
 
-			await ExecuteOfflineRunFixTestType<GitVersionIdentification, GitCSharpProgramModel, StructuralDelta<GitCSharpProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
+			await ExecuteOfflineRunFixTestType<GitVersionIdentification, FilesProgramModel, StructuralDelta<FilesProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
 		}
 
 		private async Task ExecuteTFS2010Run()
@@ -950,17 +912,15 @@ namespace RTSFramework.ViewModels
 			var oldTfsProgramArtefact = new TFS2010VersionIdentification
 			{
 				AbsoluteSolutionPath = SolutionFilePath,
-				GranularityLevel = GranularityLevel,
 				CommitId = "Test"
 			};
 			var newTfsProgramArtefact = new TFS2010VersionIdentification
 			{
 				AbsoluteSolutionPath = SolutionFilePath,
-				GranularityLevel = GranularityLevel,
 				CommitId = "Test2"
 			};
 
-			await ExecuteOfflineRunFixTestType<TFS2010VersionIdentification, TFS2010ProgramModel, StructuralDelta<TFS2010ProgramModel, FileElement>>(oldTfsProgramArtefact, newTfsProgramArtefact);
+			await ExecuteOfflineRunFixTestType<TFS2010VersionIdentification, FilesProgramModel, StructuralDelta<FilesProgramModel, FileElement>>(oldTfsProgramArtefact, newTfsProgramArtefact);
 		}
 
 		private async Task ExecuteOfflineRunFixTestType<TArtefact, TModel, TProgramDelta>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)

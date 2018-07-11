@@ -11,8 +11,6 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
 
         public string ProgramVersionId { get; set; }
 
-        public GranularityLevel GranularityLevel { get; set; }
-
         public Dictionary<string, HashSet<string>> CorrespondenceModelLinks { get; set; }
             = new Dictionary<string, HashSet<string>>();
 
@@ -24,7 +22,7 @@ namespace RTSFramework.RTSApproaches.CorrespondenceModel.Models
                 clone.Add(testcaseRelatedElements.Key, new HashSet<string>(testcaseRelatedElements.Value));
             }
 
-            return new CorrespondenceModel{ProgramVersionId = newId, CorrespondenceModelLinks = clone, GranularityLevel = GranularityLevel};
+            return new CorrespondenceModel{ProgramVersionId = newId, CorrespondenceModelLinks = clone };
         }
 
         public void UpdateByNewLinks(Dictionary<string, HashSet<string>> newLinks)

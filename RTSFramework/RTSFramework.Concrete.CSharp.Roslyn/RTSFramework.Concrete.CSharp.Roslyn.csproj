@@ -207,6 +207,10 @@
       <Project>{ed8744a8-1310-45b9-b2e4-93e1f70bcbcc}</Project>
       <Name>RTSFramework.Contracts</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RTSFramework.Core\RTSFramework.Core.csproj">
+      <Project>{34343ADE-C3E0-423D-94B6-9D0400F498CB}</Project>
+      <Name>RTSFramework.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSFramework.CSharp\RTSFramework.Concrete.CSharp.Core.csproj">
       <Project>{ecdb3480-0cf5-4ded-8118-046f41cd4743}</Project>
       <Name>RTSFramework.Concrete.CSharp.Core</Name>

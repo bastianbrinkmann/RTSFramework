@@ -46,7 +46,6 @@
     <Compile Include="IntendedChangesArtefact.cs" />
     <Compile Include="Models\CsvFileTestcase.cs" />
     <Compile Include="UserRunConfigurationProvider.cs" />
-    <Compile Include="Models\LocalProgramModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

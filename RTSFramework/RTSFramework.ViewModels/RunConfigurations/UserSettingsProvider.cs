@@ -34,7 +34,6 @@ namespace RTSFramework.ViewModels.RunConfigurations
 						DiscoveryType = DiscoveryType.GitDiscovery,
 						ProcessingType = ProcessingType.MSTestExecution,
 						RTSApproachType = RTSApproachType.DynamicRTS,
-						GranularityLevel = GranularityLevel.Class,
 						SolutionFilePath = @"",
 						RepositoryPath = @"",
 						TestCaseNameFilter = "",
