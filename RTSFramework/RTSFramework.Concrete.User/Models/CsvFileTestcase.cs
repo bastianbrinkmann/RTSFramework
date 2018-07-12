@@ -9,7 +9,7 @@ namespace RTSFramework.Concrete.User.Models
 		public string Id { get; set; }
 		public List<string> Categories => new List<string>();
 		public string Name => Id;
-		public string AssociatedClass { get; set; }
+		public List<string> AssociatedClasses { get; set; }
 		public bool IsChildTestCase => false;
 		public Func<IList<string>> GetResponsibleChangesForLastImpact { get; set; }
 

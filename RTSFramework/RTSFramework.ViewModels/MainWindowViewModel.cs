@@ -1005,7 +1005,7 @@ namespace RTSFramework.ViewModels
 			if (!string.IsNullOrEmpty(ClassNameFilter))
 			{
 				var previousFunc = filterFunction;
-				filterFunction = x => previousFunc(x) && x.AssociatedClass.Contains(ClassNameFilter);
+				filterFunction = x => previousFunc(x) && x.AssociatedClasses.Any(y => y.Contains(ClassNameFilter));
 			}
 			if (!string.IsNullOrEmpty(CategoryFilter))
 			{
@@ -1066,7 +1066,7 @@ namespace RTSFramework.ViewModels
 					{
 						FullyQualifiedName = args.TestCase.Id,
 						Name = args.TestCase.Name,
-						FullClassName = args.TestCase.AssociatedClass,
+						FullClassName = string.Join(",", args.TestCase.AssociatedClasses),
 						Categories = string.Join(",", args.TestCase.Categories),
 						ResponsibleChanges =  args.ResponsibleChanges
 					}));

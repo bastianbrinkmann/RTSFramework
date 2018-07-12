@@ -27,7 +27,7 @@ namespace RTSFramework.ViewModels.Adapter
 			}
 
 			artefact.FullyQualifiedName = model.Id;
-			artefact.FullClassName = model.AssociatedClass;
+			artefact.FullClassName = string.Join(",", model.AssociatedClasses);
 			artefact.Name = model.Name;
 			artefact.Categories = string.Join(",", model.Categories);
 

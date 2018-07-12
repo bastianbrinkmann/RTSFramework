@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using RTSFramework.Concrete.CSharp.MSTest.Models;
 using RTSFramework.Contracts.Adapter;
@@ -24,7 +25,7 @@ namespace RTSFramework.Concrete.CSharp.MSTest.Adapters
 				Name = vsTestCase.DisplayName,
 				AssemblyPath = vsTestCase.Source,
 				Id = vsTestCase.FullyQualifiedName,
-				AssociatedClass = testClassName,
+				AssociatedClasses = new List<string> { testClassName },
 				Ignored = !isEnabled,
 				VsTestTestCase = vsTestCase,
 				IsChildTestCase = isDataDriven

@@ -64,12 +64,21 @@ namespace RTSFramework.Concrete.User
 				var testCase = new CsvFileTestcase
 				{
 					Id = testName,
-					AssociatedClass = linkedClass
+					AssociatedClasses = new List<string> { linkedClass }
 				};
 
 				if (filterFunction(testCase))
 				{
-					newTestsModel.TestSuite.Add(testCase);
+					var exisitingTest = newTestsModel.TestSuite.SingleOrDefault(x => x.Id == testCase.Id);
+
+					if (exisitingTest != null)
+					{
+						exisitingTest.AssociatedClasses.AddRange(testCase.AssociatedClasses);
+					}
+					else
+					{
+						newTestsModel.TestSuite.Add(testCase);
+					}
 				}
 			}
 			testsModelAdapter.Unparse(newTestsModel, GetTestsStorage(programDelta.NewModel.VersionId));

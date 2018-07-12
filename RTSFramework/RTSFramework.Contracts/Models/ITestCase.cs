@@ -11,7 +11,7 @@ namespace RTSFramework.Contracts.Models
 
 		string Name { get; }
 
-		string AssociatedClass { get; }
+		List<string> AssociatedClasses { get; }
 
 		bool IsChildTestCase { get; }
 	}

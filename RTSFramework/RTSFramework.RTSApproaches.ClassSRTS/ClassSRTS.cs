@@ -50,7 +50,7 @@ namespace RTSFramework.RTSApproaches.Static
 
 		private void ExtendAffectedTypesAndReportImpactedTests(AffectedType type, IntertypeRelationGraph graph, List<AffectedType> affectedTypes, ISet<TTestCase> allTests, ISet<ImpactedTest<TTestCase>> impactedTests, CancellationToken cancellationToken)
 		{
-			foreach (var test in allTests.Where(x => x.AssociatedClass == type.Id))
+			foreach (var test in allTests.Where(x => x.AssociatedClasses.Contains(type.Id)))
 			{
 				impactedTests.Add(new ImpactedTest<TTestCase> {TestCase = test, ImpactedDueTo = type.ImpactedDueTo});
 			}
