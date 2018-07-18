@@ -4,7 +4,7 @@ namespace RTSFramework.ViewModels.RunConfigurations
 {
 	public class UserSettings
 	{
-		public ProgramModelType ProgramModelType { get; set; }
+		public ProgramLocation ProgramLocation { get; set; }
 		public TestType TestType { get; set; }
 		public DiscoveryType DiscoveryType { get; set; }
 		public ProcessingType ProcessingType { get; set; }

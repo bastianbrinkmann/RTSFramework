@@ -4,11 +4,11 @@ using RTSFramework.Contracts.Utilities;
 namespace RTSFramework.ViewModels.RunConfigurations
 {
 	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
-	public enum ProgramModelType
+	public enum ProgramLocation
 	{
-		[Description("Git Model")]
-		GitModel,
-		[Description("TFS 2010 Model")]
-		TFS2010Model
+		[Description("Git Repository")]
+		GitRepository,
+		[Description("Local Program")]
+		LocalProgram
 	}
 }

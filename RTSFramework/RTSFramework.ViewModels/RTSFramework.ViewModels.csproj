@@ -132,7 +132,7 @@
     <Compile Include="IntendedChangesDialogViewModel.cs" />
     <Compile Include="RequireUIServices\IApplicationUiExecutor.cs" />
     <Compile Include="RunConfigurations\DiscoveryType.cs" />
-    <Compile Include="RunConfigurations\ProgramModelType.cs" />
+    <Compile Include="RunConfigurations\ProgramLocation.cs" />
     <Compile Include="RunConfigurations\ResultArtefactType.cs" />
     <Compile Include="RunConfigurations\TestType.cs" />
     <Compile Include="RunConfigurations\UserSettings.cs" />

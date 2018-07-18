@@ -29,7 +29,7 @@ namespace RTSFramework.ViewModels.RunConfigurations
 				{
 					settings = new UserSettings
 					{
-						ProgramModelType = ProgramModelType.GitModel,
+						ProgramLocation = ProgramLocation.GitRepository,
 						TestType = TestType.MSTest,
 						DiscoveryType = DiscoveryType.GitDiscovery,
 						ProcessingType = ProcessingType.MSTestExecution,

@@ -73,7 +73,7 @@ namespace RTSFramework.ViewModels
 		private ObservableCollection<CommitViewModel> toCommitModels;
 		private bool isFromCommitChangeable;
 		private bool isToCommitChangeable;
-		private ProgramModelType programModelType;
+		private ProgramLocation programLocation;
 		private bool isRepositoryPathChangable;
 		private ObservableCollection<DiscoveryType> discoveryTypes;
 		private bool withTimeLimit;
@@ -135,7 +135,7 @@ namespace RTSFramework.ViewModels
 			var discoveryTypeFromSettings = userSettings.DiscoveryType;
 			var processingTypeFromSettings = userSettings.ProcessingType;
 
-			ProgramModelType = userSettings.ProgramModelType;
+			ProgramLocation = userSettings.ProgramLocation;
 			TestType = userSettings.TestType;
 			DiscoveryType = discoveryTypeFromSettings;
 			ProcessingType = processingTypeFromSettings;
@@ -161,7 +161,7 @@ namespace RTSFramework.ViewModels
 			Task.Run(async () =>
 			{
 				await Task.Delay(5000);
-				if (ProgramModelType == ProgramModelType.GitModel)
+				if (ProgramLocation == ProgramLocation.GitRepository)
 				{
 					applicationUiExecutor.ExecuteOnUi(RefreshCommitsSelection);
 				}
@@ -247,13 +247,13 @@ namespace RTSFramework.ViewModels
 
 		private void RefreshDiscoveryTypes()
 		{
-			if (ProgramModelType == ProgramModelType.GitModel)
+			if (ProgramLocation == ProgramLocation.GitRepository)
 			{
 				DiscoveryTypes.Clear();
 				DiscoveryTypes.Add(DiscoveryType.GitDiscovery);
 				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
 			}
-			else if (ProgramModelType == ProgramModelType.TFS2010Model)
+			else if (ProgramLocation == ProgramLocation.LocalProgram)
 			{
 				DiscoveryTypes.Clear();
 				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
@@ -288,8 +288,8 @@ namespace RTSFramework.ViewModels
 		{
 			switch (propertyChangedEventArgs.PropertyName)
 			{
-				case nameof(ProgramModelType):
-					IsRepositoryPathChangable = ProgramModelType == ProgramModelType.GitModel;
+				case nameof(ProgramLocation):
+					IsRepositoryPathChangable = ProgramLocation == ProgramLocation.GitRepository;
 					RefreshDiscoveryTypes();
 					break;
 				case nameof(DiscoveryType):
@@ -692,14 +692,14 @@ namespace RTSFramework.ViewModels
 			}
 		}
 
-		public ProgramModelType ProgramModelType
+		public ProgramLocation ProgramLocation
 		{
-			get { return programModelType; }
+			get { return programLocation; }
 			set
 			{
-				programModelType = value;
+				programLocation = value;
 				RaisePropertyChanged();
-				userSettings.ProgramModelType = value;
+				userSettings.ProgramLocation = value;
 			}
 		}
 
@@ -778,12 +778,12 @@ namespace RTSFramework.ViewModels
 		private async Task ExecuteUserIntendedChangesRun()
 		{
 			string versionId = $"Intended_Changes_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
-			switch (ProgramModelType)
+			switch (ProgramLocation)
 			{
-				case ProgramModelType.GitModel:
+				case ProgramLocation.GitRepository:
 					versionId = gitCommitsProvider.GetCommitIdentifier(RepositoryPath, gitCommitsProvider.GetLatestCommitSha(RepositoryPath));
 					break;
-				case ProgramModelType.TFS2010Model:
+				case ProgramLocation.LocalProgram:
 					versionId = "Test";
 					break;
 			}
@@ -905,22 +905,6 @@ namespace RTSFramework.ViewModels
 			}
 
 			await ExecuteOfflineRunFixTestType<GitVersionIdentification, FilesProgramModel, StructuralDelta<FilesProgramModel, FileElement>>(oldGitIdentification, newGitIdentification);
-		}
-
-		private async Task ExecuteTFS2010Run()
-		{
-			var oldTfsProgramArtefact = new TFS2010VersionIdentification
-			{
-				AbsoluteSolutionPath = SolutionFilePath,
-				CommitId = "Test"
-			};
-			var newTfsProgramArtefact = new TFS2010VersionIdentification
-			{
-				AbsoluteSolutionPath = SolutionFilePath,
-				CommitId = "Test2"
-			};
-
-			await ExecuteOfflineRunFixTestType<TFS2010VersionIdentification, FilesProgramModel, StructuralDelta<FilesProgramModel, FileElement>>(oldTfsProgramArtefact, newTfsProgramArtefact);
 		}
 
 		private async Task ExecuteOfflineRunFixTestType<TArtefact, TModel, TProgramDelta>(TArtefact oldProgramArtefact, TArtefact newProgramArtefact)

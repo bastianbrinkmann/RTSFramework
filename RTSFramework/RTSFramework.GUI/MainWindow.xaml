@@ -60,7 +60,7 @@
 			</Grid.ColumnDefinitions>
 
 			<Label x:Name="LblSolutionFile" Content="Solution File:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Margin="0,1"/>
-			<Label x:Name="LblProgramModelType" Content="Program Model:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Margin="0,1" />
+			<Label x:Name="LblProgramModelType" Content="Program Location:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Margin="0,1" />
 			<Label x:Name="LblTestType" Content="Tests:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Margin="0,1" />
 			<Label x:Name="LblDiscoveryType" Content="Delta:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="3" Margin="0,1" />
 			<Label x:Name="LblRTSApproachType" Content="Selection:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="4" Margin="0,1" />
@@ -68,7 +68,7 @@
 
 			<TextBox x:Name="TbSolutionFilePath" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding SolutionFilePath}" Margin="0,0,30,0" Grid.Row="0" Grid.Column="1"/>
 			<Button x:Name="BtnSelectSolutionFile" Command="{Binding SelectSolutionFileCommand}" Content="..." HorizontalAlignment="Right" VerticalAlignment="Center" Width="25" Grid.Column="1" Grid.Row="0" />
-			<ComboBox x:Name="CbProgramModelType" Height ="30" VerticalContentAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramModelType}}}" SelectedItem="{Binding ProgramModelType}" Grid.Row="1" Grid.Column="1" />
+			<ComboBox x:Name="CbProgramModelType" Height ="30" VerticalContentAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:ProgramLocation}}}" SelectedItem="{Binding ProgramLocation}" Grid.Row="1" Grid.Column="1" />
 			<ComboBox x:Name="CbTestType" Height ="30" VerticalContentAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding Source={utilities:EnumBindingSource {x:Type runConfig:TestType}}}" SelectedItem="{Binding TestType}" Grid.Row="2" Grid.Column="1" />
 			<CheckBox x:Name="CbDiscoverNewTests" IsEnabled="False" Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DiscoverNewTests}">Discover new tests?</CheckBox>
 			<ComboBox x:Name="CbDiscoveryType" Height ="30" VerticalContentAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding DiscoveryTypes}" SelectedItem="{Binding DiscoveryType}" Grid.Row="3" Grid.Column="1" />
@@ -105,7 +105,7 @@
 				<RowDefinition Height="28*"/>
 			</Grid.RowDefinitions>
 			<Label x:Name="LblTestCaseName" Content="Test Case Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
-			<Label x:Name="LblClassName" Content="Class Name:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1"/>
+			<Label x:Name="LblClassName" Content="Associated Classes:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1"/>
 			<Label x:Name="LblCategory" Content="Category:" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
 
 			<TextBox x:Name="TbTestCaseName" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="NoWrap" AcceptsReturn="False" VerticalAlignment="Center" Text="{Binding TestCaseNameFilter}" Grid.Row="0" Grid.Column="1"/>
@@ -183,7 +183,7 @@
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Width="200" Header="Class Name" Binding="{Binding FullClassName}" />
+					<DataGridTextColumn Width="200" Header="Associated Classes" Binding="{Binding FullClassName}" />
 					<DataGridTextColumn Width="250" Header="Test Case Name" Binding="{Binding Name}" />
 					<DataGridTemplateColumn Width="100" Header ="Outcome" CellTemplate="{StaticResource TestOutcomePresenter}"  SortMemberPath="TestOutcome" CanUserSort="True" />
 					<DataGridTextColumn Width="100" Header="Categories" Binding="{Binding Categories}"/>

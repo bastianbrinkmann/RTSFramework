@@ -52,7 +52,10 @@ namespace RTSFramework.RTSApproaches.Static
 		{
 			foreach (var test in allTests.Where(x => x.AssociatedClasses.Contains(type.Id)))
 			{
-				impactedTests.Add(new ImpactedTest<TTestCase> {TestCase = test, ImpactedDueTo = type.ImpactedDueTo});
+				if (impactedTests.All(y => y.TestCase.Id != test.Id))
+				{
+					impactedTests.Add(new ImpactedTest<TTestCase> { TestCase = test, ImpactedDueTo = type.ImpactedDueTo });
+				}
 			}
 
 			var usedByTypes = graph.UseEdges.Where(x => x.Item2 == type.Id).Select(x => x.Item1);
