@@ -176,7 +176,7 @@
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
-					<DataGridTextColumn Width="35" Header="No." Binding="{Binding ExecutionId}">
+					<DataGridTextColumn Width="50" Header="No." Binding="{Binding ExecutionId}">
 						<DataGridTextColumn.ElementStyle>
 							<Style>
 								<Setter Property="TextBlock.TextAlignment" Value="Right" />
