@@ -231,8 +231,8 @@ namespace RTSFramework.ViewModels
 			var oldFromCommit = FromCommitModels.SingleOrDefault(x => x.Identifier == fromCommitId);
 
 			FromCommit = oldFromCommit ?? FromCommitModels.FirstOrDefault();
-			IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
-			IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
+			IsFromCommitChangeable = DiscoveryType == DiscoveryType.OfflineDiscovery && FromCommitModels.Any();
+			IsToCommitChangeable = DiscoveryType == DiscoveryType.OfflineDiscovery && ToCommitModels.Any();
 		}
 
 		private CommitViewModel ConvertCommit(GitCommit gitCommit)
@@ -250,7 +250,7 @@ namespace RTSFramework.ViewModels
 			if (ProgramLocation == ProgramLocation.GitRepository)
 			{
 				DiscoveryTypes.Clear();
-				DiscoveryTypes.Add(DiscoveryType.GitDiscovery);
+				DiscoveryTypes.Add(DiscoveryType.OfflineDiscovery);
 				DiscoveryTypes.Add(DiscoveryType.UserIntendedChangesDiscovery);
 			}
 			else if (ProgramLocation == ProgramLocation.LocalProgram)
@@ -294,8 +294,8 @@ namespace RTSFramework.ViewModels
 					break;
 				case nameof(DiscoveryType):
 					IsIntededChangesEditingEnabled = DiscoveryType == DiscoveryType.UserIntendedChangesDiscovery;
-					IsFromCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && FromCommitModels.Any();
-					IsToCommitChangeable = DiscoveryType == DiscoveryType.GitDiscovery && ToCommitModels.Any();
+					IsFromCommitChangeable = DiscoveryType == DiscoveryType.OfflineDiscovery && FromCommitModels.Any();
+					IsToCommitChangeable = DiscoveryType == DiscoveryType.OfflineDiscovery && ToCommitModels.Any();
 					break;
 				case nameof(RunStatus):
 					IsRunning = RunStatus == RunStatus.Running;
@@ -746,7 +746,7 @@ namespace RTSFramework.ViewModels
 			{
 				switch (DiscoveryType)
 				{
-					case DiscoveryType.GitDiscovery:
+					case DiscoveryType.OfflineDiscovery:
 						await ExecuteGitRun();
 						break;
 					case DiscoveryType.UserIntendedChangesDiscovery:

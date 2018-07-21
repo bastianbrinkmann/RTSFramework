@@ -31,7 +31,7 @@ namespace RTSFramework.ViewModels.RunConfigurations
 					{
 						ProgramLocation = ProgramLocation.GitRepository,
 						TestType = TestType.MSTest,
-						DiscoveryType = DiscoveryType.GitDiscovery,
+						DiscoveryType = DiscoveryType.OfflineDiscovery,
 						ProcessingType = ProcessingType.MSTestExecution,
 						RTSApproachType = RTSApproachType.DynamicRTS,
 						SolutionFilePath = @"",

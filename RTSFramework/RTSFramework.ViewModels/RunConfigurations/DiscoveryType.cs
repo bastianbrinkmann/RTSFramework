@@ -6,8 +6,8 @@ namespace RTSFramework.ViewModels.RunConfigurations
 	[TypeConverter(typeof(EnumDescriptionTypeConverter))]
 	public enum DiscoveryType
     {
-		[Description("Git Discovery")]
-		GitDiscovery,
+		[Description("Offline Discovery")]
+		OfflineDiscovery,
 		[Description("Intended Changes")]
 		UserIntendedChangesDiscovery,
 	}
