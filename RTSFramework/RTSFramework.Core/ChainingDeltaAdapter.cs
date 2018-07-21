@@ -4,18 +4,20 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Core
 {
-	public class ChainingDeltaAdapter<TSourceDelta, TIntermediateDelta, TTargetDelta, TModel> : IDeltaAdapter<TSourceDelta, TTargetDelta, TModel> 
-		where TSourceDelta : IDelta<TModel>
-		where TIntermediateDelta : IDelta<TModel>
-		where TTargetDelta : IDelta<TModel> 
-		where TModel : IProgramModel 
+	public class ChainingDeltaAdapter<TSourceDelta, TIntermediateDelta, TTargetDelta, TSourceProgram, TIntermediateProgram, TTargetProgram> : IDeltaAdapter<TSourceDelta, TTargetDelta, TSourceProgram, TTargetProgram> 
+		where TSourceDelta : IDelta<TSourceProgram>
+		where TIntermediateDelta : IDelta<TIntermediateProgram>
+		where TTargetDelta : IDelta<TTargetProgram> 
+		where TSourceProgram : IProgramModel
+		where TTargetProgram : IProgramModel 
+		where TIntermediateProgram : IProgramModel
 	{
-		private readonly IDeltaAdapter<TSourceDelta, TIntermediateDelta, TModel> firstAdapter;
-		private readonly IDeltaAdapter<TIntermediateDelta, TTargetDelta, TModel> secondAdapter;
+		private readonly IDeltaAdapter<TSourceDelta, TIntermediateDelta, TSourceProgram, TIntermediateProgram> firstAdapter;
+		private readonly IDeltaAdapter<TIntermediateDelta, TTargetDelta, TIntermediateProgram, TTargetProgram> secondAdapter;
 
 
-		public ChainingDeltaAdapter(IDeltaAdapter<TSourceDelta, TIntermediateDelta, TModel> firstAdapter,
-			IDeltaAdapter<TIntermediateDelta, TTargetDelta, TModel> secondAdapter)
+		public ChainingDeltaAdapter(IDeltaAdapter<TSourceDelta, TIntermediateDelta, TSourceProgram, TIntermediateProgram> firstAdapter,
+			IDeltaAdapter<TIntermediateDelta, TTargetDelta, TIntermediateProgram, TTargetProgram> secondAdapter)
 		{
 			this.firstAdapter = firstAdapter;
 			this.secondAdapter = secondAdapter;

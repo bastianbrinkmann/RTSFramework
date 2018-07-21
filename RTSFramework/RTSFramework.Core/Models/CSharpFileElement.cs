@@ -1,7 +1,7 @@
 ﻿using System;
 using RTSFramework.Contracts.Models;
 
-namespace RTSFramework.Concrete.CSharp.Core.Models
+namespace RTSFramework.Core.Models
 {
     public class CSharpFileElement : IProgramModelElement
     {

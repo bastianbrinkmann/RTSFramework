@@ -9,19 +9,20 @@ using RTSFramework.RTSApproaches.Core.Contracts;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class StaticTestSelector<TProgram, TInputProgramDelta, TSelectionProgramDelta, TTestCase, TDataStructure> : ITestSelector<TProgram, TInputProgramDelta, TTestCase>
-		where TProgram : IProgramModel 
-		where TInputProgramDelta : IDelta<TProgram>
-		where TSelectionProgramDelta : IDelta<TProgram>
+	public class StaticTestSelector<TInputProgram, TSelectionProgram, TInputProgramDelta, TSelectionProgramDelta, TTestCase, TDataStructure> : ITestSelector<TInputProgram, TInputProgramDelta, TTestCase>
+		where TInputProgram : IProgramModel
+		where TSelectionProgram : IProgramModel
+		where TInputProgramDelta : IDelta<TInputProgram>
+		where TSelectionProgramDelta : IDelta<TSelectionProgram>
 		where TTestCase : ITestCase
 	{
-		private readonly IDataStructureBuilder<TDataStructure, TProgram> dataStructureBuilder;
-		private readonly IStaticRTS<TProgram, TSelectionProgramDelta, TTestCase, TDataStructure> staticSelector;
-		private readonly IDeltaAdapter<TInputProgramDelta, TSelectionProgramDelta, TProgram> deltaAdapter;
+		private readonly IDataStructureBuilder<TDataStructure, TSelectionProgram> dataStructureBuilder;
+		private readonly IStaticRTS<TSelectionProgram, TSelectionProgramDelta, TTestCase, TDataStructure> staticSelector;
+		private readonly IDeltaAdapter<TInputProgramDelta, TSelectionProgramDelta, TInputProgram, TSelectionProgram> deltaAdapter;
 		public ISet<TTestCase> SelectedTests { get; private set; }
-		public StaticTestSelector(IDataStructureBuilder<TDataStructure, TProgram> dataStructureBuilder,
-			IStaticRTS<TProgram, TSelectionProgramDelta, TTestCase, TDataStructure> staticSelector,
-			IDeltaAdapter<TInputProgramDelta, TSelectionProgramDelta, TProgram> deltaAdapter)
+		public StaticTestSelector(IDataStructureBuilder<TDataStructure, TSelectionProgram> dataStructureBuilder,
+			IStaticRTS<TSelectionProgram, TSelectionProgramDelta, TTestCase, TDataStructure> staticSelector,
+			IDeltaAdapter<TInputProgramDelta, TSelectionProgramDelta, TInputProgram, TSelectionProgram> deltaAdapter)
 		{
 			this.dataStructureBuilder = dataStructureBuilder;
 			this.staticSelector = staticSelector;

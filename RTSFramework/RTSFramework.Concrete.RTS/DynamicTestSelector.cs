@@ -18,11 +18,11 @@ namespace RTSFramework.RTSApproaches.Dynamic
 		where TProgram : IProgramModel
 		where TProgramDelta : IDelta<TProgram>
 	{
-		private readonly CorrespondenceModelManager<TProgram> correspondenceModelProvider;
-		private readonly IDeltaAdapter<TProgramDelta, StructuralDelta<TProgram, CSharpClassElement>, TProgram> deltaAdapter;
+		private readonly CorrespondenceModelManager<CSharpClassesProgramModel> correspondenceModelProvider;
+		private readonly IDeltaAdapter<TProgramDelta, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TProgram, CSharpClassesProgramModel> deltaAdapter;
 
-		public DynamicTestSelector(CorrespondenceModelManager<TProgram> correspondenceModelProvider,
-			IDeltaAdapter<TProgramDelta, StructuralDelta<TProgram, CSharpClassElement>, TProgram> deltaAdapter)
+		public DynamicTestSelector(CorrespondenceModelManager<CSharpClassesProgramModel> correspondenceModelProvider,
+			IDeltaAdapter<TProgramDelta, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TProgram, CSharpClassesProgramModel> deltaAdapter)
 		{
 			this.correspondenceModelProvider = correspondenceModelProvider;
 			this.deltaAdapter = deltaAdapter;

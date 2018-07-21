@@ -8,15 +8,36 @@ using RTSFramework.Concrete.CSharp.Roslyn.Models;
 using RTSFramework.Contracts.Adapter;
 using RTSFramework.Contracts.Models;
 using RTSFramework.Contracts.Models.Delta;
+using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Roslyn
 {
-	public class CSharpFileClassDeltaAdapter<TModel> : IDeltaAdapter<StructuralDelta<TModel, CSharpFileElement>, StructuralDelta<TModel, CSharpClassElement>, TModel> 
-		where TModel : IProgramModel
+	public class CSharpFileClassDeltaAdapter : IDeltaAdapter<StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, CSharpFilesProgramModel, CSharpClassesProgramModel> 
 	{
-		public StructuralDelta<TModel, CSharpClassElement> Convert(StructuralDelta<TModel, CSharpFileElement> delta)
+		private CSharpClassesProgramModel Convert(CSharpFilesProgramModel filesModel)
 		{
-			var result = new StructuralDelta<TModel, CSharpClassElement>(delta.OldModel, delta.NewModel);
+			var classesModel = new CSharpClassesProgramModel
+			{
+				AbsoluteSolutionPath = filesModel.AbsoluteSolutionPath,
+				VersionId = filesModel.VersionId,
+				GetClasses = () =>
+				{
+					var classes = new List<CSharpClassElement>();
+					foreach (var file in filesModel.Files)
+					{
+						classes.AddRange(GetContainedClasses(file.GetContent()));
+					}
+
+					return classes;
+				}
+			};
+
+			return classesModel;
+		}
+
+		public StructuralDelta<CSharpClassesProgramModel, CSharpClassElement> Convert(StructuralDelta<CSharpFilesProgramModel, CSharpFileElement> delta)
+		{
+			var result = new StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>(Convert(delta.OldModel), Convert(delta.NewModel));
 
 			foreach (var cSharpFile in delta.ChangedElements)
 			{

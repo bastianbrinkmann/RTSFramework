@@ -361,7 +361,7 @@ namespace RTSFramework.ViewModels
 			where TModel : CSharpProgramModel
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<IStaticRTS<TModel, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>, ClassSRTS<TModel, TTestCase>>();
+			unityContainer.RegisterType<IStaticRTS<CSharpClassesProgramModel, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>, ClassSRTS<TTestCase>>();
 
 			InitTestSelectorsForModelAndElementType<TModel, FileElement, TTestCase>(unityContainer);
 			InitTestSelectorsForModelAndElementType<TModel, CSharpFileElement, TTestCase>(unityContainer);
@@ -373,7 +373,7 @@ namespace RTSFramework.ViewModels
 			where TModelElement : IProgramModelElement
 			where TTestCase : class, ITestCase
 		{
-			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, StaticTestSelector<TModel, StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>>(RTSApproachType.ClassSRTS.ToString());
+			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, StaticTestSelector<TModel, CSharpClassesProgramModel, StructuralDelta<TModel, TModelElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph>>(RTSApproachType.ClassSRTS.ToString());
 			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, DynamicTestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(RTSApproachType.DynamicRTS.ToString());
 			unityContainer.RegisterType<ITestSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>, RetestAllSelector<TModel, StructuralDelta<TModel, TModelElement>, TTestCase>>(RTSApproachType.RetestAll.ToString());
 
@@ -459,6 +459,8 @@ namespace RTSFramework.ViewModels
 		private static void InitDataStructureProvider(IUnityContainer unityContainer)
 		{
 			InitDataStructureProviderForModel<FilesProgramModel>(unityContainer);
+			InitDataStructureProviderForModel<CSharpFilesProgramModel>(unityContainer);
+			InitDataStructureProviderForModel<CSharpClassesProgramModel>(unityContainer);
 		}
 
 		private static void InitDataStructureProviderForModel<TModel>(IUnityContainer unityContainer) where TModel : CSharpProgramModel
@@ -515,16 +517,16 @@ namespace RTSFramework.ViewModels
 			InitDeltaAdaptersForModelElement<TModel, CSharpFileElement>(unityContainer);
 			InitDeltaAdaptersForModelElement<TModel, CSharpClassElement>(unityContainer);
 
-			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, CSharpFileElement>, StructuralDelta<TModel, CSharpClassElement>, TModel>, CSharpFileClassDeltaAdapter<TModel>>();
-			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpFileElement>, TModel>, FilesCSharpFilesDeltaAdapter<TModel>>();
-			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpClassElement>, TModel>,
-				ChainingDeltaAdapter<StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpFileElement>, StructuralDelta<TModel, CSharpClassElement>, TModel>>();
+			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, CSharpFilesProgramModel, CSharpClassesProgramModel>, CSharpFileClassDeltaAdapter>();
+			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<FilesProgramModel, FileElement>, StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>, FilesProgramModel, CSharpFilesProgramModel>, FilesCSharpFilesDeltaAdapter>();
+			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<FilesProgramModel, FileElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, FilesProgramModel, CSharpClassesProgramModel>,
+				ChainingDeltaAdapter<StructuralDelta<FilesProgramModel, FileElement>, StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, FilesProgramModel, CSharpFilesProgramModel, CSharpClassesProgramModel>>();
 		}
 
 		private static void InitDeltaAdaptersForModelElement<TModel, TModelElement>(IUnityContainer unityContainer) where TModel : IProgramModel
 			where TModelElement : IProgramModelElement
 		{
-			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, TModelElement>, TModel>, IdentityDeltaAdapter<StructuralDelta<TModel, TModelElement>, TModel>>();
+			unityContainer.RegisterType<IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, TModelElement>, TModel, TModel>, IdentityDeltaAdapter<StructuralDelta<TModel, TModelElement>, TModel>>();
 		}
 
 		#endregion

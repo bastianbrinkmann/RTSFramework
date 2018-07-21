@@ -10,9 +10,9 @@ using RTSFramework.RTSApproaches.Core.DataStructures;
 
 namespace RTSFramework.RTSApproaches.Static
 {
-	public class ClassSRTS<TProgram, TTestCase> : IStaticRTS<TProgram, StructuralDelta<TProgram, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase where TProgram : IProgramModel
+	public class ClassSRTS<TTestCase> : IStaticRTS<CSharpClassesProgramModel, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TTestCase, IntertypeRelationGraph> where TTestCase : ITestCase
 	{
-		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<TProgram, CSharpClassElement> programDelta, CancellationToken cancellationToken)
+		public ISet<TTestCase> SelectTests(IntertypeRelationGraph dataStructure, StructuralDelta<TestsModel<TTestCase>, TTestCase> testsDelta, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement> programDelta, CancellationToken cancellationToken)
 		{
 			ISet<ImpactedTest<TTestCase>> impactedTests = new HashSet<ImpactedTest<TTestCase>>();
 

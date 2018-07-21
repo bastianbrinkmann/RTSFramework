@@ -3,10 +3,11 @@ using RTSFramework.Contracts.Models.Delta;
 
 namespace RTSFramework.Contracts.Adapter
 {
-	public interface IDeltaAdapter<TSourceDelta, TTargetDelta, TModel> 
-		where TSourceDelta : IDelta<TModel>
-		where TTargetDelta : IDelta<TModel>
-		where TModel : IProgramModel
+	public interface IDeltaAdapter<TSourceDelta, TTargetDelta, TProgramSource, TProgramTarget> 
+		where TSourceDelta : IDelta<TProgramSource>
+		where TTargetDelta : IDelta<TProgramTarget>
+		where TProgramSource : IProgramModel
+		where TProgramTarget : IProgramModel
 	{
 		TTargetDelta Convert(TSourceDelta deltaToConvert);
 	}

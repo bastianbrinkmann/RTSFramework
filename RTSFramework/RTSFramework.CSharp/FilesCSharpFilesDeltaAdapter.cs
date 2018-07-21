@@ -7,12 +7,26 @@ using RTSFramework.Core.Models;
 
 namespace RTSFramework.Concrete.CSharp.Core
 {
-	public class FilesCSharpFilesDeltaAdapter<TModel> : IDeltaAdapter<StructuralDelta<TModel, FileElement>, StructuralDelta<TModel, CSharpFileElement>, TModel>
-		where TModel : IProgramModel
+	public class FilesCSharpFilesDeltaAdapter : IDeltaAdapter<StructuralDelta<FilesProgramModel, FileElement>, StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>, FilesProgramModel, CSharpFilesProgramModel>
 	{
-		public StructuralDelta<TModel, CSharpFileElement> Convert(StructuralDelta<TModel, FileElement> delta)
+		public StructuralDelta<CSharpFilesProgramModel, CSharpFileElement> Convert(StructuralDelta<FilesProgramModel, FileElement> delta)
 		{
-			var result = new StructuralDelta<TModel, CSharpFileElement>(delta.OldModel, delta.NewModel);
+			var oldCSharpFilesModel = new CSharpFilesProgramModel
+			{
+				AbsoluteSolutionPath = delta.OldModel.AbsoluteSolutionPath,
+				VersionId = delta.OldModel.VersionId
+			};
+			oldCSharpFilesModel.Files.AddRange(delta.OldModel.Files.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));
+
+			var newCSharpFilesModel = new CSharpFilesProgramModel
+			{
+				AbsoluteSolutionPath = delta.NewModel.AbsoluteSolutionPath,
+				VersionId = delta.NewModel.VersionId
+			};
+			newCSharpFilesModel.Files.AddRange(delta.NewModel.Files.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));
+
+
+			var result = new StructuralDelta<CSharpFilesProgramModel, CSharpFileElement>(oldCSharpFilesModel, newCSharpFilesModel);
 
 			result.AddedElements.AddRange(delta.AddedElements.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));
 			result.ChangedElements.AddRange(delta.ChangedElements.Where(x => x.Id.EndsWith(".cs")).Select(x => new CSharpFileElement(x.Id, x.GetContent)));

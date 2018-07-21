@@ -1,4 +1,7 @@
-﻿namespace RTSFramework.Contracts.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace RTSFramework.Contracts.Models
 {
 	public interface IProgramModel
 	{

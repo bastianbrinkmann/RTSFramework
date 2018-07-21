@@ -14,8 +14,8 @@ namespace RTSFramework.Concrete.CSharp.Roslyn.ResponsibleChanges
 		where TModel : IProgramModel
 		where TModelElement : IProgramModelElement
 	{
-		private readonly IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter;
-		public ClassLevelResponsibleChangesReporter(IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<TModel, CSharpClassElement>, TModel> deltaAdapter)
+		private readonly IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TModel, CSharpClassesProgramModel> deltaAdapter;
+		public ClassLevelResponsibleChangesReporter(IDeltaAdapter<StructuralDelta<TModel, TModelElement>, StructuralDelta<CSharpClassesProgramModel, CSharpClassElement>, TModel, CSharpClassesProgramModel> deltaAdapter)
 		{
 			this.deltaAdapter = deltaAdapter;
 		}

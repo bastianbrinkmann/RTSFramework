@@ -86,8 +86,10 @@
     <Compile Include="DependenciesVisualization\Random25LinksVisualizer.cs" />
     <Compile Include="EmptyArtefactAdapter.cs" />
     <Compile Include="IdentityDeltaAdapter.cs" />
+    <Compile Include="Models\CSharpFileElement.cs" />
     <Compile Include="Models\CSharpProgramModel.cs" />
     <Compile Include="Models\FileElement.cs" />
+    <Compile Include="Models\CSharpFilesProgramModel.cs" />
     <Compile Include="Models\FilesProgramModel.cs" />
     <Compile Include="NoOpPrioritizer.cs" />
     <Compile Include="PercentageImpactedTestsStatisticsCollector.cs" />
